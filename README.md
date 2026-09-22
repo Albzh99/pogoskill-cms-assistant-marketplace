@@ -12,7 +12,7 @@
 
 把本仓库地址交给组员的 Codex AI，并发送下面这句话：
 
-> 请从这个私有 Git 仓库安装 PoGoskill CMS 文章助手：`<仓库地址>`。按照仓库根目录 `SETUP.md` 完成 Marketplace 和插件安装，然后提示我在本机安全输入 CMS API Key。不要要求我把 API Key 发到聊天里。安装完成后请让我新建一个任务再使用插件。
+> 请从这个私有 Git 仓库安装 PoGoskill CMS 文章助手：`https://github.com/Albzh99/pogoskill-cms-assistant-marketplace.git`。按照仓库根目录 `SETUP.md` 完成 Marketplace 和插件安装，然后提示我在本机安全输入 CMS API Key。不要要求我把 API Key 发到聊天里。安装完成后请让我新建一个任务再使用插件。
 
 组员的电脑必须已经：
 
@@ -21,4 +21,3 @@
 3. 登录有权访问此私有仓库的 GitHub 账号。
 
 API Key 不在仓库中，也不得提交到 Git。
-

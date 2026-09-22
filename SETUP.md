@@ -5,7 +5,7 @@
 把私有仓库地址交给 Codex AI，并要求它在终端执行：
 
 ```powershell
-codex plugin marketplace add "<Git 仓库 HTTPS 地址>" --ref main
+codex plugin marketplace add "https://github.com/Albzh99/pogoskill-cms-assistant-marketplace.git" --ref main
 codex plugin add pogoskill-cms-assistant@pogoskill-team
 ```
 
