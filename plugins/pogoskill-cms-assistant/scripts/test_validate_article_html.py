@@ -17,9 +17,16 @@ def sample_html():
     buybox = (PUBLISHER / "assets" / "buybox.html").read_text(encoding="utf-8")
     return f'''<div>
 <p>完整導語。</p>
-<ul class="list-filled-dot nav-list1"><li><a href="#part1">一、PoGoskill</a></li></ul>
+<ul class="list-filled-dot nav-list1">
+  <li><a href="#part1">一、核心內容 <img class="tit-tips" src="https://images.pogoskill.com/hot-tips.png?w=100&amp;h=38" width="50" alt="熱門"></a></li>
+  <li><a href="#part2">二、PoGoskill <img class="tit-tips" src="https://images.pogoskill.com/hot-tips.png?w=100&amp;h=38" width="50" alt="熱門"></a></li>
+</ul>
 <section id="part1">
-  <h2>一、PoGoskill</h2>
+  <h2>一、核心內容</h2>
+  <p>完整內容。</p>
+</section>
+<section id="part2">
+  <h2>二、PoGoskill</h2>
   <p>完整介紹、適用情境、操作思路與作用。</p>
   <p class="section-label"><strong>PoGoskill 優勢</strong></p>
   <ul class="list-cont list-dark-dot"><li>優勢。</li></ul>

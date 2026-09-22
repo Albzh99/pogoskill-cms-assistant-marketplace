@@ -7,7 +7,7 @@ description: 将 PoGoskill 台湾站 SEO 文稿转换为文章内容页面模板
 
 为 PoGoskill 台湾站制作文章，并把经过校验的内容保存为 CMS 草稿。
 
-开始前读取 [references/cms-live-contract.md](references/cms-live-contract.md) 和 [references/cms-api-contract.md](references/cms-api-contract.md)。制作或修改正文 HTML 时，必须先完整读取 [Luna HTML 固定执行契约](references/luna-html-contract.md)，逐模块复制其中的 V2 结构；需要新增图片位置时使用 [assets/image-box.html](assets/image-box.html)，正文下载区原样使用 [assets/download-cta.html](assets/download-cta.html)，正文结尾原样使用 [assets/buybox.html](assets/buybox.html)。不得靠记忆重写下载区或 Buy Box。
+开始前读取 [references/cms-live-contract.md](references/cms-live-contract.md) 和 [references/cms-api-contract.md](references/cms-api-contract.md)。制作或修改正文 HTML 时，必须先完整读取 [Luna HTML 固定执行契约](references/luna-html-contract.md) 和 [两篇旧文章的结构参考结论](references/legacy-article-patterns.md)，逐模块复制当前 V2 结构；需要新增图片位置时使用 [assets/image-box.html](assets/image-box.html)，正文下载区原样使用 [assets/download-cta.html](assets/download-cta.html)，正文结尾原样使用 [assets/buybox.html](assets/buybox.html)。不得靠记忆重写下载区或 Buy Box，也不得复制旧文章的自定义 CSS 或专属 class。
 
 ## 授权和安全
 

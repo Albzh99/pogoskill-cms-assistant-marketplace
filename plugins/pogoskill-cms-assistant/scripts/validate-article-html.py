@@ -137,6 +137,12 @@ def validate(html_text, assets_dir=None):
         errors.append("every table must be directly wrapped by .table-box.overflow-auto")
     if re.search(r"<style\b|article-toc", html_text, re.I):
         errors.append("custom style or article-toc is forbidden")
+    if re.search(r'class="[^"]*(?:rare-forest-article|gible-article|auto-tool-card|table-cont|table-list)[^"]*"', html_text, re.I):
+        errors.append("legacy article-specific classes are forbidden")
+
+    tips_count = len(re.findall(r'class="tit-tips"', html_text, re.I))
+    if tips_count != 2:
+        errors.append(f"tit-tips count must be 2, got {tips_count}")
 
     buybox_count = len(re.findall(r'class="pro-content pro-board1"', html_text, re.I))
     if buybox_count != 1:
@@ -145,6 +151,13 @@ def validate(html_text, assets_dir=None):
     before_buybox = html_text.split('<div class="pro-content pro-board1">', 1)[0]
     has_steps = "PoGoskill 操作步驟" in before_buybox
     cta_count = len(re.findall(r'class="btn-groups"', before_buybox, re.I))
+    if cta_count > 1:
+        errors.append(f"article CTA count must not exceed 1, got {cta_count}")
+    if cta_count and assets_dir:
+        expected_path = Path(assets_dir) / "download-cta.html"
+        expected = expected_path.read_text(encoding="utf-8")
+        if canonical(expected) not in canonical(before_buybox):
+            errors.append("download CTA must be copied exactly from assets/download-cta.html")
     if has_steps:
         if cta_count != 1:
             errors.append(f"article CTA count must be 1 when PoGoskill steps exist, got {cta_count}")
@@ -161,11 +174,6 @@ def validate(html_text, assets_dir=None):
         step_list = before_buybox.find('class="step-cont"', steps_h3 if steps_h3 >= 0 else 0)
         if min(advantage, cta, steps_h3, step_list) < 0 or not (advantage < cta < steps_h3 < step_list):
             errors.append("PoGoskill order must be advantages, exact CTA, H3 steps title, then step-cont")
-        if assets_dir:
-            expected_path = Path(assets_dir) / "download-cta.html"
-            expected = expected_path.read_text(encoding="utf-8")
-            if canonical(expected) not in canonical(before_buybox):
-                errors.append("download CTA must be copied exactly from assets/download-cta.html")
 
     picture_blocks = re.findall(r"<picture\b[^>]*>(.*?)</picture>", html_text, re.I | re.S)
     for index, block in enumerate(picture_blocks, 1):
@@ -199,6 +207,7 @@ def validate(html_text, assets_dir=None):
             "h2": parser.h2,
             "sections": len(parser.sections),
             "toc_links": len(parser.toc_hrefs),
+            "tit_tips": tips_count,
             "h3": len(parser.h3_classes),
             "pictures": len(picture_blocks),
             "article_cta": cta_count,
