@@ -1,0 +1,78 @@
+---
+name: pogoskill-cms-publisher
+description: 将 PoGoskill 台湾站 SEO 文稿转换为文章内容页面模板-v2 的可读 HTML，并在明确授权后创建或更新 CMS 草稿。适用于文章 HTML 制作与 CMS 草稿上传，不用于直接发布。
+---
+
+# PoGoskill CMS Publisher
+
+为 PoGoskill 台湾站制作文章，并把经过校验的内容保存为 CMS 草稿。
+
+开始前读取 [references/cms-live-contract.md](references/cms-live-contract.md) 和 [references/cms-api-contract.md](references/cms-api-contract.md)。制作或修改正文 HTML 时，必须先完整读取 [Luna HTML 固定执行契约](references/luna-html-contract.md)，逐模块复制其中的 V2 结构；需要新增图片位置时使用 [assets/image-box.html](assets/image-box.html)，正文结尾原样使用 [assets/buybox.html](assets/buybox.html)。
+
+## 授权和安全
+
+- API Key 只从安全环境变量或会话 Secret 读取，不写入 HTML、文件、日志或回复。
+- 默认允许只读查询和本地 HTML 转换。创建或更新 CMS 草稿前，确认用户已明确要求该篇文章写入 CMS。
+- 未经用户明确授权，不执行 `page/make` 或 `pagepublish/publish`。
+- 不删除文章、图片、文件或目录，不覆盖无法确认归属的页面。
+
+## 写入前发现
+
+实时查询 CMS，不依赖猜测或示例 ID：
+
+1. 用站点列表确认台湾站仍为目标站点。
+2. 用页面列表按 URL 与标题查重；命中时选择更新，不重复创建。
+3. 查询文章 V2 模板及其自定义字段。
+4. 查询并确认作者、分类页、产品和相关文章；相关文章必须存在且属于正确站点。
+5. 读取同类近期已发布文章，选择符合当前站点的 HTML 组件。
+
+任何关键字段无法确认时，停止在 CMS 写入前并报告缺失项。
+
+## HTML 转换
+
+- 使用繁体中文和台湾用语，保持 `PoGoskill` 大小写。
+- 正文不写 `<h1>`；H1 由 CMS `subject` 和模板渲染。
+- 输出按标签和逻辑区块换行、缩进，确保人工可读；禁止把 HTML 压成一整行。
+- 保持正确 heading hierarchy，使用带稳定 `id` 的 `<section>` 与目录锚点。
+- 参考模板文章 `240801` 学习可用组件，并优先读取同分类近期已上线文章作为实际结构基准。只复用基准中确实存在且适合当前内容的目录、列表、表格、步骤、图片、视频、FAQ、下载模块和产品模块。
+- 禁止自行新增文本框、提示框、卡片、彩色背景框、引用框、CSS class、内联/页面 CSS 或新的 HTML 层级；不得因为内容重要或希望页面更丰富而创造视觉模块。
+- 保持所选参考文章的标题、正文、段落间距、按钮、下载框架及模块结构；内容无法自然放入现有组件时，使用普通段落、H2/H3、列表或表格，或停止并报告模板缺口。
+- 表格使用站点现有响应式容器；图片使用站点现有 `picture`、lazy-load 与 `img-wrap` 规则。
+- 每篇文章正文最后必须且只能出现一个标准 Buy Box，使用资产文件中的完整 HTML，不自行简化或重设计。
+
+## 版式复用规则
+
+- 正文内的桌面下载 CTA（通常为 `dev-desktop > .btn-groups`）只放一组。必须先写完 PoGoskill 的介绍、适用情境、操作思路、作用与优势，再放下载 CTA；不得在第一段介绍后立刻插入按钮。
+- PoGoskill 模块固定顺序为“完整介绍与优势文字 → 下载 CTA → 较大的现有 H3『PoGoskill 操作步驟』→ `step-cont` 步骤”。操作步骤标题不得做成普通 `section-label`、H4 或自创标题样式，必须使用 `h3-triangle` 或同分类已验证等价组件；单独的每个步骤不再使用 H3。
+- FAQ 默认不放下载 CTA。只有某个问答确实解释并推荐 PoGoskill 时，才可在该答案之后放一组；不得因为文章关联产品而自动加入。
+- 标准 Buy Box 内部自带的 `dev-desktop` / `dev-mobile` 属于产品组件，不计入正文下载 CTA 数量，也不得删改。
+- 同一章节出现多个并列对象时，不要为每个对象创建 H3。优先使用参考文章已有的列表或表格；只有参考文章存在对应卡片组件时才能原样复用，H3 只表示真正的逻辑子章节。
+- 文章底部、相关文章上方的面包屑使用 V2 模板的 `.content-navlinks`；其中 `.tit` 包含“主頁 → 分类”，当前文章标题是父级下的 `a.text-primary`。必须让父级纵向排列、`.tit` 可换行、当前标题独占一行。
+- 正文中不重复创建面包屑，也不新增局部 CSS 修补。必须复用已验证正常的 V2 `.content-navlinks` 结构与 class；若仍挤压、覆盖或横向溢出，退回修改 HTML 结构或报告模板问题，不自行改样式。
+
+## 图片规则
+
+- PoGoskill 下载、安装、操作步骤与产品界面图必须先调用 `/cms/picture/list` 检索 `guides`，结合文件名、上下文、尺寸和实际画面判断是否可复用；已有合适图片时直接复用。
+- 用户为 Pokémon GO 或 Pikmin Bloom 正文配好的图片优先作为新图上传，不用图库中的相似图片替换；上传前仍须检查同名冲突与完全重复文件，避免覆盖或重复上传。
+- 有真实 JPG/PNG 素材且用户已授权当前文章写入时，调用 `$pogoskill-cms-image-pipeline` 提取、生成同名 WebP、成对上传并回填。
+- 游戏内容图按产品进入 `pokemon-ios` 或 `pikmin`；PoGoskill 下载、安装、操作步骤和产品界面进入 `guides`，即使文章主题属于游戏也不改变。
+- 下载/使用步骤图必须逐步理解文字操作，再从 `guides` 中匹配对应界面；步骤文字与图片功能必须一一对应。
+- 主图必须为 850×460。横图适配正文宽度；手机截图等竖图保持比例并限制宽高，避免占据整个屏幕。
+- ALT 描述图片真实内容，使用自然繁体中文并适度包含主题词；不同图片不得机械重复文章标题。
+- 需要图片但资源尚未提供时，保留 `img-wrap`，并在 `IMAGE_PENDING` 中填写唯一 `image-key`、用途、繁体中文 ALT、建议尺寸与双格式要求。
+- 不伪造 URL、文件名、尺寸、WebP 版本或上传成功状态；不上传 DOCX 中未被正文引用的媒体。
+- 任何 `IMAGE_PENDING` 都是硬性发布阻断：可以在授权后保存草稿，但禁止 make 和 publish。
+
+## CMS 草稿流程
+
+获得该篇文章的明确写入授权后：
+
+1. 组装 V2 页面字段，包括 `subject`、`title`、`description`、`keywords`、`seo_keywords`、`url`、`author_id`、`classify_page_id`、`related_id`、`fields` 与格式化 `content`。
+2. URL 必须为小写 `.html` 相对路径，并已通过 CMS 查重。
+3. 新建使用 `/cms/page/add`；已存在页面使用 `/cms/page/update`，更新前先读回当前版本。
+4. 保存后立即调用 `/cms/page/info` 回读，逐项比对元数据、正文、图片盒和 Buy Box。
+5. 将页面 ID、草稿状态、回读结果、待补图片和所有 `request_id` 交给审查 Agent。
+
+## 完成条件
+
+只有草稿写入和回读均成功才报告 `Draft ready for review`。存在图片占位时明确报告 `Image hold`，绝不报告已发布。

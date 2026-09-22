@@ -1,0 +1,22 @@
+{
+  "name": "pogoskill-cms-assistant",
+  "version": "1.0.0",
+  "description": "PoGoskill 台湾站文章 HTML、图片、CMS 草稿上传与预览审查助手",
+  "author": {
+    "name": "PoGoskill Team"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "PoGoskill CMS 文章助手",
+    "shortDescription": "制作文章、处理图片并安全保存 CMS 草稿。",
+    "longDescription": "将 PoGoskill 台湾站 DOCX 文稿转换为固定 V2 HTML，处理 JPG/PNG 与 WebP 图片对，通过 CMS API 保存草稿，并独立审查桌面和手机预览。默认禁止生成和发布。",
+    "developerName": "PoGoskill Team",
+    "category": "Productivity",
+    "capabilities": ["Read", "Write"],
+    "defaultPrompt": [
+      "把这篇 DOCX 转成 PoGoskill V2 HTML，并保存为 CMS 草稿，不生成、不发布。",
+      "处理这篇文章的图片：保留原图、生成 WebP、成对上传并回填草稿。",
+      "独立审查这个 CMS 草稿的字段、HTML、图片和桌面／手机预览。"
+    ]
+  }
+}

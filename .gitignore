@@ -1,0 +1,30 @@
+# Secrets and local credentials
+.env
+.env.*
+*.key
+*.secret
+.cms-api-key
+cms-api-key.txt
+cms-apikey.txt
+credentials*.json
+
+# Local article inputs and generated working data
+*.docx
+*.doc
+*.draft.json
+*.payload.json
+*.response.json
+work/
+output/
+temp/
+tmp/
+
+# Editor / OS files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Python cache
+__pycache__/
+*.py[cod]
