@@ -86,6 +86,9 @@ function Set-CmsStoredApiKey {
   if ([string]::IsNullOrWhiteSpace($ApiKey) -or $ApiKey.Trim().Length -lt 20) {
     throw 'CMS API key appears incomplete; credential was not saved.'
   }
+  if ($ApiKey.Trim() -notmatch '^AFS[0-9A-Za-z-]+$') {
+    throw 'Clipboard does not contain a valid CMS API key; credential was not saved.'
+  }
   [CmsCredentialNative]::Write($script:CmsCredentialTarget, 'X-API-KEY', $ApiKey.Trim())
 }
 

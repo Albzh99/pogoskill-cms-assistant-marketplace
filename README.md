@@ -2,7 +2,7 @@
 
 这是 PoGoskill 团队使用的 Codex 私有插件 Marketplace，包含：
 
-- 台湾站 V2 文章 HTML 转换与 CMS 草稿保存
+- 台湾站 V2 文章 HTML 转换、机械校验与 CMS 草稿回读
 - JPG/PNG 与 WebP 图片处理、上传及回填
 - CMS 草稿字段、图片和本地预览审查
 
@@ -12,12 +12,12 @@
 
 把本仓库地址交给组员的 Codex AI，并发送下面这句话：
 
-> 请从这个私有 Git 仓库安装 PoGoskill CMS 文章助手：`https://github.com/Albzh99/pogoskill-cms-assistant-marketplace.git`。按照仓库根目录 `SETUP.md` 完成 Marketplace 和插件安装，然后提示我在本机安全输入 CMS API Key。不要要求我把 API Key 发到聊天里。安装完成后请让我新建一个任务再使用插件。
+> 请从 Git 仓库安装 PoGoskill CMS 文章助手：`https://github.com/Albzh99/pogoskill-cms-assistant-marketplace.git`。按照仓库根目录 `SETUP.md` 完成 Marketplace 和插件安装。需要 CMS API Key 时，只提示我复制 Key 到剪贴板，之后由你运行保存脚本；不要让我输入长命令，也不要要求我把 Key 发到聊天里。安装完成后请让我新建一个任务再使用插件。
 
 组员的电脑必须已经：
 
 1. 安装 Codex 桌面版或 Codex CLI；
 2. 安装 Git；
-3. 登录有权访问此私有仓库的 GitHub 账号。
+3. 能正常访问 GitHub。
 
 API Key 不在仓库中，也不得提交到 Git。

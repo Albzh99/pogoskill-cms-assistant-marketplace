@@ -267,7 +267,7 @@ PoGoskill 模块必须遵循固定阅读顺序：先把 PoGoskill 的介绍、�
 
 “PoGoskill 操作步驟”必须使用 `h3-triangle`（或同分类已验证、语义等价的现有 H3 class），视觉层级要明显高于 `section-label`；不得使用裸 H3、H4 或自创 class。可以根据文章内容补充标题语义，但必须明确表示这是 PoGoskill 操作步骤。
 
-正文下载 CTA 只放一次，位置必须是 PoGoskill 的完整介绍与优势内容之后、操作步骤 H3 之前：
+正文下载 CTA 只放一次，位置必须是 PoGoskill 的完整介绍与优势内容之后、操作步骤 H3 之前。必须原样复制 `assets/download-cta.html`，不得手写简化版。下列结构中的 `secure-btn` 和 `secure-download` 就是下载按钮及其安全下载框，任何一层缺失都会导致页面样式不完整：
 
 ```html
 <div class="dev-desktop">
@@ -306,6 +306,7 @@ PoGoskill 模块必须遵循固定阅读顺序：先把 PoGoskill 的介绍、�
 - FAQ 默认不放 CTA。
 - Buy Box 内按钮不是正文 CTA，不计入“一次”的数量。
 - 不改按钮 class、下载 PID、层级或文案。
+- 两个 `.secure-btn` 和两个 `.secure-download` 必须全部保留；只有按钮、没有安全下载框的 CTA 判定为失败。
 
 ## 10. PoGoskill 操作步骤
 
@@ -431,6 +432,8 @@ Luna 必须输出校验结果后才能调用 `/cms/page/add` 或 `/cms/page/upda
 14. `IMAGE_PENDING` 为 0 才能判定图片完成。
 15. 所有标签平衡，HTML 按逻辑块换行缩进。
 16. 真实 CMS 桌面与手机预览通过后，才可报告版式通过。
+17. 上传前必须运行 `scripts/validate-article-html.py`，返回码必须为 0；不得用人工口头检查代替。
+18. DOCX 的所有正文段落、表格、FAQ、结语和图片占位都必须进入 HTML。写入后用 `compare-docx-to-cms-page.py` 列出缺失区块；存在未解释缺失时不得报告完成。
 
 任何一项失败：停止上传，回到 HTML 修正；不得依赖 CMS 或浏览器自动修复结构。
   

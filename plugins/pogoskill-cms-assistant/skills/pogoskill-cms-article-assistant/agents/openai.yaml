@@ -1,0 +1,6 @@
+interface:
+  display_name: "PoGoskill CMS 完整文章助手"
+  short_description: "DOCX 到完整 CMS 草稿和预览审查的强制闭环"
+  default_prompt: "使用 $pogoskill-cms-article-assistant 将这篇 DOCX 完整制作并保存为 CMS 草稿，不生成、不发布。"
+policy:
+  allow_implicit_invocation: true
