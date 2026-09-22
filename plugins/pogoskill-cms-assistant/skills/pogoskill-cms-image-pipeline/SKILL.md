@@ -26,7 +26,7 @@ description: 为 PoGoskill 台湾站文章提取真实 JPG/PNG 素材、生成�
 5. 主图先处理为 850×460；其他图片保持比例，横图不超过正文需求，竖图限制展示宽高。随后用 `convert-image-pairs.ps1` 保留 JPG/PNG 并生成同 basename WebP。
 6. 上传前用 `/cms/picture/list` 检查目标文件名与完全重复项，确认目标目录真实存在后上传 fallback 与 WebP。必须验证 `code === 0`、`total === 2`、`err_name_files` 为空、两者尺寸一致，并回查列表。
 7. 用上传响应返回的 `upload` URL 生成草稿图片盒；不要自己拼接 host、query string 或 CDN URL。
-8. 用 `apply-image-manifest.ps1` 按唯一 `image-key` 回填，不按“第几个图片盒”猜测。回填后交给 Reviewer 做桌面 1440px 与手机 390px 真实预览。
+8. 用 `apply-image-manifest.ps1` 按唯一 `image-key` 回填，不按“第几个图片盒”猜测。回填后交给 Reviewer 通过 CMS API 回读、图片 manifest 和机械校验复核；当前不执行 AI 页面预览。
 
 ## 停止条件
 

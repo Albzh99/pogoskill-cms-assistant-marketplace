@@ -42,6 +42,6 @@ pwsh -NoProfile -File (Join-Path $root 'plugins\pogoskill-cms-assistant\scripts\
 
 在新任务中附上 DOCX，然后说明：
 
-> 使用 `$pogoskill-cms-article-assistant` 把这篇文章按 PoGoskill 台湾站 V2 模板制作完整 HTML，处理所有图片并保存、回读和审查 CMS 草稿。禁止生成、禁止发布、禁止修改旧文章。没有页面 ID、回读结果和桌面／手机预览结论不得报告完成。
+> 使用 `$pogoskill-cms-article-assistant` 把这篇文章按 PoGoskill 台湾站 V2 模板制作完整 HTML，处理所有图片并保存、回读和审查 CMS 草稿。禁止 AI 页面预览、禁止生成、禁止发布、禁止修改旧文章。没有页面 ID 和回读结果不得报告完成。
 
 完整文章助手会强制串联 Publisher、Image Pipeline 和 Reviewer，并使用机械校验脚本阻止混乱或不完整 HTML 上传。CMS 生成与发布始终需要额外、明确授权。

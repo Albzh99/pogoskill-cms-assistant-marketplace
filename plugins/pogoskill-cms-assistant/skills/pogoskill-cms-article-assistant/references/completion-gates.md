@@ -12,8 +12,8 @@
 | CMS 写入 | `page/add` 或已确认目标的 `page/update` 返回 `code: 0`、页面 ID 与 `request_id` |
 | CMS 回读 | `page/info` 返回相同页面 ID、完整正文和草稿状态 |
 | 来源覆盖 | `compare-docx-to-cms-page.py` 报告无未解释缺失区块；有编辑性改写时逐条记录对应关系 |
-| 视觉审查 | 当前草稿的 1440px 桌面与 390px 手机预览均无遮挡、溢出或模块缺失 |
 | 安全状态 | 未调用 `page/make` 或 `pagepublish/publish`，未删除或修改无关旧文章 |
 
 任一项缺失都不得输出 `Draft ready for review`。
 
+当前暂不把 AI 桌面／手机页面预览列为完成门槛；仍须完成 HTML 机械校验、CMS 回读和来源覆盖检查。

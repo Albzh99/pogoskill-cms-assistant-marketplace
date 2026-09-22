@@ -1,6 +1,6 @@
 ---
 name: pogoskill-cms-article-assistant
-description: 将一篇 PoGoskill 台湾站 DOCX 完整处理为图片齐全、通过校验并经 CMS 回读与预览审查的草稿。适用于端到端文章任务；默认禁止生成、发布、删除或修改无法确认归属的旧文章。
+description: 将一篇 PoGoskill 台湾站 DOCX 完整处理为图片齐全、通过机械校验并经 CMS 回读审查的草稿。适用于端到端文章任务；默认禁止生成、发布、删除或修改无法确认归属的旧文章。
 ---
 
 # PoGoskill CMS 完整文章助手
@@ -34,7 +34,7 @@ pwsh -NoProfile -File scripts/cms-save-api-key.ps1
 6. 运行 `validate-article-html.py`。返回非零时继续修复，禁止上传不合格 HTML。
 7. 用户已明确要求保存草稿时，只用 CMS POST API 调用 `page/add` 或已确认目标的 `page/update`。禁止用浏览器表单代替 API；禁止 `page/make` 和发布。
 8. 写入后立即 `page/info` 回读，并运行 `compare-docx-to-cms-page.py`。缺少正文、表格、FAQ、图片、结语、下载区或 Buy Box 时修复草稿并再次回读。
-9. 使用 Reviewer 打开当前草稿的 CMS 本地桌面与手机预览，检查遮挡、溢出、标题、目录、下载框、图片、步骤和 Buy Box。
+9. 使用 Reviewer 通过 API 回读和本地机械检查复核当前草稿的字段、HTML、图片、来源覆盖与安全状态。当前暂不执行 AI 桌面／手机页面预览，也不得因此阻断草稿完成。
 
 ## 持续执行要求
 
@@ -45,5 +45,4 @@ pwsh -NoProfile -File scripts/cms-save-api-key.ps1
 
 ## 最终报告
 
-只有完成门槛全部通过后才能报告 `Draft ready for review`，并同时提供页面 ID、URL、草稿状态、HTML 校验、图片数量、来源完整度、回读 `request_id` 和桌面/手机预览结论。否则明确报告 `Image hold` 或 `Blocked`，不得说已经完成、已经上传或稍后继续。
-
+只有完成门槛全部通过后才能报告 `Draft ready for review`，并同时提供页面 ID、URL、草稿状态、HTML 校验、图片数量、来源完整度和回读 `request_id`。否则明确报告 `Image hold` 或 `Blocked`，不得说已经完成、已经上传或稍后继续。AI 页面预览目前停用，不要求也不报告桌面／手机预览结论。
