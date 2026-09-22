@@ -315,15 +315,15 @@ PoGoskill 模块必须遵循固定阅读顺序：先把 PoGoskill 的介绍、�
 
 <ul class="step-cont" id="pogoskill-guide-step">
   <li>
-    <p><span>步驟 1</span>連接手機：開啟 PoGoskill 後，把 iPhone 或 Android 連接到電腦。</p>
+    <p><span>步驟 1</span><label><strong>連接手機：</strong>開啟 PoGoskill 後，把 iPhone 或 Android 連接到電腦。</label></p>
     <!-- 与步骤 1 名称完全匹配的 Guide 图片盒 -->
   </li>
   <li>
-    <p><span>步驟 2</span>第二步的實際操作說明。</p>
+    <p><span>步驟 2</span><label><strong>搜尋位置：</strong>第二步的實際操作說明。</label></p>
     <!-- 与步骤 2 名称完全匹配的 Guide 图片盒 -->
   </li>
   <li>
-    <p><span>步驟 3</span>第三步的實際操作說明。</p>
+    <p><span>步驟 3</span><label><strong>修改定位：</strong>第三步的實際操作說明。</label></p>
     <!-- 与步骤 3 名称完全匹配的 Guide 图片盒 -->
   </li>
 </ul>
@@ -332,8 +332,9 @@ PoGoskill 模块必须遵循固定阅读顺序：先把 PoGoskill 的介绍、�
 - 每个 `<li>` 只能对应一个步骤。
 - 步骤文字与 DOCX 指定的 Guide 图片必须一一对应。
 - “PoGoskill 操作步驟”模块标题必须是 H3；但每个单独步骤不能再写成 H3，`step-cont` 已负责步骤内部的视觉层级。
-- 每个 `<li>` 的第一个元素必须是一个无 class 的 `<p>`；该 `<p>` 的第一个且唯一子元素必须是 `<span>步驟 N</span>`，其后直接接完整纯文字说明。
-- 步骤名称若需要“連接手機：”之类前缀，也写成普通文字；禁止用 `<strong>`、`<b>`、`<a>`、`<em>`、第二个 `<span>` 或 `<br>` 包裹。`.step-cont p` 在站点中采用横向布局，额外标签会变成新的布局列，造成标题逐字换行和正文挤压。
+- 每个 `<li>` 的第一个元素必须是一个无 class 的 `<p>`。其直接子元素固定为两个：先放 `<span>步驟 N</span>` 徽标，再放一个无 class 的 `<label>`，由 `label` 包住该步骤的全部标题和说明。
+- 需要加粗时，只允许在 `label` 开头使用一个 `<strong>短標題：</strong>`，其后直接接普通文字。禁止把 `strong`、正文文字或其他标签直接放在 `p` 下，也禁止在 `label` 内加入第二个 `span`、`br`、链接或其他布局元素。
+- `.step-cont p` 在站点中采用横向 flex；固定的 `span + label` 只形成“步骤徽标 + 完整内容”两列。若写成 `span + strong + 文字`，则会形成三列，使短标题逐字换行和正文挤压。
 - Guide 图片盒是 `<p>` 后面的同级元素，仍位于同一 `<li>` 内；禁止把 `<div class="img-wrap">` 或 `<picture>` 放进步骤文字 `<p>`。
 
 禁止以下会挤压的结构：
@@ -348,7 +349,7 @@ PoGoskill 模块必须遵循固定阅读顺序：先把 PoGoskill 的介绍、�
 
 ```html
 <li>
-  <p><span>步驟 1</span>連接手機：開啟 PoGoskill 後連接裝置。</p>
+  <p><span>步驟 1</span><label><strong>連接手機：</strong>開啟 PoGoskill 後連接裝置。</label></p>
   <div class="img-wrap text-center">
     <!-- 對應步驟 1 的 picture -->
   </div>
@@ -453,7 +454,7 @@ Luna 必须输出校验结果后才能调用 `/cms/page/add` 或 `/cms/page/upda
 13. Buy Box 恰好一个且与资产完全一致。
 14. `IMAGE_PENDING` 为 0 才能判定图片完成。
 15. 所有标签平衡，HTML 按逻辑块换行缩进。
-16. 每个 `step-cont > li` 必须以唯一的 `p > span` 步骤徽标开头，徽标后只允许纯文字，图片盒只能作为该 `<p>` 后面的同级元素。
+16. 每个 `step-cont > li` 必须以固定的 `p > span + label` 开头；`label` 可用一个开头 `strong` 加粗短标题，并包含其余普通正文。图片盒只能作为该 `<p>` 后面的同级元素。
 17. 上传前必须运行 `scripts/validate-article-html.py`，返回码必须为 0；不得用人工口头检查代替。
 18. DOCX 的所有正文段落、表格、FAQ、结语和图片占位都必须进入 HTML。写入后用 `compare-docx-to-cms-page.py` 列出缺失区块；存在未解释缺失时不得报告完成。
 

@@ -117,13 +117,14 @@ def validate_step_lists(html_text, errors):
                 continue
             step_line = paragraph.group(1)
             badge = re.fullmatch(
-                r"\s*<span>\s*(?:步驟|步骤)\s*(\d+)\s*</span>([^<]+)\s*",
+                r"\s*<span>\s*(?:步驟|步骤)\s*(\d+)\s*</span>\s*"
+                r"<label>\s*(?:<strong>[^<]+</strong>)?([^<]+)\s*</label>\s*",
                 step_line,
                 re.I | re.S,
             )
             if not badge:
                 errors.append(
-                    f"step-cont #{list_index} item #{item_index} must be P > one step SPAN + plain text only"
+                    f"step-cont #{list_index} item #{item_index} must be P > step SPAN + one LABEL; optional STRONG belongs inside LABEL"
                 )
                 continue
             number = int(badge.group(1))

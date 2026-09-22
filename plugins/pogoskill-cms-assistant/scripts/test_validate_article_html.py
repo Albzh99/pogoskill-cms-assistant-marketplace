@@ -32,7 +32,7 @@ def sample_html():
   <ul class="list-cont list-dark-dot"><li>優勢。</li></ul>
   {cta}
   <h3 class="h3-triangle">PoGoskill 操作步驟</h3>
-  <ul class="step-cont"><li><p><span>步驟 1</span>操作。</p></li></ul>
+  <ul class="step-cont"><li><p><span>步驟 1</span><label><strong>連接手機：</strong>操作。</label></p></li></ul>
 </section>
 {buybox}'''
 
@@ -50,12 +50,12 @@ class ValidatorTests(unittest.TestCase):
 
     def test_inline_markup_after_step_badge_is_blocked(self):
         broken = sample_html().replace(
-            '<span>步驟 1</span>操作。',
+            '<span>步驟 1</span><label><strong>連接手機：</strong>操作。</label>',
             '<span>步驟 1</span><strong>連接手機：</strong>操作。',
         )
         result = VALIDATOR.validate(broken, PUBLISHER / "assets")
         self.assertFalse(result["ok"])
-        self.assertTrue(any("one step SPAN + plain text only" in item for item in result["errors"]))
+        self.assertTrue(any("step SPAN + one LABEL" in item for item in result["errors"]))
 
     def test_step_numbers_must_be_sequential(self):
         broken = sample_html().replace('<span>步驟 1</span>', '<span>步驟 2</span>')

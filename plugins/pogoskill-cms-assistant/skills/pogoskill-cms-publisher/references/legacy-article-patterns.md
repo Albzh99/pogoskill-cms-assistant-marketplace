@@ -21,7 +21,7 @@
 - 正文下载 CTA 最多一组，且必须复制 `assets/download-cta.html`；禁止旧步数文章的三组 CTA。
 - “PoGoskill 操作步骤”使用一个 H3 作为模块标题；禁止把“步骤 1／2／3”分别写成 H3。
 - 禁止 CTA 后直接进入 `step-cont` 而缺少“PoGoskill 操作步驟”H3。
-- 禁止在 `step-cont` 的步骤徽标后插入 `<strong>`、第二个 `<span>`、链接或其他内联标签；这会被站点 CSS 拆成额外布局列，使短标题逐字换行。步骤文字保持单一纯文本节点，图片盒放在段落之后。
+- 禁止把 `<strong>` 直接放在 `step-cont` 的步骤徽标后；这会被站点 CSS 拆成第三个布局列，使短标题逐字换行。固定使用 `p > span + label`，并在 `label` 内写 `<strong>短標題：</strong>普通正文`；图片盒放在段落之后。
 - 禁止跳号、缺失 section、目录锚点与 section 不一致，以及未闭合标签。
 
 ## 选择 H3 的判断
