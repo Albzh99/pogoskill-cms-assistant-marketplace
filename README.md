@@ -12,7 +12,7 @@
 
 把本仓库地址交给组员的 Codex AI，并发送下面这句话：
 
-> 请从 Git 仓库安装 PoGoskill CMS 文章助手：`https://github.com/Albzh99/pogoskill-cms-assistant-marketplace.git`。按照仓库根目录 `SETUP.md` 完成 Marketplace 和插件安装。需要 CMS API Key 时，只提示我复制 Key 到剪贴板，之后由你运行保存脚本；不要让我输入长命令，也不要要求我把 Key 发到聊天里。安装完成后请让我新建一个任务再使用插件。
+> 请从 Git 仓库安装 PoGoskill CMS 文章助手：`https://github.com/Albzh99/pogoskill-cms-assistant-marketplace.git`。按照仓库根目录 `SETUP.md` 完成 Marketplace 和插件安装。需要 CMS API Key 时，先替我启动保存命令并让终端停在等待提示；然后让我复制 Key，回到终端只按 Enter。不要让我把 Key 粘贴进终端或发到聊天里。安装完成后请让我新建一个任务再使用插件。
 
 组员的电脑必须已经：
 

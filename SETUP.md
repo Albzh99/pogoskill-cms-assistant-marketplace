@@ -26,7 +26,7 @@ codex plugin add pogoskill-cms-assistant@pogoskill-team
 
 ## 保存 CMS API Key
 
-API Key 不包含在 Git 仓库或分享包内。使用者只需先复制完整 API Key，然后告诉 AI“已经复制”。由 AI 自动定位已安装的 Marketplace 并运行：
+API Key 不包含在 Git 仓库或分享包内。为避免终端无法粘贴，必须先运行命令，再复制 Key：
 
 ```powershell
 $marketplaces = codex plugin marketplace list --json | ConvertFrom-Json
@@ -34,9 +34,16 @@ $root = ($marketplaces.marketplaces | Where-Object name -eq 'pogoskill-team').ro
 pwsh -NoProfile -File (Join-Path $root 'plugins\pogoskill-cms-assistant\scripts\cms-save-api-key.ps1')
 ```
 
-脚本会直接从剪贴板读取密钥，写入 Windows Credential Manager，并自动清空剪贴板；不会写进文件或命令历史。
+命令启动后按以下顺序操作：
 
-不要把 `cms-save-api-key` 替换成 API Key，也不要把 API Key 发到聊天中。若必须使用键盘隐藏输入，可由 AI 加上 `-Prompt`。
+1. 等终端显示“请现在复制完整的 CMS API Key”；
+2. 复制完整 API Key 到剪贴板；
+3. 回到终端，不要粘贴，只按一次 Enter；
+4. 脚本读取剪贴板，将 Key 写入 Windows Credential Manager，然后自动清空剪贴板。
+
+Key 不会出现在终端、文件或命令历史。如果使用者已经提前复制完成，并由 AI 在非交互终端执行，可以在命令末尾加入 `-FromClipboard`，让脚本立即读取剪贴板。
+
+不要把 `cms-save-api-key` 替换成 API Key，不要把 Key 粘贴进终端，也不要把 API Key 发到聊天中。若必须使用键盘隐藏输入，可由 AI 加上 `-Prompt`。
 
 ## 使用方式
 

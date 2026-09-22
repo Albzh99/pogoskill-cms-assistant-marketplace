@@ -4,6 +4,8 @@
 
 API Key 只能由插件根目录 `scripts/CmsCredential.ps1` 从 Windows Credential Manager 读取。禁止把密钥写入文章、脚本参数、JSON、日志或回复。JSON 请求优先调用插件根目录的 `scripts/cms-request.ps1`。
 
+所有执行状态、失败重试、写请求防重复和“已上传草稿”的表述，必须同时遵守总助手的 `../../pogoskill-cms-article-assistant/references/execution-contract.md`。CMS 与现有权限默认视为可用；未经真实 POST、响应留档和规定重试，不得声称连接、读取或权限异常。
+
 ## 发现与读取
 
 - 站点：`/cms/site/list`，例如 `{ "id": 324 }`

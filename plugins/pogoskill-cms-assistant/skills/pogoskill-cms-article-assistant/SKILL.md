@@ -9,20 +9,31 @@ description: 将一篇 PoGoskill 台湾站 DOCX 完整处理为图片齐全、�
 
 开始时完整读取并依次使用：
 
-1. `../pogoskill-cms-publisher/SKILL.md` 与其中要求的 HTML/CMS 契约；
-2. `../pogoskill-cms-image-pipeline/SKILL.md` 与图片契约；
-3. `../pogoskill-cms-reviewer/SKILL.md` 与审查契约；
-4. [完成门槛](references/completion-gates.md)。
+1. [CMS 真实执行与证据契约](references/execution-contract.md)；
+2. `../pogoskill-cms-publisher/SKILL.md` 与其中要求的 HTML/CMS 契约；
+3. `../pogoskill-cms-image-pipeline/SKILL.md` 与图片契约；
+4. `../pogoskill-cms-reviewer/SKILL.md` 与审查契约；
+5. [完成门槛](references/completion-gates.md)。
+
+执行证据契约优先于口头进度：没有真实工具调用、API 响应和写后回读时，不得声称 CMS 无法访问、正在执行或已经上传。
 
 ## API Key 首次设置
 
-如果 Windows Credential Manager 中没有 CMS Key，只让使用者把完整 Key 复制到剪贴板并回复“已复制”。然后由 Agent 自己运行插件根目录：
+如果 Windows Credential Manager 中没有 CMS Key，优先采用“先启动命令、后复制”的交互流程。由 Agent 先在可见终端运行插件根目录：
 
 ```powershell
 pwsh -NoProfile -File scripts/cms-save-api-key.ps1
 ```
 
-脚本默认从剪贴板读取、保存到 Windows Credential Manager 并清空剪贴板。不要要求使用者把 Key 发到聊天、写进命令行、文件或环境日志；也不要让使用者手动输入长命令。只有明确要求键盘隐藏输入时才加 `-Prompt`。
+脚本会先停在“请现在复制完整的 CMS API Key”提示。此时让使用者复制 Key，回到终端直接按 Enter；脚本随后才读取剪贴板、保存到 Windows Credential Manager 并清空剪贴板。不要让使用者把 Key 粘贴进终端、发到聊天、写进命令行、文件或环境日志。
+
+如果 Agent 已经确认使用者提前复制完 Key，并且要通过非交互终端自动执行，则使用：
+
+```powershell
+pwsh -NoProfile -File scripts/cms-save-api-key.ps1 -FromClipboard
+```
+
+`-FromClipboard` 会立即读取剪贴板，不等待 Enter。只有使用者明确要求键盘隐藏输入时才使用 `-Prompt`。
 
 ## 强制执行闭环
 
@@ -38,9 +49,9 @@ pwsh -NoProfile -File scripts/cms-save-api-key.ps1
 
 ## 持续执行要求
 
-- Commentary 只能报告已发生且可验证的进度，例如已生成的文件、API `request_id` 或页面 ID；禁止只说“正在处理”后停止。
+- Commentary 只能报告已发生且可验证的进度，例如已生成的文件、API `request_id` 或页面 ID；任何“正在处理”之后必须立即执行真实工具调用，禁止只说不做。
 - 任务仍有安全、已授权的下一步时继续调用工具，不把剩余步骤交还给使用者。
-- 命令仍在运行时轮询同一会话；网络瞬时失败最多重试三次。写请求结果不确定时先按 URL/标题查询，确认没有已创建草稿后再重试，防止重复文章。
+- 命令仍在运行时轮询同一会话；未经真实 POST 和执行证据契约规定的重试，不得报告网络、权限或接口故障。写请求结果不确定时先按 URL/标题查询，确认没有已创建草稿后再重试，防止重复文章。
 - 只有遇到缺少必要源文件、凭据不存在、三次相同失败、关键 CMS 字段无法唯一确认或需要新增授权时才停止，并给出具体阻断证据。
 
 ## 最终报告

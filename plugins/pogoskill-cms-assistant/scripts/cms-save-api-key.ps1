@@ -16,9 +16,14 @@ try {
     $apiKey = ([Runtime.InteropServices.Marshal]::PtrToStringBSTR($keyPtr)).Trim()
   }
   else {
+    if (-not $FromClipboard) {
+      Write-Host ''
+      Write-Host '请现在复制完整的 CMS API Key。'
+      [void](Read-Host '复制完成后，回到这个窗口直接按 Enter')
+    }
     $apiKey = ([string](Get-Clipboard -Raw)).Trim()
     if ([string]::IsNullOrWhiteSpace($apiKey)) {
-      throw 'Clipboard is empty. Copy the complete CMS API key, then run this script again.'
+      throw 'Clipboard is empty. Copy the complete CMS API key before pressing Enter, then try again.'
     }
   }
 
