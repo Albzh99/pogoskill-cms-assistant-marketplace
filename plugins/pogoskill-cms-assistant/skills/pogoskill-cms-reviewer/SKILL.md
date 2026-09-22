@@ -13,6 +13,7 @@ description: 独立审查 PoGoskill 台湾站 CMS 草稿的元数据、HTML、�
 - 按 Publisher 的 [Luna HTML 固定执行契约](../pogoskill-cms-publisher/references/luna-html-contract.md) 审查正文骨架：目录必须使用 `nav-list1`，不得出现 `article-toc`；section/H2/目录锚点一一对应；普通 H3 必须使用 `h3-triangle`，FAQ 必须使用 `h3-faq faq1`；拒绝裸列表和未包入 `table-box overflow-auto` 的表格。
 - 正文不得有 H1；目录锚点与 section ID 一一对应；标准 Buy Box 必须恰好一个。
 - PoGoskill 模块必须先完整写完介绍、适用情境、操作思路、作用与优势，再原样放入 Publisher 的 `assets/download-cta.html`；下载区必须有两个 `secure-btn` 和两个 `secure-download` 安全下载框。按钮下方必须紧接较大的现有 H3“PoGoskill 操作步驟”，随后才进入 `step-cont`。若下载区被简化、按钮过早出现，或“PoGoskill 操作步驟”只有 `section-label` 小标签而没有 H3，判定为结构不合格。
+- 每个 `step-cont > li` 必须以 `<p><span>步驟 N</span>純文字說明。</p>` 开头。徽标后的说明不得含 `strong`、`b`、`a`、`em`、第二个 `span`、`br` 或任何其他标签；图片盒必须是该 `<p>` 后面的同级元素。违反时判定为会产生多列挤压的结构错误。
 - 将同分类正常上线文章作为结构基准；拒绝基准中不存在的新文本框、提示框、卡片、彩色背景框、引用框、CSS class、局部 CSS、标题样式或下载框架。
 - 每个已完成图片盒必须是 `img-wrap text-center > picture > source[type=image/webp] + img`，两者同 basename、同尺寸，fallback 为 JPG/PNG，ALT 为自然繁体中文。
 - 对每对图片核对 manifest、上传 request_id、publish_id、CMS 返回 URL、尺寸和文件名；不得把图片上传记录发布。

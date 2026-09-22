@@ -96,6 +96,53 @@ def canonical(fragment):
     return re.sub(r"\s+", " ", fragment).strip()
 
 
+def validate_step_lists(html_text, errors):
+    step_lists = re.findall(
+        r'<ul\b[^>]*class="[^"]*\bstep-cont\b[^"]*"[^>]*>(.*?)</ul>',
+        html_text,
+        re.I | re.S,
+    )
+    for list_index, list_body in enumerate(step_lists, 1):
+        items = re.findall(r"<li\b[^>]*>(.*?)</li>", list_body, re.I | re.S)
+        if not items:
+            errors.append(f"step-cont #{list_index} must contain at least one LI")
+            continue
+        expected_number = 1
+        for item_index, item_body in enumerate(items, 1):
+            paragraph = re.match(r"\s*<p>(.*?)</p>", item_body, re.I | re.S)
+            if not paragraph:
+                errors.append(
+                    f"step-cont #{list_index} item #{item_index} must begin with a plain P"
+                )
+                continue
+            step_line = paragraph.group(1)
+            badge = re.fullmatch(
+                r"\s*<span>\s*(?:步驟|步骤)\s*(\d+)\s*</span>([^<]+)\s*",
+                step_line,
+                re.I | re.S,
+            )
+            if not badge:
+                errors.append(
+                    f"step-cont #{list_index} item #{item_index} must be P > one step SPAN + plain text only"
+                )
+                continue
+            number = int(badge.group(1))
+            if number != expected_number:
+                errors.append(
+                    f"step-cont #{list_index} step numbers must be sequential from 1; got {number} at item #{item_index}"
+                )
+            expected_number += 1
+            if not badge.group(2).strip():
+                errors.append(
+                    f"step-cont #{list_index} item #{item_index} has no step description"
+                )
+            after_paragraph = item_body[paragraph.end():]
+            if re.search(r"<p\b", after_paragraph, re.I):
+                errors.append(
+                    f"step-cont #{list_index} item #{item_index} must not add another paragraph"
+                )
+
+
 def validate(html_text, assets_dir=None):
     errors = []
     parser = StructureParser()
@@ -139,6 +186,8 @@ def validate(html_text, assets_dir=None):
         errors.append("custom style or article-toc is forbidden")
     if re.search(r'class="[^"]*(?:rare-forest-article|gible-article|auto-tool-card|table-cont|table-list)[^"]*"', html_text, re.I):
         errors.append("legacy article-specific classes are forbidden")
+
+    validate_step_lists(html_text, errors)
 
     tips_count = len(re.findall(r'class="tit-tips"', html_text, re.I))
     if tips_count != 2:

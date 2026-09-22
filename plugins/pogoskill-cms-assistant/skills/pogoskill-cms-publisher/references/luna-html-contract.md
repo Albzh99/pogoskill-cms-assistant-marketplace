@@ -315,7 +315,7 @@ PoGoskill 模块必须遵循固定阅读顺序：先把 PoGoskill 的介绍、�
 
 <ul class="step-cont" id="pogoskill-guide-step">
   <li>
-    <p><span>步驟 1</span>第一步的實際操作說明。</p>
+    <p><span>步驟 1</span>連接手機：開啟 PoGoskill 後，把 iPhone 或 Android 連接到電腦。</p>
     <!-- 与步骤 1 名称完全匹配的 Guide 图片盒 -->
   </li>
   <li>
@@ -332,6 +332,28 @@ PoGoskill 模块必须遵循固定阅读顺序：先把 PoGoskill 的介绍、�
 - 每个 `<li>` 只能对应一个步骤。
 - 步骤文字与 DOCX 指定的 Guide 图片必须一一对应。
 - “PoGoskill 操作步驟”模块标题必须是 H3；但每个单独步骤不能再写成 H3，`step-cont` 已负责步骤内部的视觉层级。
+- 每个 `<li>` 的第一个元素必须是一个无 class 的 `<p>`；该 `<p>` 的第一个且唯一子元素必须是 `<span>步驟 N</span>`，其后直接接完整纯文字说明。
+- 步骤名称若需要“連接手機：”之类前缀，也写成普通文字；禁止用 `<strong>`、`<b>`、`<a>`、`<em>`、第二个 `<span>` 或 `<br>` 包裹。`.step-cont p` 在站点中采用横向布局，额外标签会变成新的布局列，造成标题逐字换行和正文挤压。
+- Guide 图片盒是 `<p>` 后面的同级元素，仍位于同一 `<li>` 内；禁止把 `<div class="img-wrap">` 或 `<picture>` 放进步骤文字 `<p>`。
+
+禁止以下会挤压的结构：
+
+```html
+<li>
+  <p><span>步驟 1</span><strong>連接手機：</strong>開啟 PoGoskill 後連接裝置。</p>
+</li>
+```
+
+必须改为：
+
+```html
+<li>
+  <p><span>步驟 1</span>連接手機：開啟 PoGoskill 後連接裝置。</p>
+  <div class="img-wrap text-center">
+    <!-- 對應步驟 1 的 picture -->
+  </div>
+</li>
+```
 
 ## 11. FAQ
 
@@ -431,7 +453,7 @@ Luna 必须输出校验结果后才能调用 `/cms/page/add` 或 `/cms/page/upda
 13. Buy Box 恰好一个且与资产完全一致。
 14. `IMAGE_PENDING` 为 0 才能判定图片完成。
 15. 所有标签平衡，HTML 按逻辑块换行缩进。
-16. 真实 CMS 桌面与手机预览通过后，才可报告版式通过。
+16. 每个 `step-cont > li` 必须以唯一的 `p > span` 步骤徽标开头，徽标后只允许纯文字，图片盒只能作为该 `<p>` 后面的同级元素。
 17. 上传前必须运行 `scripts/validate-article-html.py`，返回码必须为 0；不得用人工口头检查代替。
 18. DOCX 的所有正文段落、表格、FAQ、结语和图片占位都必须进入 HTML。写入后用 `compare-docx-to-cms-page.py` 列出缺失区块；存在未解释缺失时不得报告完成。
 

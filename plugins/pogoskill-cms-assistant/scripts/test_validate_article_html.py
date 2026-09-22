@@ -48,6 +48,21 @@ class ValidatorTests(unittest.TestCase):
     def test_truncated_html_is_blocked(self):
         self.assertFalse(VALIDATOR.validate(sample_html()[:-20], PUBLISHER / "assets")["ok"])
 
+    def test_inline_markup_after_step_badge_is_blocked(self):
+        broken = sample_html().replace(
+            '<span>步驟 1</span>操作。',
+            '<span>步驟 1</span><strong>連接手機：</strong>操作。',
+        )
+        result = VALIDATOR.validate(broken, PUBLISHER / "assets")
+        self.assertFalse(result["ok"])
+        self.assertTrue(any("one step SPAN + plain text only" in item for item in result["errors"]))
+
+    def test_step_numbers_must_be_sequential(self):
+        broken = sample_html().replace('<span>步驟 1</span>', '<span>步驟 2</span>')
+        result = VALIDATOR.validate(broken, PUBLISHER / "assets")
+        self.assertFalse(result["ok"])
+        self.assertTrue(any("sequential from 1" in item for item in result["errors"]))
+
 
 if __name__ == "__main__":
     unittest.main()
