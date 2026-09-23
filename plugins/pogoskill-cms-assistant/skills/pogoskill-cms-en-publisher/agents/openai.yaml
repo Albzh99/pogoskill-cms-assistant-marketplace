@@ -1,0 +1,7 @@
+interface:
+  display_name: "PoGoskill English CMS Publisher"
+  short_description: "English V2 HTML and verified CMS drafts for www.pogoskill.com"
+  default_prompt: "Use $pogoskill-cms-en-publisher to convert this English article into the fixed PoGoskill V2 HTML and save a verified CMS draft only when authorized. Do not generate or publish."
+policy:
+  allow_implicit_invocation: true
+

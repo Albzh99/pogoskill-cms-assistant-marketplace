@@ -1,8 +1,9 @@
 # PoGoskill CMS 文章助手
 
-这是 PoGoskill 团队使用的 Codex 私有插件 Marketplace，包含：
+这是 PoGoskill 团队使用的 Codex 插件 Marketplace，繁中站与英文站规则彼此独立，包含：
 
 - 台湾站 V2 文章 HTML 转换、机械校验与 CMS 草稿回读
+- 英文站 V2 文章 HTML 转换、固定英文下载区与 Buy Box、CMS 草稿回读
 - JPG/PNG 与 WebP 图片处理、上传及回填
 - CMS 草稿字段、HTML、来源覆盖和图片审查（AI 页面预览暂时停用）
 
@@ -21,3 +22,10 @@
 3. 能正常访问 GitHub。
 
 API Key 不在仓库中，也不得提交到 Git。
+
+## 站点必须分开使用
+
+- 繁中站：使用 `$pogoskill-cms-article-assistant`，目标为 `pogoskilltw` / `tw.pogoskill.com`。
+- 英文站：使用 `$pogoskill-cms-en-publisher`，目标为 `pogoskill` / `www.pogoskill.com`。
+
+两个技能共享安全的 API 调用与执行证据框架，但不会共享语言、站点 ID、模板 ID、下载链接或 Buy Box 文案。

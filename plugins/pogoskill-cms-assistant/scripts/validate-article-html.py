@@ -117,7 +117,7 @@ def validate_step_lists(html_text, errors):
                 continue
             step_line = paragraph.group(1)
             badge = re.fullmatch(
-                r"\s*<span>\s*(?:步驟|步骤)\s*(\d+)\s*</span>\s*"
+                r"\s*<span>\s*(?:步驟|步骤|step)\s*(\d+)\s*</span>\s*"
                 r"<label>\s*(?:<strong>[^<]+</strong>)?([^<]+)\s*</label>\s*",
                 step_line,
                 re.I | re.S,
@@ -144,7 +144,7 @@ def validate_step_lists(html_text, errors):
                 )
 
 
-def validate(html_text, assets_dir=None):
+def validate(html_text, assets_dir=None, profile="tw"):
     errors = []
     parser = StructureParser()
     try:
@@ -170,14 +170,17 @@ def validate(html_text, assets_dir=None):
         errors.append("duplicate section ids")
     if set(parser.sections) != set(parser.toc_hrefs) or len(parser.sections) != len(parser.toc_hrefs):
         errors.append("TOC href values must match section ids exactly")
+    approved_h3 = {"h3-triangle"} if profile == "tw" else {
+        "h3-triangle", "h3-orange-local", "h3-red-local", "h3-num"
+    }
     for index, cls in enumerate(parser.h3_classes, 1):
-        normal = "h3-triangle" in cls
+        normal = bool(approved_h3.intersection(cls))
         faq = {"h3-faq", "faq1"}.issubset(cls)
         if not normal and not faq:
             errors.append(f"H3 #{index} lacks approved class")
     if re.search(r"</h3>\s*<h3\b", html_text, re.I):
         errors.append("consecutive H3 headings without content are forbidden")
-    if re.search(r"<h3\b[^>]*>\s*(?:<[^>]+>)*\s*(?:步驟|步骤)\s*\d+", html_text, re.I):
+    if re.search(r"<h3\b[^>]*>\s*(?:<[^>]+>)*\s*(?:步驟|步骤|step)\s*\d+", html_text, re.I):
         errors.append("individual operation steps must not use H3")
     if parser.bare_uls:
         errors.append(f"bare UL count must be 0, got {parser.bare_uls}")
@@ -187,27 +190,41 @@ def validate(html_text, assets_dir=None):
         errors.append("custom style or article-toc is forbidden")
     if re.search(r'class="[^"]*(?:rare-forest-article|gible-article|auto-tool-card|table-cont|table-list)[^"]*"', html_text, re.I):
         errors.append("legacy article-specific classes are forbidden")
+    if profile == "en":
+        if re.search(r"[\u4e00-\u9fff]", html_text):
+            errors.append("English profile must not contain Chinese text")
+        if "tw.pogoskill.com" in html_text:
+            errors.append("English profile must not contain Taiwan-site URLs")
+        for forbidden_download in ("pogoskill_7925.exe", "pogoskill-mac_7926.dmg"):
+            if forbidden_download in html_text:
+                errors.append(f"English profile contains Taiwan download ID: {forbidden_download}")
 
     validate_step_lists(html_text, errors)
 
     tips_count = len(re.findall(r'class="tit-tips"', html_text, re.I))
-    if tips_count != 2:
+    if profile == "tw" and tips_count != 2:
         errors.append(f"tit-tips count must be 2, got {tips_count}")
 
     buybox_count = len(re.findall(r'class="pro-content pro-board1"', html_text, re.I))
     if buybox_count != 1:
         errors.append(f"Buy Box count must be 1, got {buybox_count}")
+    if assets_dir and buybox_count == 1:
+        expected_buybox = (Path(assets_dir) / "buybox.html").read_text(encoding="utf-8")
+        if canonical(expected_buybox) not in canonical(html_text):
+            errors.append("Buy Box must be copied exactly from assets/buybox.html")
 
     before_buybox = html_text.split('<div class="pro-content pro-board1">', 1)[0]
-    has_steps = "PoGoskill 操作步驟" in before_buybox
-    cta_count = len(re.findall(r'class="btn-groups"', before_buybox, re.I))
+    steps_title = "PoGoskill 操作步驟" if profile == "tw" else "How to Use PoGoskill"
+    has_steps = steps_title in before_buybox
+    expected_cta = None
+    if assets_dir:
+        expected_cta = (Path(assets_dir) / "download-cta.html").read_text(encoding="utf-8")
+        cta_count = canonical(before_buybox).count(canonical(expected_cta))
+    else:
+        secure_btn_count = len(re.findall(r'class="secure-btn(?:\s|\")', before_buybox, re.I))
+        cta_count = 1 if secure_btn_count == 2 else 0
     if cta_count > 1:
         errors.append(f"article CTA count must not exceed 1, got {cta_count}")
-    if cta_count and assets_dir:
-        expected_path = Path(assets_dir) / "download-cta.html"
-        expected = expected_path.read_text(encoding="utf-8")
-        if canonical(expected) not in canonical(before_buybox):
-            errors.append("download CTA must be copied exactly from assets/download-cta.html")
     if has_steps:
         if cta_count != 1:
             errors.append(f"article CTA count must be 1 when PoGoskill steps exist, got {cta_count}")
@@ -215,15 +232,29 @@ def validate(html_text, assets_dir=None):
         secure_download_count = len(re.findall(r'class="secure-download"', before_buybox, re.I))
         if secure_btn_count != 2 or secure_download_count != 2:
             errors.append("download CTA must keep two secure-btn and two secure-download boxes")
-        for required in ("pogoskill_7925.exe", "pogoskill-mac_7926.dmg"):
+        required_downloads = (
+            ("pogoskill_7925.exe", "pogoskill-mac_7926.dmg")
+            if profile == "tw"
+            else ("pogoskill_7144.exe", "pogoskill-mac_7145.dmg")
+        )
+        for required in required_downloads:
             if required not in before_buybox:
                 errors.append(f"download CTA missing {required}")
-        advantage = before_buybox.find("PoGoskill 優勢")
+        advantage_text = "PoGoskill 優勢" if profile == "tw" else "Key Features of PoGoskill"
+        advantage = before_buybox.find(advantage_text)
         cta = before_buybox.find('<div class="dev-desktop">')
-        steps_h3 = before_buybox.find('<h3 class="h3-triangle">PoGoskill 操作步驟</h3>')
-        step_list = before_buybox.find('class="step-cont"', steps_h3 if steps_h3 >= 0 else 0)
-        if min(advantage, cta, steps_h3, step_list) < 0 or not (advantage < cta < steps_h3 < step_list):
-            errors.append("PoGoskill order must be advantages, exact CTA, H3 steps title, then step-cont")
+        steps_heading = before_buybox.find(steps_title)
+        step_list = before_buybox.find('class="step-cont"', steps_heading if steps_heading >= 0 else 0)
+        valid_order = (
+            advantage < cta < steps_heading < step_list
+            if profile == "tw"
+            else advantage < steps_heading < cta < step_list
+        )
+        if min(advantage, cta, steps_heading, step_list) < 0 or not valid_order:
+            if profile == "tw":
+                errors.append("PoGoskill order must be advantages, exact CTA, H3 steps title, then step-cont")
+            else:
+                errors.append("English PoGoskill order must be features, How to Use heading, exact CTA, then step-cont")
 
     picture_blocks = re.findall(r"<picture\b[^>]*>(.*?)</picture>", html_text, re.I | re.S)
     for index, block in enumerate(picture_blocks, 1):
@@ -271,6 +302,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("html")
     parser.add_argument("--assets-dir")
+    parser.add_argument("--profile", choices=("tw", "en"), default="tw")
     parser.add_argument("--out")
     args = parser.parse_args()
 
@@ -278,7 +310,7 @@ def main():
     assets_dir = Path(args.assets_dir).resolve() if args.assets_dir else (
         Path(__file__).resolve().parents[1] / "skills" / "pogoskill-cms-publisher" / "assets"
     )
-    result = validate(path.read_text(encoding="utf-8"), assets_dir)
+    result = validate(path.read_text(encoding="utf-8"), assets_dir, args.profile)
     payload = json.dumps(result, ensure_ascii=False, indent=2)
     if args.out:
         Path(args.out).resolve().write_text(payload, encoding="utf-8")

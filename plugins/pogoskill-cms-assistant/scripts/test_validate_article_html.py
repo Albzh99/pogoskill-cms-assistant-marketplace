@@ -5,6 +5,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 PUBLISHER = ROOT / "skills" / "pogoskill-cms-publisher"
+EN_PUBLISHER = ROOT / "skills" / "pogoskill-cms-en-publisher"
 SPEC = importlib.util.spec_from_file_location(
     "article_validator", ROOT / "scripts" / "validate-article-html.py"
 )
@@ -37,6 +38,31 @@ def sample_html():
 {buybox}'''
 
 
+def sample_en_html():
+    cta = (EN_PUBLISHER / "assets" / "download-cta.html").read_text(encoding="utf-8")
+    buybox = (EN_PUBLISHER / "assets" / "buybox.html").read_text(encoding="utf-8")
+    return f'''<p>Complete introduction.</p>
+<ul class="list-filled-dot nav-list1">
+  <li><a href="#part1">Part 1. Core Content</a></li>
+  <li><a href="#part2">Part 2. PoGoskill</a></li>
+</ul>
+<section id="part1">
+  <h2>Part 1. Core Content</h2>
+  <h3 class="h3-orange-local">Verified Method</h3>
+  <p>Complete content.</p>
+</section>
+<section id="part2">
+  <h2>Part 2. PoGoskill</h2>
+  <p>Complete product explanation and use case.</p>
+  <h4 class="h4-filled">Key Features of PoGoskill</h4>
+  <ul class="list-cont list-flag"><li>Stable feature.</li></ul>
+  <h4 class="h4-filled">How to Use PoGoskill</h4>
+  {cta}
+  <ul class="step-cont"><li><p><span>Step 1</span><label><strong>Connect your device:</strong> Complete instruction.</label></p></li></ul>
+</section>
+{buybox}'''
+
+
 class ValidatorTests(unittest.TestCase):
     def test_valid_contract_passes(self):
         self.assertTrue(VALIDATOR.validate(sample_html(), PUBLISHER / "assets")["ok"])
@@ -62,6 +88,30 @@ class ValidatorTests(unittest.TestCase):
         result = VALIDATOR.validate(broken, PUBLISHER / "assets")
         self.assertFalse(result["ok"])
         self.assertTrue(any("sequential from 1" in item for item in result["errors"]))
+
+    def test_valid_english_contract_passes(self):
+        self.assertTrue(
+            VALIDATOR.validate(sample_en_html(), EN_PUBLISHER / "assets", "en")["ok"]
+        )
+
+    def test_english_contract_rejects_taiwan_download_ids(self):
+        broken = sample_en_html().replace("pogoskill_7144.exe", "pogoskill_7925.exe")
+        result = VALIDATOR.validate(broken, EN_PUBLISHER / "assets", "en")
+        self.assertFalse(result["ok"])
+
+    def test_english_contract_rejects_modified_buybox(self):
+        broken = sample_en_html().replace(
+            "The Best GPS Location Spoofer", "A GPS Location Spoofer", 1
+        )
+        result = VALIDATOR.validate(broken, EN_PUBLISHER / "assets", "en")
+        self.assertFalse(result["ok"])
+        self.assertTrue(any("Buy Box must be copied exactly" in item for item in result["errors"]))
+
+    def test_english_contract_rejects_taiwan_site_links(self):
+        broken = sample_en_html().replace("www.pogoskill.com", "tw.pogoskill.com", 1)
+        result = VALIDATOR.validate(broken, EN_PUBLISHER / "assets", "en")
+        self.assertFalse(result["ok"])
+        self.assertTrue(any("Taiwan-site URLs" in item for item in result["errors"]))
 
 
 if __name__ == "__main__":
