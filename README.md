@@ -29,6 +29,26 @@ API Key 不在仓库中，也不得提交到 Git。
 
 每篇文章请新建一个 Codex 任务，只附上一种语言的一篇 DOCX。不要在同一任务中同时处理繁中站和英文站文章。
 
+### 交稿前必须写进 DOCX 的内容
+
+每篇稿件都要在文档开头或备注区提供参考样式，至少填写一种可核验来源：参考文章 URL、CMS 页面 ID 或可复制的现有 HTML。AI 必须先读取参考样式，再复用其中已存在的标题、目录、图片、表格、下载区、步骤与 Buy Box 结构。
+
+- 需要新上传的正文图片：直接嵌入 DOCX 的实际出现位置，不要只写本地路径或另发一包无位置说明的图片。AI 会按文档位置提取，保留 JPG/PNG，生成同名 WebP 后成对上传。
+- Guide 图片：不要重新嵌入或让 AI 猜图；在对应正文或步骤位置写 CMS `guides` 图片库中的准确文件名（含扩展名），例如 `guide-change-location-step-1.jpg`。AI 只能按该文件名精确检索并复用同名 fallback/WebP，不能换相似图或重新上传 Guide 图。
+
+可直接写入 DOCX：
+
+```text
+参考样式：
+参考文章 URL / CMS 页面 ID / 现有 HTML：
+
+新上传正文图片：
+已直接嵌入 DOCX 对应位置。
+
+Guide 图片：
+在对应位置填写 CMS 准确文件名，例如：guide-change-location-step-1.jpg
+```
+
 ### 繁中站文章
 
 适用范围：繁体中文稿件，目标站点为 `pogoskilltw` / `https://tw.pogoskill.com`。必须调用完整流程技能 `$pogoskill-cms-article-assistant`，它会串联繁中 Publisher、图片 Pipeline 和 Reviewer。

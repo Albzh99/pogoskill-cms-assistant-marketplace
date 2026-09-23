@@ -37,11 +37,11 @@ pwsh -NoProfile -File scripts/cms-save-api-key.ps1 -FromClipboard
 
 ## 强制执行闭环
 
-1. 建立当前文章独立工作目录，保留源 DOCX、结构 JSON、HTML、图片 manifest、API payload/response 和检查结果。
+1. 建立当前文章独立工作目录，保留源 DOCX、结构 JSON、HTML、图片 manifest、API payload/response 和检查结果。先从 DOCX 提取参考文章 URL、CMS 页面 ID 或现有 HTML；至少有一种参考样式。缺失时不得自行设计页面，应明确报告输入缺少参考样式。
 2. 先用 `inspect-docx-structure.py` 读取全文、表格与图片关系，列出章节、FAQ、图片和 Guide 文件名；不得只阅读开头或摘要。
 3. 实时查询站点、模板、分类、作者、产品、相关文章和 URL 冲突。
 4. 按 Publisher 契约生成完整 HTML。下载区与 Buy Box 必须直接复制资产文件，不得手写简化。
-5. 按 Image Pipeline 完成所有正文图；Guide 图只按 DOCX 给出的准确名称查库。新上传图片必须使用上传响应的图片 `publish_id` 单独发布并确认前台双格式可读；图片未齐不得伪装完成。
+5. 按 Image Pipeline 完成所有正文图。新上传正文图必须真实嵌入 DOCX 的目标位置；按该位置提取、转换和回填。Guide 图不要求嵌入，只读取 DOCX 对应位置写明的 CMS 准确文件名（含扩展名），并按名称精确查库；不进行语义猜图、相似图替换或 Guide 重传。新上传图片必须使用上传响应的图片 `publish_id` 单独发布并确认前台双格式可读；图片未齐不得伪装完成。
 6. 运行 `validate-article-html.py`。返回非零时继续修复，禁止上传不合格 HTML。
 7. 用户已明确要求保存草稿时，只用 CMS POST API 调用 `page/add` 或已确认目标的 `page/update`。禁止用浏览器表单代替 API；禁止 `page/make` 和发布文章页面。图片资源发布是前一步的必要流程，不属于文章发布。
 8. 写入后立即 `page/info` 回读，并运行 `compare-docx-to-cms-page.py`。缺少正文、表格、FAQ、图片、结语、下载区或 Buy Box 时修复草稿并再次回读。

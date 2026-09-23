@@ -5,6 +5,12 @@ description: Convert English PoGoskill SEO drafts into the English site's fixed 
 
 # PoGoskill English CMS Publisher
 
+## Input contract
+
+- The DOCX must include at least one verifiable layout reference: a reference article URL, CMS page ID, or existing HTML. Read and record it before composing the page; never invent a new visual module when the reference is absent.
+- Every ordinary article image that must be uploaded must be embedded at its intended position in the DOCX. A loose folder, local path, or unattached image set is not enough for automatic placement.
+- Guide images are not embedded or re-uploaded. The DOCX must state the exact CMS `guides` filename, including extension, at the relevant paragraph or step. Search and reuse only that exact filename and its matching fallback/WebP pair; never guess by meaning or substitute a similar screenshot.
+
 Use this skill only for English articles on `https://www.pogoskill.com`. Traditional Chinese articles must use `pogoskill-cms-publisher`; never mix the two sites' wording, IDs, product links, image roots, or component assets.
 
 默认用中文向团队成员汇报进度、异常和最终结果；只有文章正文、HTML 文案与英文站固定组件保持英文。除非用户明确要求英文回复，否则不要因为源稿是英文就改用英文沟通。

@@ -7,6 +7,8 @@ description: 为 PoGoskill 文章提取真实 JPG/PNG、生成同名 WebP、成�
 
 把用户提供且确实属于当前文章的图片处理成 CMS V2 可预览的双格式图片盒。
 
+输入严格区分两类：普通新图直接嵌入 DOCX 的实际出现位置，按文档关系提取并回填；Guide 图不嵌入新素材，只读取对应位置写明的 CMS `guides` 准确文件名（含扩展名）。Guide 图只精确复用，不猜图、不换相似图、不重新上传。
+
 开始前读取 [references/image-contract.md](references/image-contract.md)。在当前项目的文章工作目录运行本技能 `scripts/` 下的确定性脚本；API Key 只由插件根目录 `scripts/CmsCredential.ps1` 从 Windows 凭据管理器读取。
 
 ## 权限边界

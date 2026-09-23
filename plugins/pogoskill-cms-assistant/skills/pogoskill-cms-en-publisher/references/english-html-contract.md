@@ -1,5 +1,11 @@
 # English V2 HTML contract
 
+## 0. Required source package
+
+Before writing HTML, record at least one layout reference supplied in the DOCX: a reference article URL, CMS page ID, or existing HTML. Load the referenced CMS HTML when a URL or page ID is supplied, then reuse only its approved V2 module structure. Do not invent a layout when no reference is present.
+
+Images that need a new CMS upload must be embedded in the DOCX exactly where they belong; their surrounding paragraphs define placement. Guide images are different: the DOCX must state the exact CMS `guides` filename, including extension, at the corresponding step or paragraph. Reuse only the exact-name fallback/WebP pair. Do not infer a screenshot from the prose, substitute a similar image, or upload a new Guide image.
+
 This contract is derived from three supplied English production examples and normalized to remove malformed legacy nesting and one-line output. Copy the established component structure; do not imitate accidental markup defects.
 
 ## Non-negotiable rules

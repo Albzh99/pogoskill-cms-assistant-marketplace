@@ -7,6 +7,12 @@ description: 将 PoGoskill 台湾站 SEO 文稿转换为文章内容页面模板
 
 为 PoGoskill 台湾站制作文章，并把经过校验的内容保存为 CMS 草稿。
 
+## 输入契约
+
+- DOCX 必须提供参考文章 URL、CMS 页面 ID 或现有 HTML中的至少一项。先读取并记录参考来源，再复用其现有结构；没有参考样式时不得自行设计新模块。
+- 需要上传的普通正文图必须直接嵌入 DOCX 的实际出现位置。只给路径、文件夹或无位置说明的附件不能用于自动回填。
+- Guide 图无需嵌入；DOCX 必须在对应步骤或段落写出 CMS `guides` 中的准确文件名（含扩展名）。只按该名称精确检索并复用，不按语义猜图、不换相似图、不重新上传 Guide 图。
+
 开始前读取总助手的 [CMS 真实执行与证据契约](../pogoskill-cms-article-assistant/references/execution-contract.md)、[references/cms-live-contract.md](references/cms-live-contract.md) 和 [references/cms-api-contract.md](references/cms-api-contract.md)。制作或修改正文 HTML 时，必须先完整读取 [Luna HTML 固定执行契约](references/luna-html-contract.md) 和 [两篇旧文章的结构参考结论](references/legacy-article-patterns.md)，逐模块复制当前 V2 结构；需要新增图片位置时使用 [assets/image-box.html](assets/image-box.html)，正文下载区原样使用 [assets/download-cta.html](assets/download-cta.html)，正文结尾原样使用 [assets/buybox.html](assets/buybox.html)。不得靠记忆重写下载区或 Buy Box，也不得复制旧文章的自定义 CSS 或专属 class。
 
 ## 授权和安全
