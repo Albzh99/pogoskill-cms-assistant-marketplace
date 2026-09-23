@@ -237,7 +237,24 @@ def validate(html_text, assets_dir=None, profile="tw"):
 
     before_buybox = html_text.split('<div class="pro-content pro-board1">', 1)[0]
     steps_title = "PoGoskill 操作步驟" if profile == "tw" else "How to Use PoGoskill"
-    has_steps = steps_title in before_buybox
+    step_heading_match = None
+    for heading_match in re.finditer(
+        r"<h([34])\b([^>]*)>(.*?)</h\1>", before_buybox, re.I | re.S
+    ):
+        heading_text = re.sub(r"<[^>]+>", "", heading_match.group(3)).strip()
+        is_steps_heading = (
+            "PoGoskill 操作步驟" in heading_text
+            if profile == "tw"
+            else bool(re.search(r"\bhow to\b.*\bpogoskill\b", heading_text, re.I))
+        )
+        if is_steps_heading:
+            step_heading_match = heading_match
+            if profile == "en" and heading_match.group(1) == "4":
+                heading_class = attr(f"<h4 {heading_match.group(2)}>", "class")
+                if "h4-filled" not in heading_class.split():
+                    errors.append("English How to PoGoskill H4 must use the approved h4-filled class")
+            break
+    has_steps = step_heading_match is not None
     expected_cta = None
     if assets_dir:
         expected_cta = (Path(assets_dir) / "download-cta.html").read_text(encoding="utf-8")
@@ -294,7 +311,7 @@ def validate(html_text, assets_dir=None, profile="tw"):
                 errors.append(f"download CTA missing {required}")
         advantage_text = "PoGoskill 優勢" if profile == "tw" else "Key Features of PoGoskill"
         advantage = before_buybox.find(advantage_text)
-        steps_heading = before_buybox.find(steps_title)
+        steps_heading = step_heading_match.start() if step_heading_match else -1
         cta_search_start = 0 if profile == "tw" else (steps_heading if steps_heading >= 0 else 0)
         cta = before_buybox.find('<div class="dev-desktop">', cta_search_start)
         step_list = before_buybox.find('class="step-cont"', steps_heading if steps_heading >= 0 else 0)

@@ -148,6 +148,23 @@ class ValidatorTests(unittest.TestCase):
             VALIDATOR.validate(sample_en_html(), EN_PUBLISHER / "assets", "en")["ok"]
         )
 
+    def test_english_how_to_heading_accepts_approved_h3_variant(self):
+        html = sample_en_html().replace(
+            '<h4 class="h4-filled">How to Use PoGoskill</h4>',
+            '<h3 class="h3-triangle">How to Reset &amp; Modify GPS Coordinates via PoGoskill</h3>',
+        )
+        result = VALIDATOR.validate(html, EN_PUBLISHER / "assets", "en")
+        self.assertTrue(result["ok"], result["errors"])
+
+    def test_english_how_to_h4_requires_approved_class(self):
+        broken = sample_en_html().replace(
+            '<h4 class="h4-filled">How to Use PoGoskill</h4>',
+            '<h4>How to Use PoGoskill</h4>',
+        )
+        result = VALIDATOR.validate(broken, EN_PUBLISHER / "assets", "en")
+        self.assertFalse(result["ok"])
+        self.assertTrue(any("H4 must use" in item for item in result["errors"]))
+
     def test_english_download_buttons_must_be_centered(self):
         broken = sample_en_html().replace(
             ' style="display:flex;justify-content:center;"', "", 1

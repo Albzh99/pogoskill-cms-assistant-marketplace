@@ -36,7 +36,7 @@
 
 - 主介绍模块使用对应站点的固定下载资产；繁中与英文 CTA 结构、下载 ID 和链接不得混用。
 - 桌面 `.btn-groups` 必须保留 `display:flex;justify-content:center;`，无论前方使用哪一种已验证 H3/H4 标题样式，两个按钮都应整体居中。
-- 英文主模块保留现有顺序：`How to Use PoGoskill` 标题 → 英文 CTA → `step-cont` 步骤；繁中模块按繁中契约执行。
+- 英文主模块保留现有顺序：已验证的 `How to ... PoGoskill` 标题 → 英文 CTA → `step-cont` 步骤。标题可沿用参考文章的 `h3-triangle`、其他英文站已批准 H3，或 `h4-filled`；不得强制全部改成 H4，也不得为了按钮居中改写标题层级。繁中模块按繁中契约执行。
 - FAQ 默认无 CTA。只有 DOCX 对应答案明确介绍或推荐 PoGoskill 时，才允许在答案后额外加入一组相同语言 CTA；没有源文依据、放错站点资产或全文超过两组均判定为 `FAIL`。
 
 ## 发布前强制清单

@@ -78,7 +78,7 @@ Before image publication, a correct public URL can return HTTP 404. This is an i
 - Insert `assets/download-cta.html` exactly once in the main recommendation block. Keep it in the established position after the `How to Use PoGoskill` heading and immediately before the `step-cont` list.
 - The download CTA must retain both desktop secure-download boxes and the mobile Buy Now links. Do not remove wrappers, SVG references or button classes.
 - The desktop `.btn-groups` must retain `style="display:flex;justify-content:center;"` so both download buttons stay centered regardless of the approved H3/H4 heading variant above them.
-- Place a clear existing-style heading such as `<h4 class="h4-filled">How to Use PoGoskill</h4>` before the CTA/steps grouping according to the selected English reference. Do not translate it or turn every step into a heading.
+- Place one clear existing-style operation heading before the CTA/steps grouping. English reference pages may use an approved H3 such as `<h3 class="h3-triangle">How to Reset &amp; Modify GPS Coordinates Smoothly via PoGoskill?</h3>` or `<h3 class="h3-orange-local">How to Use PoGoskill</h3>`, and may also use `<h4 class="h4-filled">How to Use PoGoskill</h4>`. Preserve the appropriate verified variant instead of forcing every article to H4. Do not translate it or turn each individual step into a heading.
 - Each step uses this stable structure:
 
 ```html
