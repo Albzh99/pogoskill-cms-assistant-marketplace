@@ -25,7 +25,7 @@ description: 为 PoGoskill 台湾站文章提取真实 JPG/PNG 素材、生成�
 4. 人工或语义映射补齐每张图的 `image_key`、符合文章语言的 `alt`、语义化 basename 和 `max_width`。不得把 DOCX 的 `descr` 自动当作最终 ALT，也不得给 basename 追加随机字符串或 SHA 哈希。
 5. 主图先处理为 850×460；其他图片保持比例，横图不超过正文需求，竖图限制展示宽高。随后用 `convert-image-pairs.ps1` 保留 JPG/PNG 并生成同 basename WebP。
 6. 上传前用 `/cms/picture/list` 检查目标文件名与完全重复项，确认目标目录真实存在后上传 fallback 与 WebP。必须验证 `code === 0`、`total === 2`、`err_name_files` 为空、两者尺寸一致，并回查列表。
-7. `upload` URL 只用于验证 CMS 上传成功，禁止写入正文。脚本按站点生成前台公开 URL：繁中站 `324` 使用 `https://tw.pogoskill.com/images/<folder>/<name>.<ext>?w=<w>&h=<h>`；英文站 `286` 使用 `https://images.pogoskill.com/<folder>/<name>.<ext>?w=<w>&h=<h>`。
+7. 上传响应 `data.list[].url` 就是文章应使用的前台正式地址；`data.list[].upload` 只用于 CMS 上传验证，禁止写入正文。优先直接读取 `url`，缺失时用 `/cms/picture/list` 返回的 `online` 核对，不能声称“无法上传前台 URL”或改用后台地址。脚本只给已验证的公开 URL 追加 `w/h` 尺寸参数。
 8. 用 `apply-image-manifest.ps1` 按唯一 `image-key` 回填，不按“第几个图片盒”猜测。回填后交给 Reviewer 通过 CMS API 回读、图片 manifest 和机械校验复核；当前不执行 AI 页面预览。
 
 ## 停止条件

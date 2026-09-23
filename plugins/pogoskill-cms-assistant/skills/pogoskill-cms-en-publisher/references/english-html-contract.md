@@ -60,7 +60,7 @@ Use the established structure:
 
 The WebP and JPG/PNG basenames must match. ALT describes the actual image. Keep the main image at 850×460 and do not invent URLs or claim upload success without API evidence.
 
-The CMS `upload` URL is evidence only. Never place `site.p.cms.afirstsoft.cn`, `attachment=1`, or another CMS backend URL in article HTML. Public English image URLs must use `https://images.pogoskill.com/`; filenames must remain readable semantic names without a trailing checksum/hash.
+Use `/cms/picture/upload` response `data.list[].url` as the public article URL; if it is absent, verify `/cms/picture/list` field `online`. The CMS `upload` URL is evidence only. Never claim that the API cannot provide a frontend URL before checking those fields, and never place `site.p.cms.afirstsoft.cn`, `attachment=1`, or another CMS backend URL in article HTML. Public English image URLs must use `https://images.pogoskill.com/`; filenames must remain readable semantic names without a trailing checksum/hash.
 
 - User-supplied article images are the primary source. Convert each JPG/PNG to a same-basename WebP and keep both formats.
 - Upload against English `site_id = 286` and choose the English image directory by article topic, such as `change-location`, `pokemon-ios`, `pikmin-bloom` or another live-confirmed folder.

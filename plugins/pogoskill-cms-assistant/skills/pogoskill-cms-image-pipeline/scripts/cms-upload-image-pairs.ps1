@@ -43,11 +43,22 @@ function Test-UploadedUrl([string]$Url) {
   return ($LASTEXITCODE -eq 0 -and $status -in @('200', '206'))
 }
 
-function Get-PublicImageUrl([string]$Name, [int]$Width, [int]$Height) {
-  $baseUrl = if ($SiteId -eq 324) { 'https://tw.pogoskill.com/images' } else { 'https://images.pogoskill.com' }
-  $folder = $CmsPath.Trim('/')
-  $relative = if ([string]::IsNullOrWhiteSpace($folder)) { $Name } else { $folder + '/' + $Name }
-  return $baseUrl + '/' + $relative + '?w=' + $Width + '&h=' + $Height
+function Get-PublicImageUrl([object]$UploadedFile, [object]$ListedFile, [int]$Width, [int]$Height) {
+  $expectedPrefix = if ($SiteId -eq 324) { 'https://tw.pogoskill.com/images/' } else { 'https://images.pogoskill.com/' }
+  $candidates = @([string]$UploadedFile.url, [string]$ListedFile.online)
+  $url = $candidates | Where-Object {
+    -not [string]::IsNullOrWhiteSpace($_) -and
+    $_.StartsWith($expectedPrefix) -and
+    $_ -notmatch 'site\.p\.cms\.afirstsoft\.cn|[?&]attachment=1'
+  } | Select-Object -First 1
+  if ([string]::IsNullOrWhiteSpace($url)) {
+    throw "CMS response did not provide a valid public URL for $($UploadedFile.name); expected prefix $expectedPrefix"
+  }
+  if ($url -notmatch '[?&]w=') {
+    $separator = if ($url.Contains('?')) { '&' } else { '?' }
+    $url = $url + $separator + 'w=' + $Width + '&h=' + $Height
+  }
+  return $url
 }
 
 try {
@@ -122,8 +133,8 @@ try {
     $item | Add-Member -NotePropertyName publish_id -NotePropertyValue $response.data.publish_id -Force
     $item | Add-Member -NotePropertyName fallback_upload_url -NotePropertyValue $fallback.upload -Force
     $item | Add-Member -NotePropertyName webp_upload_url -NotePropertyValue $webp.upload -Force
-    $item | Add-Member -NotePropertyName fallback_public_url -NotePropertyValue (Get-PublicImageUrl $item.fallback_name ([int]$item.width) ([int]$item.height)) -Force
-    $item | Add-Member -NotePropertyName webp_public_url -NotePropertyValue (Get-PublicImageUrl $item.webp_name ([int]$item.width) ([int]$item.height)) -Force
+    $item | Add-Member -NotePropertyName fallback_public_url -NotePropertyValue (Get-PublicImageUrl $fallback $listedFallback ([int]$item.width) ([int]$item.height)) -Force
+    $item | Add-Member -NotePropertyName webp_public_url -NotePropertyValue (Get-PublicImageUrl $webp $listedWebp ([int]$item.width) ([int]$item.height)) -Force
     $item | Add-Member -NotePropertyName site_id -NotePropertyValue $SiteId -Force
     $item | Add-Member -NotePropertyName cms_path -NotePropertyValue $CmsPath -Force
     $item | Add-Member -NotePropertyName fallback_url_readable -NotePropertyValue $fallbackReadable -Force

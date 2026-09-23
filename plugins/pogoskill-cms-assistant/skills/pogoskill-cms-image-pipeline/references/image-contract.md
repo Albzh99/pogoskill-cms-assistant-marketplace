@@ -44,8 +44,10 @@
 ## 前台公开 URL
 
 - CMS 响应的 `upload` URL（例如 `https://site.p.cms.afirstsoft.cn/...?...attachment=1`）只用于上传验证，不是文章地址，严禁写入 `src`、`srcset`、`data-src` 或 `data-srcset`。
+- `/cms/picture/upload` 成功响应中的 `data.list[].url` 是前台正式地址，必须优先直接采用；`/cms/picture/list` 的 `online` 是缺失时的核对兜底。不得忽略已有 `url` 字段后声称前台地址无法取得。
 - 繁中站 `site_id = 324`：`https://tw.pogoskill.com/images/<folder>/<semantic-name>.<ext>?w=<width>&h=<height>`。
 - 英文站 `site_id = 286`：`https://images.pogoskill.com/<folder>/<semantic-name>.<ext>?w=<width>&h=<height>`。
+- 只在 API 返回的公开 URL 尚无尺寸参数时追加 `w` 与 `h`；不得自行替换 API 返回的 host、目录或文件名。
 - fallback 与 WebP 使用同目录、同 basename、同尺寸参数，仅扩展名不同。查询参数写入 HTML 时必须编码为 `&amp;`。
 
 ## V2 HTML
@@ -76,4 +78,4 @@ CMS 新上传资源的已发布范例使用：
 
 ## Manifest 必填项
 
-每项至少包含：`image_key`、`source_entry`、`source_sha256`、`fallback_path`、`webp_path`、`width`、`height`、`alt`、`max_width`。上传后追加 `site_id`、`upload_request_id`、`publish_id`、仅供验证的 `fallback_upload_url`/`webp_upload_url`、正文专用的 `fallback_public_url`/`webp_public_url` 和 URL 检查结果。
+每项至少包含：`image_key`、`source_entry`、`source_sha256`、`fallback_path`、`webp_path`、`width`、`height`、`alt`、`max_width`。上传后追加 `site_id`、`upload_request_id`、`publish_id`、仅供验证的 `fallback_upload_url`/`webp_upload_url`、从响应 `url`（或回查 `online`）取得的 `fallback_public_url`/`webp_public_url` 和 URL 检查结果。
