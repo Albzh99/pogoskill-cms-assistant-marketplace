@@ -23,9 +23,36 @@
 
 API Key 不在仓库中，也不得提交到 Git。
 
-## 站点必须分开使用
+## 安装后怎样使用
 
-- 繁中站：使用 `$pogoskill-cms-article-assistant`，目标为 `pogoskilltw` / `tw.pogoskill.com`。
-- 英文站：使用 `$pogoskill-cms-en-publisher`，目标为 `pogoskill` / `www.pogoskill.com`。
+每篇文章请新建一个 Codex 任务，只附上一种语言的一篇 DOCX。不要在同一任务中同时处理繁中站和英文站文章。
 
-两个技能共享安全的 API 调用与执行证据框架，但不会共享语言、站点 ID、模板 ID、下载链接或 Buy Box 文案。
+### 繁中站文章
+
+适用范围：繁体中文稿件，目标站点为 `pogoskilltw` / `https://tw.pogoskill.com`。必须调用完整流程技能 `$pogoskill-cms-article-assistant`，它会串联繁中 Publisher、图片 Pipeline 和 Reviewer。
+
+附上 DOCX 后，把下面整段复制给 AI：
+
+> 使用 `$pogoskill-cms-article-assistant` 完整处理这篇繁中 DOCX。严格使用台湾站 V2 模板和繁体中文；完整保留正文、表格、FAQ、图片、下载区与 Buy Box。DOCX 中指定名称的 Guide 图片从 CMS 图片库精确查找；其他随稿图片保留 JPG/PNG 并生成同名 WebP，成对上传后使用图片上传响应的 `publish_id` 单独发布图片资源，确认两个前台 URL 均可访问后再回填 HTML。通过 CMS POST API 保存为草稿并回读核对。禁止调用 `/cms/page/make`，禁止发布文章页面，禁止删除或修改其他文章。没有页面 ID、草稿状态、写入 request_id 和回读 request_id 时，不得声称完成。
+
+### 英文站文章
+
+适用范围：英文稿件，目标站点为 `pogoskill` / `https://www.pogoskill.com`。必须调用 `$pogoskill-cms-en-publisher`；不得调用繁中 Publisher，也不得混用繁中站链接、产品 ID、下载区或 Buy Box。
+
+附上英文 DOCX 后，把下面整段复制给 AI：
+
+> Use `$pogoskill-cms-en-publisher` to process this complete English DOCX for `www.pogoskill.com`. Preserve every paragraph, table, FAQ, image, download CTA, and Buy Box, and follow the fixed English V2 HTML contract. Resolve Guide images only by the exact filenames supplied in the DOCX. For other supplied JPG/PNG images, keep the original, create a same-basename WebP, upload both to the correct English CMS folder, publish only the image resources with the `publish_id` returned by `/cms/picture/upload`, and verify that both public URLs are readable before inserting them into HTML. Save and read back a CMS draft through POST APIs. Never call `/cms/page/make`, never publish the article page, and never delete or modify another article. Do not claim completion without the page ID, draft status, write request_id, and readback request_id.
+
+### 只处理图片
+
+如果不需要创建或修改文章草稿，只需处理当前文章的图片，可附上图片或 DOCX 后输入：
+
+> 使用 `$pogoskill-cms-image-pipeline` 处理这些当前文章的真实图片。保留 JPG/PNG，生成同名 WebP，检查目标目录与重复文件，成对上传，并使用本次图片上传响应中的 `publish_id` 单独发布图片资源。确认两个前台 URL 均可访问后返回 manifest 和 request_id。禁止生成或发布文章页面。
+
+重要区别：`/cms/pagepublish/publish` 在这里仅用于发布图片上传记录。允许传入的唯一 ID 是 `/cms/picture/upload` 本次返回且有上传 `request_id` 佐证的图片 `publish_id`；页面 ID 和 `/cms/page/make` 产生的文章发布 ID 一律禁止。
+
+## 如何判断 AI 真的完成了
+
+成功回复至少应包含：页面 ID、URL、`status = 5`、`sync_status = 1`、写入 `request_id`、回读 `request_id`、HTML 校验结果、图片数量，以及“图片资源已发布，文章未生成、未发布”。如果只说“正在处理”“已准备 payload”或没有这些证据，就不算完成。
+
+两个站点共享安全的 API 调用与执行证据框架，但不会共享语言、站点 ID、模板 ID、下载链接或 Buy Box 文案。
