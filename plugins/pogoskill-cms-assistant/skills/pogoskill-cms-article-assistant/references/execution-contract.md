@@ -45,7 +45,7 @@
 4. 回读页面 ID、URL、模板和目标文章一致；
 5. 回读确认 `status = 5`、`sync_status = 1`，即草稿且未生成；
 6. 回读正文与本地最终 HTML 完整比较通过，且元数据、图片、下载区与 Buy Box 均存在；
-7. 未调用 `/cms/page/make`、`/cms/pagepublish/publish`、删除接口，也未修改无关旧文章。
+7. 未调用 `/cms/page/make`、未发布文章页面；`/cms/pagepublish/publish` 只用于有当前 `/cms/picture/upload` request_id 佐证的图片 `publish_id`；未调用删除接口，也未修改无关旧文章。
 
 缺少任一项时，只能说明已经完成到哪个可验证阶段，不得把“payload 已准备”“请求准备发送”“本地校验通过”描述成已上传。
 
@@ -61,7 +61,7 @@
 
 用户已要求保存当前文章草稿，就已授权正常的只读发现、查重、图片处理、`page/add` 或已确认目标的 `page/update`、写后回读与完整性比较。不得为这些常规步骤逐项停下来再次询问。
 
-若用户要求修改现有草稿，而且 `/cms/picture/list` 已确认正文所需图片对存在，则必须复用图片并继续 `/cms/page/update`。图片未发布导致前台 URL 暂时 404，不属于停止条件；不得重复上传图片，也不得以此声称无法修改草稿。
+若用户要求修改现有草稿，而且 `/cms/picture/list` 已确认正文所需图片对存在，则必须复用图片。图片未发布导致前台 URL 为 404 时，不得重复上传或停止；必须从原始 manifest/上传响应恢复图片 `publish_id`，单独发布图片资源并确认前台双格式可读，再继续 `/cms/page/update`。`/picture/list` 不能证明 publish ID，禁止猜测或使用页面 ID。
 
 ## 7. 最终报告格式
 

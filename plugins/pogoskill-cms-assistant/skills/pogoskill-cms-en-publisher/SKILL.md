@@ -18,7 +18,7 @@ Before any CMS request, read the shared [execution evidence contract](../pogoski
 - Read-only discovery and local HTML conversion are allowed by default.
 - Create or update a draft only when the user explicitly asks to save that English article in CMS.
 - Use CMS POST API only; never use browser forms.
-- Never call `/cms/page/make`, `/cms/pagepublish/publish`, delete endpoints, or modify an unrelated page.
+- Never call `/cms/page/make`, publish an article page, call delete endpoints, or modify an unrelated page. The image pipeline must call `/cms/pagepublish/publish` only with a `publish_id` returned by the current `/cms/picture/upload` response, solely to publish image resources.
 - Never claim upload success without `page/add` or confirmed `page/update` evidence followed by successful `page/info` readback.
 
 ## Required workflow
@@ -27,7 +27,7 @@ Before any CMS request, read the shared [execution evidence contract](../pogoski
 2. Query the English site, V2 template, fields, author, classification, products, sidebar, related pages and exact URL in real time.
 3. Build readable, indented V2 HTML using only approved structures from the English contract.
 4. For supplied JPG/PNG article images, create the same-basename WebP and upload both with the image pipeline using `-SiteId 286`. Article HTML must use `https://images.pogoskill.com/<folder>/<semantic-name>.<ext>` public URLs, never the CMS `upload` host. For Guide images named in the source, search the English `guides` library by that exact name; do not guess substitutes.
-   If the exact fallback/WebP pair already exists in `/cms/picture/list`, reuse it instead of uploading again. A public URL may return 404 until the image is published; that is expected and must not block saving or updating the draft.
+   If the exact fallback/WebP pair already exists in `/cms/picture/list`, reuse it instead of uploading again. If its public URL returns 404, recover the original image-upload `publish_id`, publish that image resource, and wait until both public URLs are readable before updating the draft. Never substitute a page ID or guess a publish ID.
 5. Copy the English download CTA and Buy Box byte-for-byte from this skill's assets. Do not translate, shorten, restyle or reconstruct them.
 6. Run the shared validator with the English profile:
 
@@ -40,4 +40,4 @@ python scripts/validate-article-html.py <html-path> --profile en --assets-dir sk
 
 ## Completion
 
-`Draft ready for review` requires the page ID, write `request_id`, readback `request_id`, `status = 5`, `sync_status = 1`, complete HTML comparison, exact English CTA, exactly one English Buy Box, and confirmation that no make or publish endpoint was called.
+`Draft ready for review` requires the page ID, write `request_id`, readback `request_id`, `status = 5`, `sync_status = 1`, complete HTML comparison, exact English CTA, exactly one English Buy Box, published and publicly readable image resources, and confirmation that no page make or article publication occurred.

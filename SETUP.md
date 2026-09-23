@@ -49,12 +49,12 @@ Key 不会出现在终端、文件或命令历史。如果使用者已经提前�
 
 繁中站在新任务中附上 DOCX，然后说明：
 
-> 使用 `$pogoskill-cms-article-assistant` 把这篇文章按 PoGoskill 台湾站 V2 模板制作完整 HTML，处理所有图片并保存、回读和审查 CMS 草稿。禁止 AI 页面预览、禁止生成、禁止发布、禁止修改旧文章。没有页面 ID 和回读结果不得报告完成。
+> 使用 `$pogoskill-cms-article-assistant` 把这篇文章按 PoGoskill 台湾站 V2 模板制作完整 HTML，上传并单独发布所有新图片资源，再保存、回读和审查 CMS 草稿。禁止 AI 页面预览、禁止生成或发布文章页面、禁止修改旧文章。没有页面 ID 和回读结果不得报告完成。
 
-完整文章助手会强制串联 Publisher、Image Pipeline 和 Reviewer，并使用机械校验脚本阻止混乱或不完整 HTML 上传。CMS 生成与发布始终需要额外、明确授权。
+完整文章助手会强制串联 Publisher、Image Pipeline 和 Reviewer，并使用机械校验脚本阻止混乱或不完整 HTML 上传。图片上传后会单独发布图片资源；文章生成与文章发布始终禁止，除非使用者提出一个新的、明确的文章发布任务。
 
 英文站附上英文稿件或 HTML，然后说明：
 
-> 使用 `$pogoskill-cms-en-publisher` 按 www.pogoskill.com 的英文 V2 契约制作完整 HTML；下载区和 Buy Box 必须复制英文固定资产，保存后回读 CMS 草稿。禁止生成、禁止发布、禁止修改旧文章。
+> 使用 `$pogoskill-cms-en-publisher` 按 www.pogoskill.com 的英文 V2 契约制作完整 HTML；下载区和 Buy Box 必须复制英文固定资产，新上传图片需单独发布后再保存并回读 CMS 草稿。禁止生成或发布文章页面、禁止修改旧文章。
 
 不要让同一个任务同时处理繁中站和英文站文章。两个站点的模板、产品、下载链接与内容资产不同。

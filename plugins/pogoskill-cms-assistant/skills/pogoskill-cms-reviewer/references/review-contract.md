@@ -10,8 +10,8 @@
 
 ## 图片验收
 
-- 有真实素材时，按 `$pogoskill-cms-image-pipeline` 的 manifest 核对 fallback JPG/PNG 与同名 WebP、尺寸、URL、ALT、upload request_id 和待发布 publish_id。
-- CMS `/picture/list` 已上线且当前 API Key 已获授权。图片验收必须包含上传响应与列表回查。后台 `upload` URL 用于验证上传；前台 `url/online` 在图片发布前可能返回 404，该状态不阻断草稿。
+- 有真实素材时，按 `$pogoskill-cms-image-pipeline` 的 manifest 核对 fallback JPG/PNG 与同名 WebP、尺寸、URL、ALT、图片上传 request_id、图片 publish_id 和图片发布 request_id。
+- CMS `/picture/list` 已上线且当前 API Key 已获授权。图片验收必须包含上传响应、列表回查、图片资源发布响应和前台 URL 检查。后台 `upload` URL 只用于验证上传；前台 `url/online` 在发布前返回 404 只是中间状态，不能作为完成证据。
 - 对 `guides` 图片核对上传前图库检索与画面匹配证据；已有合适 Guide 图片却重复上传，判定为 `FAIL`。对用户提供的游戏正文图片，确认其被优先使用且仅做同名/完全重复检查，不得被图库相似图擅自替换。
 - 主图必须为 850×460。横图应适合正文宽度；竖图保持比例且显示高度合理，不得占满长屏。
 - 核对目录：Pokémon GO 游戏图为 `pokemon-ios`，Pikmin Bloom 游戏图为 `pikmin`，PoGoskill 下载/安装/操作/产品界面为 `guides`。
@@ -19,7 +19,7 @@
 - 繁中正文的图片 URL 必须来自 `https://tw.pogoskill.com/images/`；CMS 后台域名、`attachment=1` 和结尾 SHA/随机哈希一律判定为 `FAIL`。`upload` URL 只允许存在于 manifest 证据中。
 - 逐张比较正文上下文、图片真实画面和繁体 ALT；步骤 1/2/3 必须分别对应其实际界面功能，不能只因属于 PoGoskill 就插入。
 - `IMAGE_PENDING` 必须保留在未有真实素材的位置，审查结果只能是 `PASS WITH IMAGE HOLD` 或 `FAIL`；图片全部补齐并通过 API 与机械检查后才可 `PASS`。
-- 图片上传的 `publish_id` 不得传给发布接口，除非用户日后另行明确要求发布。
+- 图片上传响应的 `publish_id` 必须传给 `/cms/pagepublish/publish`，且只用于发布图片资源。必须验证 `code === 0`、`data.failed = []`、`data.success[].id` 覆盖全部请求 ID，并确认前台双格式可读。页面 ID 或文章生成所得 ID 绝不能用于此步骤。
 
 ## 交付格式
 

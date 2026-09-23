@@ -55,4 +55,4 @@ API Key 只能由插件根目录 `scripts/CmsCredential.ps1` 从 Windows Credent
 
 ## 写后回读
 
-新增或更新成功后立即调用 `/cms/page/info`，确认：页面 ID、站点、模板、URL、作者、分类、产品、相关文章、`status = 5`、`sync_status = 1`，以及正文与本地 HTML 完全一致。未经用户另行明确授权，绝不调用 `/cms/page/make`、`/cms/pagepublish/publish` 或删除接口。
+新增或更新成功后立即调用 `/cms/page/info`，确认：页面 ID、站点、模板、URL、作者、分类、产品、相关文章、`status = 5`、`sync_status = 1`，以及正文与本地 HTML 完全一致。绝不调用 `/cms/page/make` 或发布文章页面；`/cms/pagepublish/publish` 只允许由图片 Pipeline 使用当前 `/cms/picture/upload` 返回且有 request_id 佐证的图片 `publish_id`，用于图片资源上云。绝不调用删除接口。

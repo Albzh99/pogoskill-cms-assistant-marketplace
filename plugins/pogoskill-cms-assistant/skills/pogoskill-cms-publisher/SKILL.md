@@ -13,7 +13,7 @@ description: 将 PoGoskill 台湾站 SEO 文稿转换为文章内容页面模板
 
 - API Key 只从安全环境变量或会话 Secret 读取，不写入 HTML、文件、日志或回复。
 - 默认允许只读查询和本地 HTML 转换。创建或更新 CMS 草稿前，确认用户已明确要求该篇文章写入 CMS。
-- 未经用户明确授权，不执行 `page/make` 或 `pagepublish/publish`。
+- 绝不执行 `/cms/page/make`，也绝不把页面 ID 或文章生成所得 ID 传给 `/cms/pagepublish/publish`。图片 Pipeline 必须把当前图片上传响应中的 `publish_id` 传给该接口，以单独发布图片资源；这不等于发布文章。
 - 不删除文章、图片、文件或目录，不覆盖无法确认归属的页面。
 
 ## 写入前发现
@@ -62,7 +62,7 @@ description: 将 PoGoskill 台湾站 SEO 文稿转换为文章内容页面模板
 - 主图必须为 850×460。横图适配正文宽度；手机截图等竖图保持比例并限制宽高，避免占据整个屏幕。
 - ALT 描述图片真实内容，使用自然繁体中文并适度包含主题词；不同图片不得机械重复文章标题。
 - 正文图片只使用繁中前台公开地址 `https://tw.pogoskill.com/images/<folder>/<semantic-name>.<ext>?w=<w>&h=<h>`。CMS 返回的 `site.p.cms.afirstsoft.cn`、`attachment=1` 或其他后台 `upload` 地址只作上传证据，禁止写进 HTML；文件名禁止追加 SHA/随机哈希。
-- 新图片尚未发布时，正确前台 URL 返回 404 是正常状态，不得阻止保存或更新 CMS 草稿。只要 `/cms/picture/list` 已确认同名、同尺寸 fallback/WebP 对存在，就直接复用并更新 HTML，禁止重复上传。
+- 新图片尚未发布时，正确前台 URL 返回 404 是正常的中间状态，不得重复上传。必须从原始图片上传 manifest/响应恢复该图片的 `publish_id`，先由图片 Pipeline 单独发布图片资源，等待 fallback/WebP 前台 URL 均可读后，才回填并保存或更新 CMS 草稿。`/cms/picture/list` 不能替代图片上传 `publish_id` 证据。
 - 需要图片但资源尚未提供时，保留 `img-wrap`，并在 `IMAGE_PENDING` 中填写唯一 `image-key`、用途、繁体中文 ALT、建议尺寸与双格式要求。
 - 不伪造 URL、文件名、尺寸、WebP 版本或上传成功状态；不上传 DOCX 中未被正文引用的媒体。
 - 任何 `IMAGE_PENDING` 都是硬性发布阻断：可以在授权后保存草稿，但禁止 make 和 publish。
@@ -74,7 +74,7 @@ description: 将 PoGoskill 台湾站 SEO 文稿转换为文章内容页面模板
 1. 组装 V2 页面字段，包括 `subject`、`title`、`description`、`keywords`、`seo_keywords`、`url`、`author_id`、`classify_page_id`、`related_id`、`fields` 与格式化 `content`。
 2. URL 必须为小写 `.html` 相对路径，并已通过 CMS 查重。
 3. 新建使用 `/cms/page/add`；已存在页面使用 `/cms/page/update`，更新前先读回当前版本。
-   用户明确要求修改某个现有草稿时，先以页面 ID/URL 回读确认目标，再直接更新该草稿；不得因图片已上传或前台 URL 暂时 404 而改为新增页面、重复上传图片或停止执行。
+   用户明确要求修改某个现有草稿时，先以页面 ID/URL 回读确认目标，再直接更新该草稿；若图片已上传但前台 URL 为 404，先用原图片上传 `publish_id` 发布图片资源，确认上云后再更新原草稿。不得改为新增页面或重复上传图片。
 4. 保存后立即调用 `/cms/page/info` 回读，逐项比对元数据、正文、图片盒和 Buy Box。
 5. 将页面 ID、草稿状态、回读结果、待补图片和所有 `request_id` 交给审查 Agent。
 

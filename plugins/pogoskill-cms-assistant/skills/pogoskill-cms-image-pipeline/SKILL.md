@@ -1,6 +1,6 @@
 ---
 name: pogoskill-cms-image-pipeline
-description: 为 PoGoskill 台湾站文章提取真实 JPG/PNG 素材、生成同名 WebP、成对上传 CMS 并安全回填 V2 图片盒。适用于文章图片处理；不用于生成虚构图片、覆盖既有资源、生成页面或发布。
+description: 为 PoGoskill 文章提取真实 JPG/PNG、生成同名 WebP、成对上传并单独发布图片资源，再安全回填 V2 图片盒。适用于繁中与英文文章图片处理；不用于生成虚构图片、覆盖资源、生成页面或发布文章。
 ---
 
 # PoGoskill CMS Image Pipeline
@@ -13,7 +13,7 @@ description: 为 PoGoskill 台湾站文章提取真实 JPG/PNG 素材、生成�
 
 - 读取、提取、转换和本地验证默认允许。
 - 只有用户已明确要求把当前文章及其图片写入 CMS 时，才可用 `cms-upload-image-pairs.ps1 -Execute` 上传。
-- 上传只产生待发布记录；记录 `publish_id`，绝不调用 `/cms/pagepublish/publish`、`/cms/page/make` 或删除接口。
+- 图片上传成功后必须使用该次 `/cms/picture/upload` 原样返回的 `publish_id` 调用 `/cms/pagepublish/publish`，把图片资源同步到云端。该授权只适用于图片上传记录；绝不传入文章页面 ID、`page/make` 返回的发布 ID，也绝不发布文章页面。
 - 不上传测试图、占位图、AI 猜测图或 DOCX 中未被正文引用的媒体。
 - 不覆盖无法证明归属的已有文件。上传前后使用 `/cms/picture/list` 查重与回读；SHA-256 只保存在 manifest 用于去重，禁止写入公开文件名。
 
@@ -25,8 +25,9 @@ description: 为 PoGoskill 台湾站文章提取真实 JPG/PNG 素材、生成�
 4. 人工或语义映射补齐每张图的 `image_key`、符合文章语言的 `alt`、语义化 basename 和 `max_width`。不得把 DOCX 的 `descr` 自动当作最终 ALT，也不得给 basename 追加随机字符串或 SHA 哈希。
 5. 主图先处理为 850×460；其他图片保持比例，横图不超过正文需求，竖图限制展示宽高。随后用 `convert-image-pairs.ps1` 保留 JPG/PNG 并生成同 basename WebP。
 6. 上传前用 `/cms/picture/list` 检查目标文件名与完全重复项。若目标目录已经存在同名、同尺寸的 fallback/WebP 对，直接复用并回填，不得再次上传。只有缺少该图片对时才上传；上传后必须验证 `code === 0`、`total === 2`、`err_name_files` 为空、两者尺寸一致，并回查列表。
-7. 上传响应 `data.list[].url` 就是文章应使用的前台正式地址；`data.list[].upload` 只用于 CMS 上传验证，禁止写入正文。优先直接读取 `url`，缺失时用 `/cms/picture/list` 返回的 `online` 核对，不能声称“无法上传前台 URL”或改用后台地址。脚本只给已验证的公开 URL 追加 `w/h` 尺寸参数。
-8. 用 `apply-image-manifest.ps1` 按唯一 `image-key` 回填，不按“第几个图片盒”猜测。回填后交给 Reviewer 通过 CMS API 回读、图片 manifest 和机械校验复核；当前不执行 AI 页面预览。
+7. 上传响应 `data.list[].url` 就是文章应使用的前台正式地址；`data.list[].upload` 只用于 CMS 上传验证，禁止写入正文。优先直接读取 `url`，缺失时用 `/cms/picture/list` 返回的 `online` 核对。脚本只给已验证的公开 URL 追加 `w/h` 尺寸参数。
+8. 对新上传或尚未上云的图片运行 `cms-publish-image-resources.ps1 -Execute`。只发布 manifest 中同时具有 `picture/upload request_id + publish_id` 的图片记录；验证 `code === 0`、`failed = []`、成功 ID 完整，并等待前台 fallback/WebP 均可读取。禁止把文章 ID 交给该脚本。
+9. 图片状态为 `image_published` 后，才用 `apply-image-manifest.ps1` 按唯一 `image-key` 回填；不按“第几个图片盒”猜测。随后保存或更新文章草稿，但不生成、不发布文章。
 
 ## 停止条件
 
@@ -34,6 +35,6 @@ description: 为 PoGoskill 台湾站文章提取真实 JPG/PNG 素材、生成�
 - 转换器不可用、尺寸不一致、文件超过 30 MB、命名不合法、目录不存在或上传仅成功一个格式：停止，不改 CMS 正文。
 - 占位数量、`image-key`、原区块哈希或上下文不匹配：停止，不进行模糊替换。
 - CMS 后台 `upload` 验证 URL 无法读取、文件实际解码失败或 `/cms/picture/list` 找不到图片对：停止，不报告图片完成。
-- 前台公开 URL 在图片尚未发布时返回 404 属于预期状态，不是草稿阻断项。只要上传响应或图片列表已确认 fallback/WebP 对存在、尺寸正确且公开 URL 字段正确，就继续回填并更新草稿；不得因此重复上传或拒绝 `/cms/page/update`。
+- 前台公开 URL 在图片资源发布前返回 404 属于预期状态，不得因此重复上传。应使用原图片上传响应的 `publish_id` 发布图片资源；发布成功并等待前台可读后再回填草稿。
 - 正文出现 `site.p.cms.afirstsoft.cn`、`attachment=1`、错误站点域名或带随机哈希的文件名：停止并修正 manifest/HTML。
 - 主图不是 850×460、文件名不具语义、目标目录错误、步骤图与 DOCX 指定名称不对应、竖图过高、Guide 名称无法唯一命中，或任何图片存在同名/完全重复冲突：停止，不写入 CMS。

@@ -1,6 +1,6 @@
 ---
 name: pogoskill-cms-article-assistant
-description: 将一篇 PoGoskill 台湾站 DOCX 完整处理为图片齐全、通过机械校验并经 CMS 回读审查的草稿。适用于端到端文章任务；默认禁止生成、发布、删除或修改无法确认归属的旧文章。
+description: 将一篇 PoGoskill 台湾站 DOCX 完整处理为图片已单独发布、通过机械校验并经 CMS 回读审查的草稿。适用于端到端文章任务；禁止生成或发布文章、删除或修改无法确认归属的旧文章。
 ---
 
 # PoGoskill CMS 完整文章助手
@@ -41,9 +41,9 @@ pwsh -NoProfile -File scripts/cms-save-api-key.ps1 -FromClipboard
 2. 先用 `inspect-docx-structure.py` 读取全文、表格与图片关系，列出章节、FAQ、图片和 Guide 文件名；不得只阅读开头或摘要。
 3. 实时查询站点、模板、分类、作者、产品、相关文章和 URL 冲突。
 4. 按 Publisher 契约生成完整 HTML。下载区与 Buy Box 必须直接复制资产文件，不得手写简化。
-5. 按 Image Pipeline 完成所有正文图；Guide 图只按 DOCX 给出的准确名称查库。图片未齐不得伪装完成。
+5. 按 Image Pipeline 完成所有正文图；Guide 图只按 DOCX 给出的准确名称查库。新上传图片必须使用上传响应的图片 `publish_id` 单独发布并确认前台双格式可读；图片未齐不得伪装完成。
 6. 运行 `validate-article-html.py`。返回非零时继续修复，禁止上传不合格 HTML。
-7. 用户已明确要求保存草稿时，只用 CMS POST API 调用 `page/add` 或已确认目标的 `page/update`。禁止用浏览器表单代替 API；禁止 `page/make` 和发布。
+7. 用户已明确要求保存草稿时，只用 CMS POST API 调用 `page/add` 或已确认目标的 `page/update`。禁止用浏览器表单代替 API；禁止 `page/make` 和发布文章页面。图片资源发布是前一步的必要流程，不属于文章发布。
 8. 写入后立即 `page/info` 回读，并运行 `compare-docx-to-cms-page.py`。缺少正文、表格、FAQ、图片、结语、下载区或 Buy Box 时修复草稿并再次回读。
 9. 使用 Reviewer 通过 API 回读和本地机械检查复核当前草稿的字段、HTML、图片、来源覆盖与安全状态。当前暂不执行 AI 桌面／手机页面预览，也不得因此阻断草稿完成。
 

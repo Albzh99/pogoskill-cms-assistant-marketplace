@@ -10,7 +10,7 @@
 - 上传：`POST /cms/picture/upload`，`multipart/form-data`
 - 单文件上限 30 MB；单次最多 100 个；支持 jpg/jpeg/png/webp
 - 文件名只允许小写 ASCII `[a-z0-9-_.]`，长度 4–255
-- 上传成功返回 `publish_id`、文件名、MIME、size、w、h、url 与 upload；上传后不调用发布接口
+- 上传成功返回 `publish_id`、文件名、MIME、size、w、h、url 与 upload；必须用该图片上传记录的 `publish_id` 调用 `/cms/pagepublish/publish`，将图片同步到云端
 
 ## 素材与命名
 
@@ -41,7 +41,7 @@
 - 上传后验证：`code=0`、`data.total=2`、`err_name_files=[]`、返回名称/尺寸/目录匹配，并对两个后台 `upload` URL 做可读性检查。
 - 上传后必须再用 `/picture/list` 回查 `uri/w/h/upload/online`；两种格式都存在且尺寸一致后才能交给文章回填。
 - 若 `/picture/list` 已确认同名、同尺寸 fallback/WebP 对存在，应直接复用；禁止为了取得不同 URL 再次上传同一图片。
-- 图片未发布时，前台 `url/online` 返回 HTTP 404 是正常的待发布状态。草稿 HTML 本来就应先保存这些未来生效的前台地址，因此 404 不阻断 `/cms/page/update`，也不触发重复上传。只有 URL 字段缺失、域名/路径错误、图片对不存在或后台 `upload` 验证失败才阻断草稿。
+- 图片未发布时，前台 `url/online` 返回 HTTP 404 是正常的待发布状态，不触发重复上传；应继续使用原上传响应中的图片 `publish_id` 发布资源。图片发布并确认前台可读后，才把 URL 回填到草稿。
 
 ## 前台公开 URL
 
@@ -50,7 +50,15 @@
 - 繁中站 `site_id = 324`：`https://tw.pogoskill.com/images/<folder>/<semantic-name>.<ext>?w=<width>&h=<height>`。
 - 英文站 `site_id = 286`：`https://images.pogoskill.com/<folder>/<semantic-name>.<ext>?w=<width>&h=<height>`。
 - 只在 API 返回的公开 URL 尚无尺寸参数时追加 `w` 与 `h`；不得自行替换 API 返回的 host、目录或文件名。
-- 前台 URL 的 HTTP 200 不是保存草稿的前置条件；图片发布前可能为 404。判断依据是上传 `code:0` 或 `/cms/picture/list` 的双格式存在证据。
+- 图片上传存在与图片已上云是两个状态：`picture/list` 确认双格式存在后，仍须完成图片资源发布。前台 fallback/WebP 均返回 200/206 后，才能判定 `image_published` 并回填文章。
+
+## 图片资源发布
+
+- 唯一允许传给 `/cms/pagepublish/publish` 的 ID，是当前图片 `/cms/picture/upload` 响应中的 `data.publish_id`。必须同时保留该上传 `request_id` 作为来源证据。
+- 请求使用 `{ "ids": [图片发布记录ID], "description": "...image resources..." }`。成功必须同时满足 `code === 0`、`data.failed = []`，且 `data.success[].id` 完整覆盖请求 IDs。
+- 图片发布与文章发布必须严格区分：禁止传入页面 ID；禁止传入 `/cms/page/make` 产生的文章发布 ID；仍禁止调用 `/cms/page/make`。
+- 发布接口成功后可能异步同步 OSS/S3。最多轮询前台 URL 约 30 秒；尚未可读时保留 `image_publish_submitted` 和发布 `request_id`，之后只重试 URL 验证，不重复发布同一 ID。
+- 已存在且前台可读的图片对直接标记 `image_published`，不重复上传、不重复发布。已存在但 404 的图片对必须从原始 manifest/上传响应恢复 `publish_id`；`picture/list` 本身不能证明发布 ID，禁止拿图片名、页面 ID 或猜测数字代替。
 - fallback 与 WebP 使用同目录、同 basename、同尺寸参数，仅扩展名不同。查询参数写入 HTML 时必须编码为 `&amp;`。
 
 ## V2 HTML
@@ -81,4 +89,4 @@ CMS 新上传资源的已发布范例使用：
 
 ## Manifest 必填项
 
-每项至少包含：`image_key`、`source_entry`、`source_sha256`、`fallback_path`、`webp_path`、`width`、`height`、`alt`、`max_width`。新上传项追加 `site_id`、`upload_request_id`、`publish_id`；复用现有项记录 `site_id`、`list_request_id` 并标记 `status = reused_existing`，不伪造新的上传 ID。两种情况都保存仅供验证的 `fallback_upload_url`/`webp_upload_url`、从响应 `url`（或回查 `online`）取得的 `fallback_public_url`/`webp_public_url` 和 URL 检查结果。
+每项至少包含：`image_key`、`source_entry`、`source_sha256`、`fallback_path`、`webp_path`、`width`、`height`、`alt`、`max_width`。新上传项追加 `site_id`、`upload_request_id`、图片 `publish_id`；复用现有项记录 `site_id`、`list_request_id`。两种情况都保存后台验证 URL、前台 URL 与检查结果。图片发布后追加 `image_publish_request_id`、`image_publish_submitted_at`、`image_public_verified_at`，最终状态必须为 `image_published` 才能回填 HTML。

@@ -17,8 +17,8 @@ description: 独立审查 PoGoskill 台湾站 CMS 草稿的元数据、HTML、�
 - 将同分类正常上线文章作为结构基准；拒绝基准中不存在的新文本框、提示框、卡片、彩色背景框、引用框、CSS class、局部 CSS、标题样式或下载框架。
 - 每个已完成图片盒必须是 `img-wrap text-center > picture > source[type=image/webp] + img`，两者同 basename、同尺寸，fallback 为 JPG/PNG，ALT 为自然繁体中文。
 - 图片 `data-src/data-srcset` 必须使用 `https://tw.pogoskill.com/images/` 前台地址；出现 `site.p.cms.afirstsoft.cn`、`attachment=1`、错误站点域名或哈希结尾文件名时直接判定 `FAIL`。
-- 图片发布前，正确前台 URL 返回 404 不判失败。以 `/cms/picture/list` 中同名、同尺寸 fallback/WebP 对存在作为草稿验收证据；不得要求重复上传。
-- 对每对图片核对 manifest、上传 request_id、publish_id、CMS 返回 URL、尺寸和文件名；不得把图片上传记录发布。
+- 图片发布前，正确前台 URL 返回 404 只是中间状态，不得要求重复上传，但不能据此判定图片完成。必须用原图片上传响应的 `publish_id` 单独发布图片资源，并等待 fallback/WebP 前台 URL 均可读。
+- 对每对图片核对 manifest、图片上传 `request_id`、图片 `publish_id`、图片发布 `request_id`、CMS 返回 URL、尺寸和文件名；确认发布接口成功 ID 完整且无失败。禁止使用页面 ID 或文章生成所得 ID。
 - 任一 `IMAGE_PENDING`、本地路径、假 URL、坏图、单格式图片、尺寸不一致或标签未闭合均为发布阻断。
 - 审查前先运行 Publisher 要求的 `validate-article-html.py`，并读取 DOCX/CMS 完整度比较结果；脚本失败或存在未解释缺失区块时直接判定 `FAIL`。
 
@@ -29,5 +29,5 @@ description: 独立审查 PoGoskill 台湾站 CMS 草稿的元数据、HTML、�
 ## 判定
 
 - `PASS`：数据、HTML、来源覆盖和所有图片检查全部通过。
-- `PASS WITH IMAGE HOLD`：只有已知图片占位未补；仍禁止 make/publish。
+- `PASS WITH IMAGE HOLD`：只有已知图片占位未补；仍禁止生成或发布文章页面。
 - `FAIL`：存在字段、HTML、来源覆盖或图片问题。
