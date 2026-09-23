@@ -35,7 +35,7 @@
 
 - JPG：`cwebp -q 90 -m 6 -metadata none`
 - PNG：`cwebp -lossless -z 9 -metadata none`
-- 文章主图必须在成对转换前准备为 850×460，且不得拉伸变形；无合适素材时停止并报告。正文图保持原始比例，横图按正文展示需求控制，手机截图等竖图限制 `max_width` 和最终展示高度。
+- 文章主图必须在成对转换前准备为 850×460，且不得拉伸变形；无合适素材时停止并报告。正文图保持原始比例，横图按正文展示需求控制。手机截图标记 `display_mode = phone-screenshot`；手机截图和其他竖图以 `max_height` 限制最终展示高度，并使用 `width:auto;height:auto`，不得用固定像素 `max-width` 作为主要限制。
 - WebP 转换本身不 resize、不 crop；fallback 与 WebP 像素宽高必须完全一致。
 - 上传前验证：可解码、非零、≤30 MB、扩展名与 MIME 合理、SHA-256 已记录。
 - 上传后验证：`code=0`、`data.total=2`、`err_name_files=[]`、返回名称/尺寸/目录匹配，并对两个后台 `upload` URL 做可读性检查。
@@ -83,10 +83,10 @@ CMS 新上传资源的已发布范例使用：
 
 - `<source>` 必须在 `<img>` 前；ALT 只放在 fallback `<img>`。
 - `src/srcset` 使用对应站点的公开 `loading.svg`；`data-src/data-srcset` 使用上述前台公开图片 URL。后台 `upload` URL 只能留在 manifest 作证据。
-- `max-width` 不超过原图宽度；主图固定 850×460，步骤图与竖图按实际可读性缩小，窄素材按真实宽度。竖图不得占满一个长屏。
+- 横图的 `max-width` 不超过原图宽度；主图固定 850×460。手机截图和其他竖图使用 `max-height:520px;max-width:100%;width:auto;height:auto;`，可按实际内容使用更小且不超过原图高度的 `max_height`。英文手机截图不得输出固定像素 `max-width`。竖图不得占满一个长屏。
 - ALT 必须描述图片实际画面，以自然繁体中文表达，可包含适当关键词；不得直接复制 H1，也不得让多张图使用相同 ALT。
 - 不改用 `loading="lazy"`，保留站点的 `lozad img-fluid` 机制。
 
 ## Manifest 必填项
 
-每项至少包含：`image_key`、`source_entry`、`source_sha256`、`fallback_path`、`webp_path`、`width`、`height`、`alt`、`max_width`。新上传项追加 `site_id`、`upload_request_id`、图片 `publish_id`；复用现有项记录 `site_id`、`list_request_id`。两种情况都保存后台验证 URL、前台 URL 与检查结果。图片发布后追加 `image_publish_request_id`、`image_publish_submitted_at`、`image_public_verified_at`，最终状态必须为 `image_published` 才能回填 HTML。
+每项至少包含：`image_key`、`source_entry`、`source_sha256`、`fallback_path`、`webp_path`、`width`、`height`、`alt`、`max_width`。手机截图追加 `display_mode = phone-screenshot`，可指定 `max_height`（默认不超过 520px）。新上传项追加 `site_id`、`upload_request_id`、图片 `publish_id`；复用现有项记录 `site_id`、`list_request_id`。两种情况都保存后台验证 URL、前台 URL 与检查结果。图片发布后追加 `image_publish_request_id`、`image_publish_submitted_at`、`image_public_verified_at`，最终状态必须为 `image_published` 才能回填 HTML。

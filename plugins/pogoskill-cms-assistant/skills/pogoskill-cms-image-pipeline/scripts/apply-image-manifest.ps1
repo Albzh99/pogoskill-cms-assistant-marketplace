@@ -41,6 +41,19 @@ foreach ($item in $manifest.items) {
   $loadingUrl = if ([int]$item.site_id -eq 324) { 'https://tw.pogoskill.com/images/loading.svg' } else { 'https://images.pogoskill.com/loading.svg' }
   $maxWidth = [int]$item.max_width
   if ($maxWidth -le 0 -or $maxWidth -gt [int]$item.width) { throw "Invalid max_width for $($item.image_key)" }
+  $isPhoneScreenshot = ([string]$item.display_mode -eq 'phone-screenshot')
+  $isVertical = ([int]$item.height -gt [int]$item.width)
+  if ($isPhoneScreenshot -or $isVertical) {
+    $maxHeight = if ($item.PSObject.Properties.Name -contains 'max_height' -and [int]$item.max_height -gt 0) {
+      [int]$item.max_height
+    } else {
+      [Math]::Min(520, [int]$item.height)
+    }
+    if ($maxHeight -le 0 -or $maxHeight -gt [int]$item.height) { throw "Invalid max_height for $($item.image_key)" }
+    $displayStyle = "max-height:${maxHeight}px;max-width:100%;width:auto;height:auto;"
+  } else {
+    $displayStyle = "max-width:${maxWidth}px;width:100%;height:auto;"
+  }
   $block = @"
 <div class="img-wrap text-center">
   <picture>
@@ -52,7 +65,7 @@ foreach ($item in $manifest.items) {
          src="$loadingUrl"
          data-src="$fallbackUrl"
          alt="$alt"
-         style="max-width:${maxWidth}px;width:100%;height:auto;">
+         style="$displayStyle">
   </picture>
 </div>
 "@

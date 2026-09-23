@@ -399,9 +399,14 @@ PoGoskill 模块必须遵循固定阅读顺序：先把 PoGoskill 的介绍、�
 ```html
 <section id="partN">
   <h2>結語</h2>
-  <p>总结全文；最后一次提到 <a href="https://tw.pogoskill.com/">PoGoskill</a> 时链接官网。</p>
+  <p>總結全文；<a href="https://tw.pogoskill.com/">最佳皮克敏飛人工具</a> PoGoskill 可協助完成文章所述需求。</p>
 </section>
 ```
+
+- 结语必须有一个指向 `https://tw.pogoskill.com/` 的首页链接。
+- 链接锚文本必须使用 DOCX 结语中实际写出的自然关键词，例如“最佳皮克敏種花助手”“最佳寶可夢飛人工具”或“最佳自動種花助手”。
+- `PoGoskill` 品牌名紧跟在关键词链接之后，并保持为普通文字；禁止输出 `<a ...>PoGoskill</a>`。
+- 不得为了满足格式自行生成文稿中不存在的关键词；源文缺少结语首页关键词时停止并报告。
 
 结语之后原样复制 `assets/buybox.html`，不得删减、重排或重写。整篇必须恰好一个 `class="pro-content pro-board1"`。
 
@@ -460,6 +465,7 @@ Luna 必须输出校验结果后才能调用 `/cms/page/add` 或 `/cms/page/upda
 17. 上传前必须运行 `scripts/validate-article-html.py`，返回码必须为 0；不得用人工口头检查代替。
 18. DOCX 的所有正文段落、表格、FAQ、结语和图片占位都必须进入 HTML。写入后用 `compare-docx-to-cms-page.py` 列出缺失区块；存在未解释缺失时不得报告完成。
 19. 所有图片 `data-src/data-srcset` 必须使用 `https://tw.pogoskill.com/images/`；正文不得出现 `site.p.cms.afirstsoft.cn`、`attachment=1` 或哈希结尾文件名。新图还必须具备上传 request_id、图片 publish_id、图片发布 request_id，且前台双格式可读。
+20. 最后一个结语 section 必须包含首页链接，锚文本不得是 `PoGoskill`；链接后必须保留普通文字品牌名 `PoGoskill`。
 
 任何一项失败：停止上传，回到 HTML 修正；不得依赖 CMS 或浏览器自动修复结构。
   

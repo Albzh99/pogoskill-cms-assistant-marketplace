@@ -7,6 +7,8 @@ description: Convert English PoGoskill SEO drafts into the English site's fixed 
 
 Use this skill only for English articles on `https://www.pogoskill.com`. Traditional Chinese articles must use `pogoskill-cms-publisher`; never mix the two sites' wording, IDs, product links, image roots, or component assets.
 
+默认用中文向团队成员汇报进度、异常和最终结果；只有文章正文、HTML 文案与英文站固定组件保持英文。除非用户明确要求英文回复，否则不要因为源稿是英文就改用英文沟通。
+
 Before any CMS request, read the shared [execution evidence contract](../pogoskill-cms-article-assistant/references/execution-contract.md). Before writing HTML, read:
 
 1. [English V2 HTML contract](references/english-html-contract.md);
@@ -29,6 +31,8 @@ Before any CMS request, read the shared [execution evidence contract](../pogoski
 4. For supplied JPG/PNG article images, create the same-basename WebP and upload both with the image pipeline using `-SiteId 286`. Article HTML must use `https://images.pogoskill.com/<folder>/<semantic-name>.<ext>` public URLs, never the CMS `upload` host. For Guide images named in the source, search the English `guides` library by that exact name; do not guess substitutes.
    If the exact fallback/WebP pair already exists in `/cms/picture/list`, reuse it instead of uploading again. If its public URL returns 404, recover the original image-upload `publish_id`, publish that image resource, and wait until both public URLs are readable before updating the draft. Never substitute a page ID or guess a publish ID.
 5. Copy the English download CTA and Buy Box byte-for-byte from this skill's assets. Do not translate, shorten, restyle or reconstruct them.
+   In the final Conclusion paragraph, link the natural homepage keyword phrase supplied by the source, such as `best Pikmin planting assistant` or `best Pokémon GO location changer`, and keep the following brand name `PoGoskill` outside the link. Never use `PoGoskill` itself as the Conclusion homepage anchor, and never invent a keyword absent from the source.
+   Treat English phone screenshots as height-limited vertical media: use `max-height` with `width:auto;height:auto`, not a fixed pixel `max-width` that enlarges the screenshot across the article body.
 6. Run the shared validator with the English profile:
 
 ```powershell

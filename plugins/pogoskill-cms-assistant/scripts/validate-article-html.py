@@ -1,10 +1,11 @@
 import argparse
+import html
 import json
 import re
 import sys
 from html.parser import HTMLParser
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 
 
 VOID_TAGS = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"}
@@ -170,6 +171,27 @@ def validate(html_text, assets_dir=None, profile="tw"):
         errors.append("duplicate section ids")
     if set(parser.sections) != set(parser.toc_hrefs) or len(parser.sections) != len(parser.toc_hrefs):
         errors.append("TOC href values must match section ids exactly")
+    if section_openings:
+        conclusion = section_openings[-1]
+        homepage = (
+            "https://tw.pogoskill.com/"
+            if profile == "tw"
+            else "https://www.pogoskill.com/"
+        )
+        homepage_link = None
+        for match in re.finditer(r"<a\b[^>]*>.*?</a>", conclusion, re.I | re.S):
+            if attr(match.group(0), "href") == homepage:
+                homepage_link = match
+                break
+        if homepage_link is None:
+            errors.append("final Conclusion section must link the correct site homepage")
+        else:
+            anchor_text = re.sub(r"<[^>]+>", "", homepage_link.group(0)).strip()
+            if not anchor_text or "pogoskill" in anchor_text.lower():
+                errors.append("Conclusion homepage anchor must be the source keyword phrase, not PoGoskill")
+            after_link = conclusion[homepage_link.end():]
+            if not re.search(r"\bPoGoskill\b", after_link):
+                errors.append("Conclusion must keep PoGoskill as plain text after the keyword link")
     approved_h3 = {"h3-triangle"} if profile == "tw" else {
         "h3-triangle", "h3-orange-local", "h3-red-local", "h3-num"
     }
@@ -289,6 +311,19 @@ def validate(html_text, assets_dir=None, profile="tw"):
             errors.append(f"picture #{index} filename must not end with a checksum/hash")
         if not attr(image, "alt").strip():
             errors.append(f"picture #{index} ALT is empty")
+        if profile == "en" and fallback_url:
+            query = parse_qs(urlparse(html.unescape(fallback_url)).query)
+            try:
+                width = int(query.get("w", [0])[0])
+                height = int(query.get("h", [0])[0])
+            except (TypeError, ValueError):
+                width = height = 0
+            if height > width > 0:
+                style = attr(image, "style").replace(" ", "").lower()
+                if not re.search(r"max-height:\d+px", style) or "width:auto" not in style or "height:auto" not in style:
+                    errors.append(f"English vertical picture #{index} must use max-height with width:auto and height:auto")
+                if re.search(r"max-width:\d+px", style):
+                    errors.append(f"English vertical picture #{index} must not use a fixed pixel max-width")
 
     pending_count = html_text.count("IMAGE_PENDING")
     if pending_count:

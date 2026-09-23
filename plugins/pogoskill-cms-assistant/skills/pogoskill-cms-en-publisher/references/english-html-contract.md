@@ -68,6 +68,7 @@ Before image publication, a correct public URL can return HTTP 404. This is an i
 - Upload against English `site_id = 286` and choose the English image directory by article topic, such as `change-location`, `pokemon-ios`, `pikmin-bloom` or another live-confirmed folder.
 - Guide/product screenshots are different: when the source supplies an exact Guide filename, search the English `guides` library and reuse that exact image pair. Do not guess a visually similar screenshot.
 - Never upload an English image into `pogoskilltw_images`, and never silently reuse a Taiwan-site media URL as proof of an English CMS upload.
+- English phone screenshots are height-limited media. Their `<img>` must use `style="max-height:520px;max-width:100%;width:auto;height:auto;"` or a smaller justified `max-height`; do not use a fixed pixel `max-width` as the main limit. Landscape article images continue to use the normal width-limited style.
 
 ## PoGoskill recommendation block
 
@@ -107,6 +108,21 @@ Keep the label around both bold lead text and the normal description so the layo
 - Copy both assets exactly. Do not hand-retype, shorten, translate, reorder, restyle or partially copy them.
 - A valid article contains at most one inline download CTA and exactly one Buy Box.
 - The `dev-desktop` / `dev-mobile` inside the Buy Box do not count as a second inline CTA.
+
+## Conclusion homepage link
+
+The final Conclusion paragraph must contain one homepage link whose anchor is the natural keyword phrase already supplied in the source. Keep `PoGoskill` immediately after that link as plain text:
+
+```html
+<section id="partN">
+  <h2>Conclusion</h2>
+  <p>For a reliable option, the <a href="https://www.pogoskill.com/">best Pikmin planting assistant</a> PoGoskill can help with the workflow described above.</p>
+</section>
+```
+
+- Use the actual phrase from the DOCX, such as `best Pikmin planting assistant`, `best Pikmin location changer`, or `best Pokémon GO location changer`.
+- Never use `<a ...>PoGoskill</a>` for the Conclusion homepage link.
+- Do not invent a keyword phrase when the source does not provide one; stop and report the missing Conclusion keyword.
 
 ## Defects seen in source examples that must be corrected
 

@@ -21,6 +21,7 @@ def sample_html():
 <ul class="list-filled-dot nav-list1">
   <li><a href="#part1">一、核心內容 <img class="tit-tips" src="https://images.pogoskill.com/hot-tips.png?w=100&amp;h=38" width="50" alt="熱門"></a></li>
   <li><a href="#part2">二、PoGoskill <img class="tit-tips" src="https://images.pogoskill.com/hot-tips.png?w=100&amp;h=38" width="50" alt="熱門"></a></li>
+  <li><a href="#part3">結語</a></li>
 </ul>
 <section id="part1">
   <h2>一、核心內容</h2>
@@ -36,6 +37,10 @@ def sample_html():
   <h3 class="h3-triangle">PoGoskill 操作步驟</h3>
   <ul class="step-cont"><li><p><span>步驟 1</span><label><strong>連接手機：</strong>操作。</label></p></li></ul>
 </section>
+<section id="part3">
+  <h2>結語</h2>
+  <p><a href="https://tw.pogoskill.com/">最佳皮克敏飛人工具</a> PoGoskill 可協助完成上述需求。</p>
+</section>
 {buybox}'''
 
 
@@ -46,6 +51,7 @@ def sample_en_html():
 <ul class="list-filled-dot nav-list1">
   <li><a href="#part1">Part 1. Core Content</a></li>
   <li><a href="#part2">Part 2. PoGoskill</a></li>
+  <li><a href="#part3">Conclusion</a></li>
 </ul>
 <section id="part1">
   <h2>Part 1. Core Content</h2>
@@ -61,6 +67,10 @@ def sample_en_html():
   <h4 class="h4-filled">How to Use PoGoskill</h4>
   {cta}
   <ul class="step-cont"><li><p><span>Step 1</span><label><strong>Connect your device:</strong> Complete instruction.</label></p></li></ul>
+</section>
+<section id="part3">
+  <h2>Conclusion</h2>
+  <p>The <a href="https://www.pogoskill.com/">best Pikmin planting assistant</a> PoGoskill supports the workflow above.</p>
 </section>
 {buybox}'''
 
@@ -138,6 +148,47 @@ class ValidatorTests(unittest.TestCase):
         result = VALIDATOR.validate(broken, EN_PUBLISHER / "assets", "en")
         self.assertFalse(result["ok"])
         self.assertTrue(any("CMS backend/attachment URL" in item for item in result["errors"]))
+
+    def test_taiwan_conclusion_rejects_pogoskill_as_anchor(self):
+        broken = sample_html().replace(
+            '<a href="https://tw.pogoskill.com/">最佳皮克敏飛人工具</a> PoGoskill',
+            '<a href="https://tw.pogoskill.com/">PoGoskill</a>',
+        )
+        result = VALIDATOR.validate(broken, PUBLISHER / "assets")
+        self.assertFalse(result["ok"])
+        self.assertTrue(any("source keyword phrase" in item for item in result["errors"]))
+
+    def test_english_conclusion_rejects_pogoskill_as_anchor(self):
+        broken = sample_en_html().replace(
+            '<a href="https://www.pogoskill.com/">best Pikmin planting assistant</a> PoGoskill',
+            '<a href="https://www.pogoskill.com/">PoGoskill</a>',
+        )
+        result = VALIDATOR.validate(broken, EN_PUBLISHER / "assets", "en")
+        self.assertFalse(result["ok"])
+        self.assertTrue(any("source keyword phrase" in item for item in result["errors"]))
+
+    def test_english_vertical_screenshot_requires_max_height(self):
+        vertical = sample_en_html().replace(
+            'rare-pikmin-guide.webp?w=850&amp;h=460',
+            'phone-location-step.webp?w=390&amp;h=844',
+        ).replace(
+            'rare-pikmin-guide.jpg?w=850&amp;h=460" alt="Rare Decor Pikmin guide"',
+            'phone-location-step.jpg?w=390&amp;h=844" alt="PoGoskill phone screenshot" style="max-width:390px;width:100%;height:auto;"',
+        )
+        result = VALIDATOR.validate(vertical, EN_PUBLISHER / "assets", "en")
+        self.assertFalse(result["ok"])
+        self.assertTrue(any("must use max-height" in item for item in result["errors"]))
+
+    def test_english_vertical_screenshot_accepts_max_height(self):
+        vertical = sample_en_html().replace(
+            'rare-pikmin-guide.webp?w=850&amp;h=460',
+            'phone-location-step.webp?w=390&amp;h=844',
+        ).replace(
+            'rare-pikmin-guide.jpg?w=850&amp;h=460" alt="Rare Decor Pikmin guide"',
+            'phone-location-step.jpg?w=390&amp;h=844" alt="PoGoskill phone screenshot" style="max-height:520px;max-width:100%;width:auto;height:auto;"',
+        )
+        result = VALIDATOR.validate(vertical, EN_PUBLISHER / "assets", "en")
+        self.assertTrue(result["ok"], result["errors"])
 
 
 if __name__ == "__main__":
