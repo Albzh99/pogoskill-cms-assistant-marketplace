@@ -245,15 +245,45 @@ def validate(html_text, assets_dir=None, profile="tw"):
     else:
         secure_btn_count = len(re.findall(r'class="secure-btn(?:\s|\")', before_buybox, re.I))
         cta_count = 1 if secure_btn_count == 2 else 0
-    if cta_count > 1:
-        errors.append(f"article CTA count must not exceed 1, got {cta_count}")
+    if cta_count > 2:
+        errors.append(f"article CTA count must not exceed 2, got {cta_count}")
+
+    faq_cta_count = 0
+    if expected_cta:
+        expected_cta_canonical = canonical(expected_cta)
+        for section in section_openings:
+            heading = re.search(r"<h2\b[^>]*>(.*?)</h2>", section, re.I | re.S)
+            heading_text = re.sub(r"<[^>]+>", "", heading.group(1)).strip() if heading else ""
+            if re.search(r"FAQ|常見問題|常见问题", heading_text, re.I):
+                section_cta_count = canonical(section).count(expected_cta_canonical)
+                faq_cta_count += section_cta_count
+                faq_before_cta = canonical(section).split(expected_cta_canonical, 1)[0]
+                if section_cta_count and "pogoskill" not in faq_before_cta.lower():
+                    errors.append("FAQ CTA requires a PoGoskill recommendation in the same FAQ section")
+        if cta_count > 1 and faq_cta_count != cta_count - 1:
+            errors.append("an additional article CTA is allowed only inside a PoGoskill recommendation FAQ")
+
+    desktop_groups = re.findall(
+        r'<div\b[^>]*class="[^"]*\bdev-desktop\b[^"]*"[^>]*>\s*'
+        r'<div\b[^>]*class="[^"]*\bbtn-groups\b[^"]*"([^>]*)>',
+        before_buybox,
+        re.I | re.S,
+    )
+    for index, attrs_text in enumerate(desktop_groups, 1):
+        style = attr(f"<div {attrs_text}>", "style").replace(" ", "").lower()
+        if "justify-content:center" not in style:
+            errors.append(f"article CTA #{index} desktop button group must be centered")
     if has_steps:
-        if cta_count != 1:
-            errors.append(f"article CTA count must be 1 when PoGoskill steps exist, got {cta_count}")
+        if cta_count < 1:
+            errors.append(f"the main article CTA is required when PoGoskill steps exist, got {cta_count}")
         secure_btn_count = len(re.findall(r'class="secure-btn(?:\s|\")', before_buybox, re.I))
         secure_download_count = len(re.findall(r'class="secure-download"', before_buybox, re.I))
-        if secure_btn_count != 2 or secure_download_count != 2:
-            errors.append("download CTA must keep two secure-btn and two secure-download boxes")
+        expected_boxes = 2 * cta_count
+        if secure_btn_count != expected_boxes or secure_download_count != expected_boxes:
+            errors.append(
+                f"download CTA copies must each keep two secure-btn and two secure-download boxes; "
+                f"expected {expected_boxes} of each"
+            )
         required_downloads = (
             ("pogoskill_7925.exe", "pogoskill-mac_7926.dmg")
             if profile == "tw"
@@ -264,8 +294,9 @@ def validate(html_text, assets_dir=None, profile="tw"):
                 errors.append(f"download CTA missing {required}")
         advantage_text = "PoGoskill 優勢" if profile == "tw" else "Key Features of PoGoskill"
         advantage = before_buybox.find(advantage_text)
-        cta = before_buybox.find('<div class="dev-desktop">')
         steps_heading = before_buybox.find(steps_title)
+        cta_search_start = 0 if profile == "tw" else (steps_heading if steps_heading >= 0 else 0)
+        cta = before_buybox.find('<div class="dev-desktop">', cta_search_start)
         step_list = before_buybox.find('class="step-cont"', steps_heading if steps_heading >= 0 else 0)
         valid_order = (
             advantage < cta < steps_heading < step_list

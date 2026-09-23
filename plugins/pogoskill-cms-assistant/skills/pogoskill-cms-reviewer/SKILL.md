@@ -13,7 +13,7 @@ description: 独立审查 PoGoskill 台湾站 CMS 草稿的元数据、HTML、�
 - 按 Publisher 的 [Luna HTML 固定执行契约](../pogoskill-cms-publisher/references/luna-html-contract.md) 审查正文骨架：目录必须使用 `nav-list1`，不得出现 `article-toc`；section/H2/目录锚点一一对应；普通 H3 必须使用 `h3-triangle`，FAQ 必须使用 `h3-faq faq1`；拒绝裸列表和未包入 `table-box overflow-auto` 的表格。
 - 正文不得有 H1；目录锚点与 section ID 一一对应；标准 Buy Box 必须恰好一个。
 - 最后一个结语 section 必须包含正确站点首页链接；锚文本是 DOCX 实际提供的“最佳／最好……”自然关键词，不能是 `PoGoskill`。链接后面的 `PoGoskill` 必须保持普通文字。英文结语同样使用源文的 `best ...` 关键词作为首页锚文本。
-- PoGoskill 模块必须先完整写完介绍、适用情境、操作思路、作用与优势，再原样放入 Publisher 的 `assets/download-cta.html`；下载区必须有两个 `secure-btn` 和两个 `secure-download` 安全下载框。按钮下方必须紧接较大的现有 H3“PoGoskill 操作步驟”，随后才进入 `step-cont`。若下载区被简化、按钮过早出现，或“PoGoskill 操作步驟”只有 `section-label` 小标签而没有 H3，判定为结构不合格。
+- PoGoskill 模块必须先完整写完介绍、适用情境、操作思路、作用与优势，再原样放入对应站点的 `assets/download-cta.html`；下载区必须有两个 `secure-btn` 和两个 `secure-download` 安全下载框，桌面按钮组固定居中。按钮下方必须紧接较大的现有 H3“PoGoskill 操作步驟”或英文站已验证的 `How to Use PoGoskill` 标题，随后才进入 `step-cont`。若下载区被简化、未居中、按钮过早出现或步骤标题层级错误，判定为结构不合格。FAQ 只有在 DOCX 对应答案明确介绍或推荐 PoGoskill 时才允许额外一组对应语言 CTA；繁中与英文下载资产不得混用。
 - 每个 `step-cont > li` 必须以 `<p><span>步驟 N</span><label><strong>短標題：</strong>普通正文。</label></p>` 开头。`p` 只能直接包含步骤徽标和一个无 class 的 `label`；加粗标题只能位于 `label` 开头。图片盒必须是该 `<p>` 后面的同级元素。把 `strong` 或正文直接放在 `p` 下时，判定为会产生多列挤压的结构错误。
 - 将同分类正常上线文章作为结构基准；拒绝基准中不存在的新文本框、提示框、卡片、彩色背景框、引用框、CSS class、局部 CSS、标题样式或下载框架。
 - 每个已完成图片盒必须是 `img-wrap text-center > picture > source[type=image/webp] + img`，两者同 basename、同尺寸，fallback 为 JPG/PNG，ALT 为自然繁体中文。

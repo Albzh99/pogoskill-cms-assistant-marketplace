@@ -44,6 +44,25 @@ def sample_html():
 {buybox}'''
 
 
+def sample_html_with_faq_cta():
+    cta = (PUBLISHER / "assets" / "download-cta.html").read_text(encoding="utf-8")
+    html = sample_html().replace(
+        '<li><a href="#part3">結語</a></li>',
+        '<li><a href="#part3">常見問題</a></li>\n  <li><a href="#part4">結語</a></li>',
+    )
+    return html.replace(
+        '<section id="part3">\n  <h2>結語</h2>',
+        f'''<section id="part3">
+  <h2>常見問題</h2>
+  <h3 class="h3-faq faq1">1. PoGoskill 可以協助這個操作嗎？</h3>
+  <p>可以，本題明確推薦 PoGoskill 協助完成上述定位操作。</p>
+  {cta}
+</section>
+<section id="part4">
+  <h2>結語</h2>''',
+    )
+
+
 def sample_en_html():
     cta = (EN_PUBLISHER / "assets" / "download-cta.html").read_text(encoding="utf-8")
     buybox = (EN_PUBLISHER / "assets" / "buybox.html").read_text(encoding="utf-8")
@@ -75,6 +94,25 @@ def sample_en_html():
 {buybox}'''
 
 
+def sample_en_html_with_faq_cta():
+    cta = (EN_PUBLISHER / "assets" / "download-cta.html").read_text(encoding="utf-8")
+    html = sample_en_html().replace(
+        '<li><a href="#part3">Conclusion</a></li>',
+        '<li><a href="#part3">FAQ</a></li>\n  <li><a href="#part4">Conclusion</a></li>',
+    )
+    return html.replace(
+        '<section id="part3">\n  <h2>Conclusion</h2>',
+        f'''<section id="part3">
+  <h2>FAQ</h2>
+  <h3 class="h3-faq faq1">Can PoGoskill help with this task?</h3>
+  <p>Yes. PoGoskill is recommended here because it supports the location workflow described above.</p>
+  {cta}
+</section>
+<section id="part4">
+  <h2>Conclusion</h2>''',
+    )
+
+
 class ValidatorTests(unittest.TestCase):
     def test_valid_contract_passes(self):
         self.assertTrue(VALIDATOR.validate(sample_html(), PUBLISHER / "assets")["ok"])
@@ -82,6 +120,10 @@ class ValidatorTests(unittest.TestCase):
     def test_missing_download_box_is_blocked(self):
         broken = sample_html().replace('class="secure-download"', 'class="missing-download-box"', 1)
         self.assertFalse(VALIDATOR.validate(broken, PUBLISHER / "assets")["ok"])
+
+    def test_taiwan_faq_recommendation_allows_second_cta(self):
+        result = VALIDATOR.validate(sample_html_with_faq_cta(), PUBLISHER / "assets")
+        self.assertTrue(result["ok"], result["errors"])
 
     def test_truncated_html_is_blocked(self):
         self.assertFalse(VALIDATOR.validate(sample_html()[:-20], PUBLISHER / "assets")["ok"])
@@ -105,6 +147,30 @@ class ValidatorTests(unittest.TestCase):
         self.assertTrue(
             VALIDATOR.validate(sample_en_html(), EN_PUBLISHER / "assets", "en")["ok"]
         )
+
+    def test_english_download_buttons_must_be_centered(self):
+        broken = sample_en_html().replace(
+            ' style="display:flex;justify-content:center;"', "", 1
+        )
+        result = VALIDATOR.validate(broken, EN_PUBLISHER / "assets", "en")
+        self.assertFalse(result["ok"])
+        self.assertTrue(any("must be centered" in item for item in result["errors"]))
+
+    def test_english_faq_recommendation_allows_second_cta(self):
+        result = VALIDATOR.validate(
+            sample_en_html_with_faq_cta(), EN_PUBLISHER / "assets", "en"
+        )
+        self.assertTrue(result["ok"], result["errors"])
+
+    def test_english_faq_cta_requires_pogoskill_recommendation(self):
+        broken = sample_en_html_with_faq_cta().replace(
+            "PoGoskill is recommended here", "This option is recommended here", 1
+        ).replace(
+            "Can PoGoskill help with this task?", "Can this method help with the task?", 1
+        )
+        result = VALIDATOR.validate(broken, EN_PUBLISHER / "assets", "en")
+        self.assertFalse(result["ok"])
+        self.assertTrue(any("FAQ CTA requires" in item for item in result["errors"]))
 
     def test_english_contract_rejects_taiwan_download_ids(self):
         broken = sample_en_html().replace("pogoskill_7144.exe", "pogoskill_7925.exe")

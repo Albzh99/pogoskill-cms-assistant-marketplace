@@ -269,7 +269,7 @@ PoGoskill 模块必须遵循固定阅读顺序：先把 PoGoskill 的介绍、�
 
 “PoGoskill 操作步驟”必须使用 `h3-triangle`（或同分类已验证、语义等价的现有 H3 class），视觉层级要明显高于 `section-label`；不得使用裸 H3、H4 或自创 class。可以根据文章内容补充标题语义，但必须明确表示这是 PoGoskill 操作步骤。
 
-正文下载 CTA 只放一次，位置必须是 PoGoskill 的完整介绍与优势内容之后、操作步骤 H3 之前。必须原样复制 `assets/download-cta.html`，不得手写简化版。下列结构中的 `secure-btn` 和 `secure-download` 就是下载按钮及其安全下载框，任何一层缺失都会导致页面样式不完整：
+PoGoskill 主介绍模块的正文下载 CTA 只放一次，位置必须是 PoGoskill 的完整介绍与优势内容之后、操作步骤 H3 之前。按钮组必须保持 `style="display:flex;justify-content:center;"` 固定居中，不受前方 H3 样式影响。必须原样复制 `assets/download-cta.html`，不得手写简化版。下列结构中的 `secure-btn` 和 `secure-download` 就是下载按钮及其安全下载框，任何一层缺失都会导致页面样式不完整：
 
 ```html
 <div class="dev-desktop">
@@ -305,7 +305,7 @@ PoGoskill 模块必须遵循固定阅读顺序：先把 PoGoskill 的介绍、�
 ```
 
 - 指南步骤前后不再重复 CTA。
-- FAQ 默认不放 CTA。
+- FAQ 默认不放 CTA。若某个问答的 DOCX 原文明确介绍或推荐 PoGoskill，可在该答案后额外原样放一组繁中 CTA；没有明确推荐时不放，且禁止混用英文下载资产。
 - Buy Box 内按钮不是正文 CTA，不计入“一次”的数量。
 - 不改按钮 class、下载 PID、层级或文案。
 - 两个 `.secure-btn` 和两个 `.secure-download` 必须全部保留；只有按钮、没有安全下载框的 CTA 判定为失败。
@@ -374,7 +374,7 @@ PoGoskill 模块必须遵循固定阅读顺序：先把 PoGoskill 的介绍、�
 
 - FAQ 问题不能用普通裸 H3 或 `h3-triangle`。
 - 每个问题后必须紧跟答案段落。
-- FAQ 不是 PoGoskill 推广区，不自动插入 CTA。
+- FAQ 不是 PoGoskill 推广区，不自动插入 CTA。只有该问答的 DOCX 原文明示介绍或推荐 PoGoskill 时，才可在答案后额外放一组繁中 `assets/download-cta.html`；该组同样必须居中。
 
 ## 12. 视频
 
@@ -436,7 +436,7 @@ PoGoskill 模块必须遵循固定阅读顺序：先把 PoGoskill 的介绍、�
 <style> 或自定义 CSS
 自创 xxx-card、xxx-box、xxx-note、xxx-article class
 手写面包屑、相关文章、作者或侧边栏
-重复正文 CTA
+无 DOCX FAQ 推荐依据的第二组 CTA，或全文超过两组 CTA
 缺少 WebP/fallback 任一格式的图片盒
 目录 href 与 section id 不一致
 未闭合或不平衡的 div/section/table
@@ -456,7 +456,7 @@ Luna 必须输出校验结果后才能调用 `/cms/page/add` 或 `/cms/page/upda
 8. 所有完成图片盒含同 basename 的 fallback 与 WebP。
 9. 主图为 850×460；竖图使用高度限制。
 10. `.tit-tips` 恰好用于两个经过语义判断的目录项。
-11. 正文 `.btn-groups` 恰好一组。
+11. 主介绍模块的 `.btn-groups` 恰好一组并固定居中；只有 DOCX 的 FAQ 原文明确推荐 PoGoskill 时，才允许 FAQ 再出现一组相同繁中 CTA，全文最多两组。
 12. PoGoskill 模块的完整介绍、适用情境、操作思路、作用与优势都位于 CTA 之前；CTA 之后紧接 `h3.h3-triangle` 的“PoGoskill 操作步驟”，再紧接 `ul.step-cont`。不得出现“介绍一段 → CTA → 继续介绍／优势”的错误顺序。
 13. Buy Box 恰好一个且与资产完全一致。
 14. `IMAGE_PENDING` 为 0 才能判定图片完成。

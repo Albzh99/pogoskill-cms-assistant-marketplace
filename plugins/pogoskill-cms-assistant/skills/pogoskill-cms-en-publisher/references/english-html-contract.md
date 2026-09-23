@@ -17,7 +17,7 @@ This contract is derived from three supplied English production examples and nor
 2. Main image in the standard `img-wrap > picture > source + img` structure.
 3. One table of contents: `<ul class="list-filled-dot nav-list1">` containing the `<li>` items directly. Do not create a bare nested `<ul>`.
 4. Main sections in source order. Each linked section uses `id="partN"`, begins with one H2, and has exactly one matching TOC link.
-5. If the article recommends PoGoskill: complete product explanation, approved feature list, `How to Use PoGoskill` subheading, exact download CTA, then one `step-cont` list.
+5. If the article recommends PoGoskill: complete product explanation, approved feature list, `How to Use PoGoskill` subheading, one centered exact download CTA, then one `step-cont` list.
 6. FAQ section using the established FAQ heading structure.
 7. Conclusion section.
 8. Exactly one complete Buy Box copied from `assets/buybox.html`, after the conclusion text.
@@ -75,8 +75,9 @@ Before image publication, a correct public URL can return HTTP 404. This is an i
 - The first mention of PoGoskill in its recommendation section links to `https://www.pogoskill.com/`.
 - Explain what PoGoskill does and why it solves the article's problem before showing download buttons.
 - Use the reference site's existing feature heading/list. Do not create a custom feature card.
-- Insert `assets/download-cta.html` exactly once in the recommendation block.
+- Insert `assets/download-cta.html` exactly once in the main recommendation block. Keep it in the established position after the `How to Use PoGoskill` heading and immediately before the `step-cont` list.
 - The download CTA must retain both desktop secure-download boxes and the mobile Buy Now links. Do not remove wrappers, SVG references or button classes.
+- The desktop `.btn-groups` must retain `style="display:flex;justify-content:center;"` so both download buttons stay centered regardless of the approved H3/H4 heading variant above them.
 - Place a clear existing-style heading such as `<h4 class="h4-filled">How to Use PoGoskill</h4>` before the CTA/steps grouping according to the selected English reference. Do not translate it or turn every step into a heading.
 - Each step uses this stable structure:
 
@@ -99,14 +100,14 @@ Keep the label around both bold lead text and the normal description so the layo
 - FAQ is a major H2 section.
 - Each question uses the existing `h3-faq faq1` component, including its complete approved icon markup copied from a verified English page.
 - Put one or more answer paragraphs immediately after each question.
-- Do not insert a download CTA inside FAQ unless the source explicitly contains a PoGoskill recommendation there; even then, never duplicate the article CTA.
+- Do not insert a download CTA inside FAQ unless that exact source answer explicitly introduces or recommends PoGoskill. When it does, one additional centered copy of the English CTA is allowed immediately after that answer; do not add it merely because the article is product-related.
 
 ## Download CTA and Buy Box
 
 - `assets/download-cta.html` is the only permitted English inline download CTA. It uses English download IDs `7144` and `7145` and `www.pogoskill.com` purchase links.
 - `assets/buybox.html` is the only permitted English Buy Box. It includes desktop and mobile platform variants, product buttons, badges and counts.
 - Copy both assets exactly. Do not hand-retype, shorten, translate, reorder, restyle or partially copy them.
-- A valid article contains at most one inline download CTA and exactly one Buy Box.
+- A valid article normally contains one main inline CTA. It may contain one additional FAQ CTA only when the source FAQ explicitly recommends PoGoskill, so the absolute maximum is two. Both copies must remain byte-for-byte equal to the English CTA asset and centered.
 - The `dev-desktop` / `dev-mobile` inside the Buy Box do not count as a second inline CTA.
 
 ## Conclusion homepage link
