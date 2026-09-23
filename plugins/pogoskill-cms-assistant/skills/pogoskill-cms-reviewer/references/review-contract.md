@@ -11,7 +11,7 @@
 ## 图片验收
 
 - 有真实素材时，按 `$pogoskill-cms-image-pipeline` 的 manifest 核对 fallback JPG/PNG 与同名 WebP、尺寸、URL、ALT、upload request_id 和待发布 publish_id。
-- CMS `/picture/list` 已上线且当前 API Key 已获授权。图片验收必须包含上传响应、列表回查和 URL 可读性。
+- CMS `/picture/list` 已上线且当前 API Key 已获授权。图片验收必须包含上传响应与列表回查。后台 `upload` URL 用于验证上传；前台 `url/online` 在图片发布前可能返回 404，该状态不阻断草稿。
 - 对 `guides` 图片核对上传前图库检索与画面匹配证据；已有合适 Guide 图片却重复上传，判定为 `FAIL`。对用户提供的游戏正文图片，确认其被优先使用且仅做同名/完全重复检查，不得被图库相似图擅自替换。
 - 主图必须为 850×460。横图应适合正文宽度；竖图保持比例且显示高度合理，不得占满长屏。
 - 核对目录：Pokémon GO 游戏图为 `pokemon-ios`，Pikmin Bloom 游戏图为 `pikmin`，PoGoskill 下载/安装/操作/产品界面为 `guides`。

@@ -80,6 +80,41 @@ try {
   }
 
   foreach ($item in $manifest.items) {
+    $existingResponse = Invoke-CmsJson '/cms/picture/list' @{ site_id = $SiteId; path = $CmsPath; type = 'file' }
+    if ($existingResponse.code -ne 0) {
+      throw "CMS picture list preflight failed: code=$($existingResponse.code), request_id=$($existingResponse.request_id), msg=$($existingResponse.msg)"
+    }
+    $existingFiles = @($existingResponse.data.list | ForEach-Object { @($_.fileChildren) })
+    $existingFallback = $existingFiles | Where-Object { $_.name -eq $item.fallback_name } | Select-Object -First 1
+    $existingWebp = $existingFiles | Where-Object { $_.name -eq $item.webp_name } | Select-Object -First 1
+    if (($existingFallback -and -not $existingWebp) -or ($existingWebp -and -not $existingFallback)) {
+      throw "Only one format already exists for $($item.image_key); do not upload or overwrite until the conflict is resolved."
+    }
+    if ($existingFallback -and $existingWebp) {
+      if ([int]$existingFallback.w -ne [int]$item.width -or [int]$existingFallback.h -ne [int]$item.height -or
+          [int]$existingWebp.w -ne [int]$item.width -or [int]$existingWebp.h -ne [int]$item.height) {
+        throw "Existing CMS pair dimensions differ for $($item.image_key); do not overwrite."
+      }
+      $fallbackReadable = Test-UploadedUrl ([string]$existingFallback.upload)
+      $webpReadable = Test-UploadedUrl ([string]$existingWebp.upload)
+      if (-not $fallbackReadable -or -not $webpReadable) {
+        throw "Existing CMS upload URL is not readable for $($item.image_key)"
+      }
+      $item | Add-Member -NotePropertyName fallback_upload_url -NotePropertyValue $existingFallback.upload -Force
+      $item | Add-Member -NotePropertyName webp_upload_url -NotePropertyValue $existingWebp.upload -Force
+      $item | Add-Member -NotePropertyName fallback_public_url -NotePropertyValue (Get-PublicImageUrl $existingFallback $existingFallback ([int]$item.width) ([int]$item.height)) -Force
+      $item | Add-Member -NotePropertyName webp_public_url -NotePropertyValue (Get-PublicImageUrl $existingWebp $existingWebp ([int]$item.width) ([int]$item.height)) -Force
+      $item | Add-Member -NotePropertyName site_id -NotePropertyValue $SiteId -Force
+      $item | Add-Member -NotePropertyName cms_path -NotePropertyValue $CmsPath -Force
+      $item | Add-Member -NotePropertyName fallback_url_readable -NotePropertyValue $fallbackReadable -Force
+      $item | Add-Member -NotePropertyName webp_url_readable -NotePropertyValue $webpReadable -Force
+      $item | Add-Member -NotePropertyName public_url_http_required_for_draft -NotePropertyValue $false -Force
+      $item | Add-Member -NotePropertyName public_url_state_note -NotePropertyValue 'Frontend 404 is expected before image publication and does not block CMS draft HTML.' -Force
+      $item | Add-Member -NotePropertyName list_request_id -NotePropertyValue $existingResponse.request_id -Force
+      $item.status = 'reused_existing'
+      continue
+    }
+
     $responsePath = Join-Path $env:TEMP ('cms-image-upload-' + [guid]::NewGuid().ToString('N') + '.json')
     try {
       $formArgs = @(
@@ -139,6 +174,8 @@ try {
     $item | Add-Member -NotePropertyName cms_path -NotePropertyValue $CmsPath -Force
     $item | Add-Member -NotePropertyName fallback_url_readable -NotePropertyValue $fallbackReadable -Force
     $item | Add-Member -NotePropertyName webp_url_readable -NotePropertyValue $webpReadable -Force
+    $item | Add-Member -NotePropertyName public_url_http_required_for_draft -NotePropertyValue $false -Force
+    $item | Add-Member -NotePropertyName public_url_state_note -NotePropertyValue 'Frontend 404 is expected before image publication and does not block CMS draft HTML.' -Force
     $item | Add-Member -NotePropertyName list_request_id -NotePropertyValue $listResponse.request_id -Force
     $item | Add-Member -NotePropertyName fallback_online_url -NotePropertyValue $listedFallback.online -Force
     $item | Add-Member -NotePropertyName webp_online_url -NotePropertyValue $listedWebp.online -Force
@@ -148,7 +185,12 @@ try {
   $manifest | Add-Member -NotePropertyName site_id -NotePropertyValue $SiteId -Force
   $manifest | Add-Member -NotePropertyName uploaded_at -NotePropertyValue ([DateTimeOffset]::Now.ToString('o')) -Force
   [IO.File]::WriteAllText($manifestFile, ($manifest | ConvertTo-Json -Depth 16), (New-Object Text.UTF8Encoding($false)))
-  [pscustomobject]@{ manifest = $manifestFile; uploaded_pairs = @($manifest.items).Count; note = 'Images uploaded as pending records only; nothing was published.' }
+  [pscustomobject]@{
+    manifest = $manifestFile
+    uploaded_pairs = @($manifest.items | Where-Object status -eq 'uploaded_pending_publish').Count
+    reused_pairs = @($manifest.items | Where-Object status -eq 'reused_existing').Count
+    note = 'Existing pairs were reused; new pairs are pending records only. Nothing was published.'
+  }
 }
 finally {
   $apiKey = $null

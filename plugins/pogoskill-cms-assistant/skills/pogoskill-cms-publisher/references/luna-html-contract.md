@@ -234,6 +234,7 @@ style="max-height:520px;max-width:100%;width:auto;height:auto;"
 - `<source>` 使用 WebP，`<img>` 使用同 basename 的 JPG/PNG。
 - 不能只写 `<img>`，不能缺少 `data-src/data-srcset`，不能伪造 URL。
 - 新图与 Guide 图都必须使用繁中站前台公开 URL。新上传图片直接取上传响应 `data.list[].url`，缺失时以 `/cms/picture/list` 的 `online` 核对；不得说 API 无法提供前台 URL。`site.p.cms.afirstsoft.cn`、`attachment=1` 或其他后台 `upload` URL 只用于验证，禁止进入正文。
+- 图片尚未发布时，上述前台 URL 返回 404 是正常的，不影响 CMS 草稿保存或更新。判断图片是否可回填，要看 CMS 中是否已有正确的 fallback/WebP 文件对，而不是要求前台在发布前返回 200。
 - 文件名必须是可读的语义名称；禁止 `image1`、随机串或结尾 SHA/哈希。fallback 与 WebP 仅扩展名不同。
 
 ## 9. PoGoskill 介绍、下载与操作步骤顺序

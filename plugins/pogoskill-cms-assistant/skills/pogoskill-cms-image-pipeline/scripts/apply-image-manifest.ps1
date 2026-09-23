@@ -16,7 +16,7 @@ $html = Get-Content -LiteralPath $inputFile -Raw -Encoding UTF8
 $manifest = Get-Content -LiteralPath $manifestFile -Raw -Encoding UTF8 | ConvertFrom-Json
 
 foreach ($item in $manifest.items) {
-  if ($item.status -ne 'uploaded_pending_publish') { throw "Image is not uploaded and verified: $($item.image_key)" }
+  if ($item.status -notin @('uploaded_pending_publish', 'reused_existing')) { throw "Image is not uploaded/reused and verified: $($item.image_key)" }
   foreach ($required in @('image_key','alt','fallback_public_url','webp_public_url','max_width','site_id')) {
     if ([string]::IsNullOrWhiteSpace([string]$item.$required)) { throw "Manifest field missing for $($item.image_key): $required" }
   }

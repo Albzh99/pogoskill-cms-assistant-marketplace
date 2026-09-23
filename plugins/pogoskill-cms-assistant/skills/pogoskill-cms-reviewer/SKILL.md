@@ -17,6 +17,7 @@ description: 独立审查 PoGoskill 台湾站 CMS 草稿的元数据、HTML、�
 - 将同分类正常上线文章作为结构基准；拒绝基准中不存在的新文本框、提示框、卡片、彩色背景框、引用框、CSS class、局部 CSS、标题样式或下载框架。
 - 每个已完成图片盒必须是 `img-wrap text-center > picture > source[type=image/webp] + img`，两者同 basename、同尺寸，fallback 为 JPG/PNG，ALT 为自然繁体中文。
 - 图片 `data-src/data-srcset` 必须使用 `https://tw.pogoskill.com/images/` 前台地址；出现 `site.p.cms.afirstsoft.cn`、`attachment=1`、错误站点域名或哈希结尾文件名时直接判定 `FAIL`。
+- 图片发布前，正确前台 URL 返回 404 不判失败。以 `/cms/picture/list` 中同名、同尺寸 fallback/WebP 对存在作为草稿验收证据；不得要求重复上传。
 - 对每对图片核对 manifest、上传 request_id、publish_id、CMS 返回 URL、尺寸和文件名；不得把图片上传记录发布。
 - 任一 `IMAGE_PENDING`、本地路径、假 URL、坏图、单格式图片、尺寸不一致或标签未闭合均为发布阻断。
 - 审查前先运行 Publisher 要求的 `validate-article-html.py`，并读取 DOCX/CMS 完整度比较结果；脚本失败或存在未解释缺失区块时直接判定 `FAIL`。

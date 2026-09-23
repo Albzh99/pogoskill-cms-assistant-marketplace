@@ -38,8 +38,10 @@
 - 文章主图必须在成对转换前准备为 850×460，且不得拉伸变形；无合适素材时停止并报告。正文图保持原始比例，横图按正文展示需求控制，手机截图等竖图限制 `max_width` 和最终展示高度。
 - WebP 转换本身不 resize、不 crop；fallback 与 WebP 像素宽高必须完全一致。
 - 上传前验证：可解码、非零、≤30 MB、扩展名与 MIME 合理、SHA-256 已记录。
-- 上传后验证：`code=0`、`data.total=2`、`err_name_files=[]`、返回名称/尺寸/目录匹配，并对两个 `upload` URL 做可读性检查。
+- 上传后验证：`code=0`、`data.total=2`、`err_name_files=[]`、返回名称/尺寸/目录匹配，并对两个后台 `upload` URL 做可读性检查。
 - 上传后必须再用 `/picture/list` 回查 `uri/w/h/upload/online`；两种格式都存在且尺寸一致后才能交给文章回填。
+- 若 `/picture/list` 已确认同名、同尺寸 fallback/WebP 对存在，应直接复用；禁止为了取得不同 URL 再次上传同一图片。
+- 图片未发布时，前台 `url/online` 返回 HTTP 404 是正常的待发布状态。草稿 HTML 本来就应先保存这些未来生效的前台地址，因此 404 不阻断 `/cms/page/update`，也不触发重复上传。只有 URL 字段缺失、域名/路径错误、图片对不存在或后台 `upload` 验证失败才阻断草稿。
 
 ## 前台公开 URL
 
@@ -48,6 +50,7 @@
 - 繁中站 `site_id = 324`：`https://tw.pogoskill.com/images/<folder>/<semantic-name>.<ext>?w=<width>&h=<height>`。
 - 英文站 `site_id = 286`：`https://images.pogoskill.com/<folder>/<semantic-name>.<ext>?w=<width>&h=<height>`。
 - 只在 API 返回的公开 URL 尚无尺寸参数时追加 `w` 与 `h`；不得自行替换 API 返回的 host、目录或文件名。
+- 前台 URL 的 HTTP 200 不是保存草稿的前置条件；图片发布前可能为 404。判断依据是上传 `code:0` 或 `/cms/picture/list` 的双格式存在证据。
 - fallback 与 WebP 使用同目录、同 basename、同尺寸参数，仅扩展名不同。查询参数写入 HTML 时必须编码为 `&amp;`。
 
 ## V2 HTML
@@ -78,4 +81,4 @@ CMS 新上传资源的已发布范例使用：
 
 ## Manifest 必填项
 
-每项至少包含：`image_key`、`source_entry`、`source_sha256`、`fallback_path`、`webp_path`、`width`、`height`、`alt`、`max_width`。上传后追加 `site_id`、`upload_request_id`、`publish_id`、仅供验证的 `fallback_upload_url`/`webp_upload_url`、从响应 `url`（或回查 `online`）取得的 `fallback_public_url`/`webp_public_url` 和 URL 检查结果。
+每项至少包含：`image_key`、`source_entry`、`source_sha256`、`fallback_path`、`webp_path`、`width`、`height`、`alt`、`max_width`。新上传项追加 `site_id`、`upload_request_id`、`publish_id`；复用现有项记录 `site_id`、`list_request_id` 并标记 `status = reused_existing`，不伪造新的上传 ID。两种情况都保存仅供验证的 `fallback_upload_url`/`webp_upload_url`、从响应 `url`（或回查 `online`）取得的 `fallback_public_url`/`webp_public_url` 和 URL 检查结果。

@@ -24,7 +24,7 @@ description: 为 PoGoskill 台湾站文章提取真实 JPG/PNG 素材、生成�
 3. 为每张图确定用途、所在段落和目标目录：Pokémon GO 游戏图用 `pokemon-ios`，Pikmin Bloom 游戏图用 `pikmin`，PoGoskill 下载/安装/步骤/产品界面用 `guides`。
 4. 人工或语义映射补齐每张图的 `image_key`、符合文章语言的 `alt`、语义化 basename 和 `max_width`。不得把 DOCX 的 `descr` 自动当作最终 ALT，也不得给 basename 追加随机字符串或 SHA 哈希。
 5. 主图先处理为 850×460；其他图片保持比例，横图不超过正文需求，竖图限制展示宽高。随后用 `convert-image-pairs.ps1` 保留 JPG/PNG 并生成同 basename WebP。
-6. 上传前用 `/cms/picture/list` 检查目标文件名与完全重复项，确认目标目录真实存在后上传 fallback 与 WebP。必须验证 `code === 0`、`total === 2`、`err_name_files` 为空、两者尺寸一致，并回查列表。
+6. 上传前用 `/cms/picture/list` 检查目标文件名与完全重复项。若目标目录已经存在同名、同尺寸的 fallback/WebP 对，直接复用并回填，不得再次上传。只有缺少该图片对时才上传；上传后必须验证 `code === 0`、`total === 2`、`err_name_files` 为空、两者尺寸一致，并回查列表。
 7. 上传响应 `data.list[].url` 就是文章应使用的前台正式地址；`data.list[].upload` 只用于 CMS 上传验证，禁止写入正文。优先直接读取 `url`，缺失时用 `/cms/picture/list` 返回的 `online` 核对，不能声称“无法上传前台 URL”或改用后台地址。脚本只给已验证的公开 URL 追加 `w/h` 尺寸参数。
 8. 用 `apply-image-manifest.ps1` 按唯一 `image-key` 回填，不按“第几个图片盒”猜测。回填后交给 Reviewer 通过 CMS API 回读、图片 manifest 和机械校验复核；当前不执行 AI 页面预览。
 
@@ -33,6 +33,7 @@ description: 为 PoGoskill 台湾站文章提取真实 JPG/PNG 素材、生成�
 - 没有真实图片：保留 `IMAGE_PENDING`，报告 Image hold。
 - 转换器不可用、尺寸不一致、文件超过 30 MB、命名不合法、目录不存在或上传仅成功一个格式：停止，不改 CMS 正文。
 - 占位数量、`image-key`、原区块哈希或上下文不匹配：停止，不进行模糊替换。
-- 图片 URL 无法读取或实际解码失败：停止，不报告图片完成。
+- CMS 后台 `upload` 验证 URL 无法读取、文件实际解码失败或 `/cms/picture/list` 找不到图片对：停止，不报告图片完成。
+- 前台公开 URL 在图片尚未发布时返回 404 属于预期状态，不是草稿阻断项。只要上传响应或图片列表已确认 fallback/WebP 对存在、尺寸正确且公开 URL 字段正确，就继续回填并更新草稿；不得因此重复上传或拒绝 `/cms/page/update`。
 - 正文出现 `site.p.cms.afirstsoft.cn`、`attachment=1`、错误站点域名或带随机哈希的文件名：停止并修正 manifest/HTML。
 - 主图不是 850×460、文件名不具语义、目标目录错误、步骤图与 DOCX 指定名称不对应、竖图过高、Guide 名称无法唯一命中，或任何图片存在同名/完全重复冲突：停止，不写入 CMS。

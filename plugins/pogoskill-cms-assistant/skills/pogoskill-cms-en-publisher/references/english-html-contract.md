@@ -62,6 +62,8 @@ The WebP and JPG/PNG basenames must match. ALT describes the actual image. Keep 
 
 Use `/cms/picture/upload` response `data.list[].url` as the public article URL; if it is absent, verify `/cms/picture/list` field `online`. The CMS `upload` URL is evidence only. Never claim that the API cannot provide a frontend URL before checking those fields, and never place `site.p.cms.afirstsoft.cn`, `attachment=1`, or another CMS backend URL in article HTML. Public English image URLs must use `https://images.pogoskill.com/`; filenames must remain readable semantic names without a trailing checksum/hash.
 
+Before image publication, a correct public URL can return HTTP 404. This is expected and does not block a CMS draft add/update. When `/cms/picture/list` confirms the exact fallback/WebP pair already exists, reuse it and do not upload the files again.
+
 - User-supplied article images are the primary source. Convert each JPG/PNG to a same-basename WebP and keep both formats.
 - Upload against English `site_id = 286` and choose the English image directory by article topic, such as `change-location`, `pokemon-ios`, `pikmin-bloom` or another live-confirmed folder.
 - Guide/product screenshots are different: when the source supplies an exact Guide filename, search the English `guides` library and reuse that exact image pair. Do not guess a visually similar screenshot.
