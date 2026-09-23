@@ -26,7 +26,7 @@ Before any CMS request, read the shared [execution evidence contract](../pogoski
 1. Read the complete English source, including every paragraph, table, FAQ and image marker.
 2. Query the English site, V2 template, fields, author, classification, products, sidebar, related pages and exact URL in real time.
 3. Build readable, indented V2 HTML using only approved structures from the English contract.
-4. For supplied JPG/PNG article images, create the same-basename WebP and upload both to the correct site-286 image folder. For Guide images named in the source, search the English `guides` library by that exact name; do not guess substitutes.
+4. For supplied JPG/PNG article images, create the same-basename WebP and upload both with the image pipeline using `-SiteId 286`. Article HTML must use `https://images.pogoskill.com/<folder>/<semantic-name>.<ext>` public URLs, never the CMS `upload` host. For Guide images named in the source, search the English `guides` library by that exact name; do not guess substitutes.
 5. Copy the English download CTA and Buy Box byte-for-byte from this skill's assets. Do not translate, shorten, restyle or reconstruct them.
 6. Run the shared validator with the English profile:
 

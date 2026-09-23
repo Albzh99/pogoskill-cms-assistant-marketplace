@@ -8,7 +8,7 @@
 | CMS 字段确认 | 实时 API 返回的站点、模板、分类、作者、产品、相关文章与 URL 查重结果 |
 | HTML 完整 | `validate-article-html.py` 返回 `ok: true` |
 | 下载区完整 | 唯一正文 CTA；两个 `secure-btn`、两个 `secure-download`，并位于完整介绍之后、步骤 H3 之前 |
-| 图片完整 | DOCX 正文图全部完成 fallback/WebP；Guide 图按指定名称唯一命中；`IMAGE_PENDING = 0` |
+| 图片完整 | DOCX 正文图全部完成 fallback/WebP；Guide 图按指定名称唯一命中；`IMAGE_PENDING = 0`；繁中/英文分别使用正确前台公开图片域名，正文无 CMS 后台 URL、`attachment=1` 或文件名哈希 |
 | CMS 写入 | `page/add` 或已确认目标的 `page/update` 返回 `code: 0`、页面 ID 与 `request_id` |
 | CMS 回读 | `page/info` 返回相同页面 ID、完整正文和草稿状态 |
 | 来源覆盖 | `compare-docx-to-cms-page.py` 报告无未解释缺失区块；有编辑性改写时逐条记录对应关系 |

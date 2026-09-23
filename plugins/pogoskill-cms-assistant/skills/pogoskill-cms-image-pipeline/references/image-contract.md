@@ -18,7 +18,7 @@
 - 用户为 Pokémon GO 或 Pikmin Bloom 正文配好的图片优先上传为新素材，不用 CMS 中主题相似的图片替换；上传前仍检查同名冲突与完全相同文件。
 - DOCX 只提取 `word/document.xml` 中 `a:blip r:embed` 实际引用的媒体。
 - JPG/PNG 原字节保留为 fallback；`.jpeg` 文件名规范为 `.jpg`，PNG 不改成 JPG。
-- basename 必须是简洁、英文、小写、连字符分隔且描述图片真实内容的语义名称，例如 `coral-decor-pikmin-guide` 或 `pogoskill-pikmin-location-step-1`。禁止 `image1`、`123`、`test`、`screenshot1` 或无意义随机串；源文件 SHA-256 保留在 manifest，不强制写入公开文件名。
+- basename 必须是简洁、英文、小写、连字符分隔且描述图片真实内容的语义名称，例如 `coral-decor-pikmin-guide` 或 `pogoskill-pikmin-location-step-1`。禁止 `image1`、`123`、`test`、`screenshot1`、无意义随机串或结尾 SHA/哈希；源文件 SHA-256 只保留在 manifest，绝不写入公开文件名。
 - fallback 与 WebP 必须同目录、同 basename。若语义名称已存在，先判断是否可直接复用；不可复用时使用有意义的主题、年份或步骤后缀，不得覆盖。
 - 目标目录必须由 `/cms/picture/dirs` 确认存在，不从文章 URL 猜测，也不自动新建。
 
@@ -41,6 +41,13 @@
 - 上传后验证：`code=0`、`data.total=2`、`err_name_files=[]`、返回名称/尺寸/目录匹配，并对两个 `upload` URL 做可读性检查。
 - 上传后必须再用 `/picture/list` 回查 `uri/w/h/upload/online`；两种格式都存在且尺寸一致后才能交给文章回填。
 
+## 前台公开 URL
+
+- CMS 响应的 `upload` URL（例如 `https://site.p.cms.afirstsoft.cn/...?...attachment=1`）只用于上传验证，不是文章地址，严禁写入 `src`、`srcset`、`data-src` 或 `data-srcset`。
+- 繁中站 `site_id = 324`：`https://tw.pogoskill.com/images/<folder>/<semantic-name>.<ext>?w=<width>&h=<height>`。
+- 英文站 `site_id = 286`：`https://images.pogoskill.com/<folder>/<semantic-name>.<ext>?w=<width>&h=<height>`。
+- fallback 与 WebP 使用同目录、同 basename、同尺寸参数，仅扩展名不同。查询参数写入 HTML 时必须编码为 `&amp;`。
+
 ## V2 HTML
 
 CMS 新上传资源的已发布范例使用：
@@ -49,12 +56,12 @@ CMS 新上传资源的已发布范例使用：
 <div class="img-wrap text-center">
   <picture>
     <source class="lozad img-fluid"
-            srcset="WEBP_UPLOAD_URL"
-            data-srcset="WEBP_UPLOAD_URL"
+            srcset="PUBLIC_LOADING_SVG"
+            data-srcset="PUBLIC_WEBP_URL"
             type="image/webp">
     <img class="lozad img-fluid"
-         src="FALLBACK_UPLOAD_URL"
-         data-src="FALLBACK_UPLOAD_URL"
+         src="PUBLIC_LOADING_SVG"
+         data-src="PUBLIC_FALLBACK_URL"
          alt="自然、准确的繁体中文 ALT"
          style="max-width:850px;width:100%;height:auto;">
   </picture>
@@ -62,11 +69,11 @@ CMS 新上传资源的已发布范例使用：
 ```
 
 - `<source>` 必须在 `<img>` 前；ALT 只放在 fallback `<img>`。
-- 新上传资源在 CMS 草稿预览中，`src/srcset` 与 `data-src/data-srcset` 都使用上传响应返回的 `upload` URL。
+- `src/srcset` 使用对应站点的公开 `loading.svg`；`data-src/data-srcset` 使用上述前台公开图片 URL。后台 `upload` URL 只能留在 manifest 作证据。
 - `max-width` 不超过原图宽度；主图固定 850×460，步骤图与竖图按实际可读性缩小，窄素材按真实宽度。竖图不得占满一个长屏。
 - ALT 必须描述图片实际画面，以自然繁体中文表达，可包含适当关键词；不得直接复制 H1，也不得让多张图使用相同 ALT。
 - 不改用 `loading="lazy"`，保留站点的 `lozad img-fluid` 机制。
 
 ## Manifest 必填项
 
-每项至少包含：`image_key`、`source_entry`、`source_sha256`、`fallback_path`、`webp_path`、`width`、`height`、`alt`、`max_width`。上传后追加 `upload_request_id`、`publish_id`、`fallback_upload_url`、`webp_upload_url` 和 URL 检查结果。
+每项至少包含：`image_key`、`source_entry`、`source_sha256`、`fallback_path`、`webp_path`、`width`、`height`、`alt`、`max_width`。上传后追加 `site_id`、`upload_request_id`、`publish_id`、仅供验证的 `fallback_upload_url`/`webp_upload_url`、正文专用的 `fallback_public_url`/`webp_public_url` 和 URL 检查结果。

@@ -25,6 +25,7 @@ def sample_html():
 <section id="part1">
   <h2>一、核心內容</h2>
   <p>完整內容。</p>
+  <div class="img-wrap text-center"><picture><source class="lozad img-fluid" srcset="https://tw.pogoskill.com/images/loading.svg" data-srcset="https://tw.pogoskill.com/images/pikmin/rare-pikmin-guide.webp?w=850&amp;h=460" type="image/webp"><img class="lozad img-fluid" src="https://tw.pogoskill.com/images/loading.svg" data-src="https://tw.pogoskill.com/images/pikmin/rare-pikmin-guide.png?w=850&amp;h=460" alt="稀有飾品皮克敏指南"></picture></div>
 </section>
 <section id="part2">
   <h2>二、PoGoskill</h2>
@@ -50,6 +51,7 @@ def sample_en_html():
   <h2>Part 1. Core Content</h2>
   <h3 class="h3-orange-local">Verified Method</h3>
   <p>Complete content.</p>
+  <div class="img-wrap text-center"><picture><source class="lozad img-fluid" srcset="https://images.pogoskill.com/loading.svg" data-srcset="https://images.pogoskill.com/pikmin-bloom/rare-pikmin-guide.webp?w=850&amp;h=460" type="image/webp"><img class="lozad img-fluid" src="https://images.pogoskill.com/loading.svg" data-src="https://images.pogoskill.com/pikmin-bloom/rare-pikmin-guide.jpg?w=850&amp;h=460" alt="Rare Decor Pikmin guide"></picture></div>
 </section>
 <section id="part2">
   <h2>Part 2. PoGoskill</h2>
@@ -112,6 +114,30 @@ class ValidatorTests(unittest.TestCase):
         result = VALIDATOR.validate(broken, EN_PUBLISHER / "assets", "en")
         self.assertFalse(result["ok"])
         self.assertTrue(any("Taiwan-site URLs" in item for item in result["errors"]))
+
+    def test_taiwan_contract_rejects_cms_backend_image_url(self):
+        broken = sample_html().replace(
+            "https://tw.pogoskill.com/images/pikmin/rare-pikmin-guide.png?w=850&amp;h=460",
+            "https://site.p.cms.afirstsoft.cn/pogoskilltw_images/pikmin/rare-pikmin-guide.png?attachment=1&amp;123",
+        )
+        result = VALIDATOR.validate(broken, PUBLISHER / "assets")
+        self.assertFalse(result["ok"])
+        self.assertTrue(any("CMS backend/attachment URL" in item for item in result["errors"]))
+
+    def test_taiwan_contract_rejects_hash_suffix(self):
+        broken = sample_html().replace("rare-pikmin-guide", "rare-pikmin-guide-394dd20f66")
+        result = VALIDATOR.validate(broken, PUBLISHER / "assets")
+        self.assertFalse(result["ok"])
+        self.assertTrue(any("checksum/hash" in item for item in result["errors"]))
+
+    def test_english_contract_rejects_cms_backend_image_url(self):
+        broken = sample_en_html().replace(
+            "https://images.pogoskill.com/pikmin-bloom/rare-pikmin-guide.jpg?w=850&amp;h=460",
+            "https://site.p.cms.afirstsoft.cn/pogoskill_images/pikmin-bloom/rare-pikmin-guide.jpg?attachment=1",
+        )
+        result = VALIDATOR.validate(broken, EN_PUBLISHER / "assets", "en")
+        self.assertFalse(result["ok"])
+        self.assertTrue(any("CMS backend/attachment URL" in item for item in result["errors"]))
 
 
 if __name__ == "__main__":

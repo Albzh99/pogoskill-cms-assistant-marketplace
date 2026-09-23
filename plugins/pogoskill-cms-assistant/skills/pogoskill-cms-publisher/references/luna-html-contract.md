@@ -194,12 +194,12 @@
 <div class="img-wrap text-center">
   <picture>
     <source class="lozad img-fluid"
-            srcset="WEBP_UPLOAD_URL"
-            data-srcset="WEBP_UPLOAD_URL"
+            srcset="https://tw.pogoskill.com/images/loading.svg"
+            data-srcset="https://tw.pogoskill.com/images/FOLDER/SEMANTIC-NAME.webp?w=WIDTH&amp;h=HEIGHT"
             type="image/webp">
     <img class="lozad img-fluid"
-         src="FALLBACK_UPLOAD_URL"
-         data-src="FALLBACK_UPLOAD_URL"
+         src="https://tw.pogoskill.com/images/loading.svg"
+         data-src="https://tw.pogoskill.com/images/FOLDER/SEMANTIC-NAME.png?w=WIDTH&amp;h=HEIGHT"
          alt="描述圖片真實內容的繁體中文 ALT"
          style="max-width:850px;width:100%;height:auto;">
   </picture>
@@ -233,7 +233,8 @@ style="max-height:520px;max-width:100%;width:auto;height:auto;"
 - 主图必须实际为 850×460。
 - `<source>` 使用 WebP，`<img>` 使用同 basename 的 JPG/PNG。
 - 不能只写 `<img>`，不能缺少 `data-src/data-srcset`，不能伪造 URL。
-- 新图使用上传接口返回的 URL；Guide 图只用 DOCX 指定名称在 CMS 查到的准确 URL。
+- 新图与 Guide 图都必须使用繁中站前台公开 URL。上传响应中的 `site.p.cms.afirstsoft.cn`、`attachment=1` 或其他后台 `upload` URL 只用于验证，禁止进入正文。
+- 文件名必须是可读的语义名称；禁止 `image1`、随机串或结尾 SHA/哈希。fallback 与 WebP 仅扩展名不同。
 
 ## 9. PoGoskill 介绍、下载与操作步骤顺序
 
@@ -457,6 +458,7 @@ Luna 必须输出校验结果后才能调用 `/cms/page/add` 或 `/cms/page/upda
 16. 每个 `step-cont > li` 必须以固定的 `p > span + label` 开头；`label` 可用一个开头 `strong` 加粗短标题，并包含其余普通正文。图片盒只能作为该 `<p>` 后面的同级元素。
 17. 上传前必须运行 `scripts/validate-article-html.py`，返回码必须为 0；不得用人工口头检查代替。
 18. DOCX 的所有正文段落、表格、FAQ、结语和图片占位都必须进入 HTML。写入后用 `compare-docx-to-cms-page.py` 列出缺失区块；存在未解释缺失时不得报告完成。
+19. 所有图片 `data-src/data-srcset` 必须使用 `https://tw.pogoskill.com/images/`；正文不得出现 `site.p.cms.afirstsoft.cn`、`attachment=1` 或哈希结尾文件名。
 
 任何一项失败：停止上传，回到 HTML 修正；不得依赖 CMS 或浏览器自动修复结构。
   

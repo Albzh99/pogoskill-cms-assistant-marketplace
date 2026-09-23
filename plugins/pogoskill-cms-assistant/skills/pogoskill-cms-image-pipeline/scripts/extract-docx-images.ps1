@@ -74,7 +74,8 @@ try {
     }
     finally { $sha256.Dispose() }
     $index++
-    $baseName = '{0}-{1:d2}-{2}' -f $ArticleSlug, $index, $sha.Substring(0, 10)
+    # Keep the checksum in the manifest for duplicate detection, never in the public filename.
+    $baseName = '{0}-{1:d2}' -f $ArticleSlug, $index
     $fallbackName = $baseName + $fallbackExt
     $fallbackPath = Join-Path $output $fallbackName
     [IO.File]::WriteAllBytes($fallbackPath, $bytes)

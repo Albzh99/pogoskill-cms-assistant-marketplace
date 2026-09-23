@@ -16,6 +16,7 @@
 - 主图必须为 850×460。横图应适合正文宽度；竖图保持比例且显示高度合理，不得占满长屏。
 - 核对目录：Pokémon GO 游戏图为 `pokemon-ios`，Pikmin Bloom 游戏图为 `pikmin`，PoGoskill 下载/安装/操作/产品界面为 `guides`。
 - 核对文件名是简洁英文小写语义 slug，URL 与图片内容相关；拒绝顺序号、测试名、通用截图名或无意义随机串。
+- 繁中正文的图片 URL 必须来自 `https://tw.pogoskill.com/images/`；CMS 后台域名、`attachment=1` 和结尾 SHA/随机哈希一律判定为 `FAIL`。`upload` URL 只允许存在于 manifest 证据中。
 - 逐张比较正文上下文、图片真实画面和繁体 ALT；步骤 1/2/3 必须分别对应其实际界面功能，不能只因属于 PoGoskill 就插入。
 - `IMAGE_PENDING` 必须保留在未有真实素材的位置，审查结果只能是 `PASS WITH IMAGE HOLD` 或 `FAIL`；图片全部补齐并通过 API 与机械检查后才可 `PASS`。
 - 图片上传的 `publish_id` 不得传给发布接口，除非用户日后另行明确要求发布。

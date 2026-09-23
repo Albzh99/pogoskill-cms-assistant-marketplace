@@ -17,7 +17,7 @@ $manifest = Get-Content -LiteralPath $manifestFile -Raw -Encoding UTF8 | Convert
 
 foreach ($item in $manifest.items) {
   if ($item.status -ne 'uploaded_pending_publish') { throw "Image is not uploaded and verified: $($item.image_key)" }
-  foreach ($required in @('image_key','alt','fallback_upload_url','webp_upload_url','max_width')) {
+  foreach ($required in @('image_key','alt','fallback_public_url','webp_public_url','max_width','site_id')) {
     if ([string]::IsNullOrWhiteSpace([string]$item.$required)) { throw "Manifest field missing for $($item.image_key): $required" }
   }
   $escapedKey = [regex]::Escape([string]$item.image_key)
@@ -26,19 +26,30 @@ foreach ($item in $manifest.items) {
   if ($matches.Count -ne 1) { throw "Expected exactly one placeholder for $($item.image_key), found $($matches.Count)." }
 
   $alt = [Net.WebUtility]::HtmlEncode([string]$item.alt)
-  $webpUrl = [Net.WebUtility]::HtmlEncode([string]$item.webp_upload_url)
-  $fallbackUrl = [Net.WebUtility]::HtmlEncode([string]$item.fallback_upload_url)
+  $webpPublicUrl = [string]$item.webp_public_url
+  $fallbackPublicUrl = [string]$item.fallback_public_url
+  if ($webpPublicUrl -match 'site\.p\.cms\.afirstsoft\.cn|[?&]attachment=1' -or
+      $fallbackPublicUrl -match 'site\.p\.cms\.afirstsoft\.cn|[?&]attachment=1') {
+    throw "CMS backend or attachment URL must not enter article HTML: $($item.image_key)"
+  }
+  $expectedPrefix = if ([int]$item.site_id -eq 324) { 'https://tw.pogoskill.com/images/' } elseif ([int]$item.site_id -eq 286) { 'https://images.pogoskill.com/' } else { throw "Unsupported site_id for $($item.image_key)" }
+  if (-not $webpPublicUrl.StartsWith($expectedPrefix) -or -not $fallbackPublicUrl.StartsWith($expectedPrefix)) {
+    throw "Public image URL does not match site_id for $($item.image_key)"
+  }
+  $webpUrl = [Net.WebUtility]::HtmlEncode($webpPublicUrl)
+  $fallbackUrl = [Net.WebUtility]::HtmlEncode($fallbackPublicUrl)
+  $loadingUrl = if ([int]$item.site_id -eq 324) { 'https://tw.pogoskill.com/images/loading.svg' } else { 'https://images.pogoskill.com/loading.svg' }
   $maxWidth = [int]$item.max_width
   if ($maxWidth -le 0 -or $maxWidth -gt [int]$item.width) { throw "Invalid max_width for $($item.image_key)" }
   $block = @"
 <div class="img-wrap text-center">
   <picture>
     <source class="lozad img-fluid"
-            srcset="$webpUrl"
+            srcset="$loadingUrl"
             data-srcset="$webpUrl"
             type="image/webp">
     <img class="lozad img-fluid"
-         src="$fallbackUrl"
+         src="$loadingUrl"
          data-src="$fallbackUrl"
          alt="$alt"
          style="max-width:${maxWidth}px;width:100%;height:auto;">
@@ -54,4 +65,3 @@ if ($html -match '<!--\s*IMAGE_PENDING(?:(?!-->).)*?image-key:\s*(?:' + (($manif
 [IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName($outputFile)) | Out-Null
 [IO.File]::WriteAllText($outputFile, $html, (New-Object Text.UTF8Encoding($false)))
 [pscustomobject]@{ output = $outputFile; replaced = @($manifest.items).Count }
-

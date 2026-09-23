@@ -1,6 +1,7 @@
 param(
   [Parameter(Mandatory = $true)][string]$ManifestPath,
   [Parameter(Mandatory = $true)][ValidatePattern('^[a-z0-9/_-]*$')][string]$CmsPath,
+  [ValidateSet(286, 324)][int]$SiteId = 324,
   [switch]$Execute
 )
 
@@ -42,8 +43,15 @@ function Test-UploadedUrl([string]$Url) {
   return ($LASTEXITCODE -eq 0 -and $status -in @('200', '206'))
 }
 
+function Get-PublicImageUrl([string]$Name, [int]$Width, [int]$Height) {
+  $baseUrl = if ($SiteId -eq 324) { 'https://tw.pogoskill.com/images' } else { 'https://images.pogoskill.com' }
+  $folder = $CmsPath.Trim('/')
+  $relative = if ([string]::IsNullOrWhiteSpace($folder)) { $Name } else { $folder + '/' + $Name }
+  return $baseUrl + '/' + $relative + '?w=' + $Width + '&h=' + $Height
+}
+
 try {
-  $dirResponse = Invoke-CmsJson '/cms/picture/dirs' @{ site_id = 324; path = $CmsPath; tree = 0 }
+  $dirResponse = Invoke-CmsJson '/cms/picture/dirs' @{ site_id = $SiteId; path = $CmsPath; tree = 0 }
   if ($dirResponse.code -ne 0) { throw "CMS image directory check failed: code=$($dirResponse.code), request_id=$($dirResponse.request_id), msg=$($dirResponse.msg)" }
 
   foreach ($item in $manifest.items) {
@@ -52,6 +60,7 @@ try {
       $file = Get-Item -LiteralPath $path
       if ($file.Length -le 0 -or $file.Length -gt 31457280) { throw "Image size is invalid: $path" }
       if ($file.Name -cnotmatch '^[a-z0-9-_\.]{4,255}$') { throw "CMS filename is invalid: $($file.Name)" }
+      if ($file.BaseName -match '-[0-9a-f]{10}$') { throw "Public filename must not end with a checksum: $($file.Name)" }
     }
     if ([string]::IsNullOrWhiteSpace($item.alt)) { throw "ALT is required before upload: $($item.image_key)" }
     if ([int]$item.width -ne [int]$item.webp_width -or [int]$item.height -ne [int]$item.webp_height) {
@@ -65,7 +74,7 @@ try {
       $formArgs = @(
         '-k', '-sS', '-X', 'POST', 'https://gw.afirstsoft.com/cms/picture/upload',
         '-H', '@-',
-        '-F', 'site_id=324',
+        '-F', ('site_id=' + $SiteId),
         '-F', ('path=' + $CmsPath),
         '-F', ('files[]=@' + $item.fallback_path),
         '-F', ('files[]=@' + $item.webp_path),
@@ -96,7 +105,7 @@ try {
       throw "At least one uploaded preview URL is not readable for $($item.image_key)"
     }
 
-    $listResponse = Invoke-CmsJson '/cms/picture/list' @{ site_id = 324; path = $CmsPath; type = 'file' }
+    $listResponse = Invoke-CmsJson '/cms/picture/list' @{ site_id = $SiteId; path = $CmsPath; type = 'file' }
     if ($listResponse.code -ne 0) {
       throw "CMS picture list verification failed: code=$($listResponse.code), request_id=$($listResponse.request_id), msg=$($listResponse.msg)"
     }
@@ -113,6 +122,9 @@ try {
     $item | Add-Member -NotePropertyName publish_id -NotePropertyValue $response.data.publish_id -Force
     $item | Add-Member -NotePropertyName fallback_upload_url -NotePropertyValue $fallback.upload -Force
     $item | Add-Member -NotePropertyName webp_upload_url -NotePropertyValue $webp.upload -Force
+    $item | Add-Member -NotePropertyName fallback_public_url -NotePropertyValue (Get-PublicImageUrl $item.fallback_name ([int]$item.width) ([int]$item.height)) -Force
+    $item | Add-Member -NotePropertyName webp_public_url -NotePropertyValue (Get-PublicImageUrl $item.webp_name ([int]$item.width) ([int]$item.height)) -Force
+    $item | Add-Member -NotePropertyName site_id -NotePropertyValue $SiteId -Force
     $item | Add-Member -NotePropertyName cms_path -NotePropertyValue $CmsPath -Force
     $item | Add-Member -NotePropertyName fallback_url_readable -NotePropertyValue $fallbackReadable -Force
     $item | Add-Member -NotePropertyName webp_url_readable -NotePropertyValue $webpReadable -Force
@@ -122,6 +134,7 @@ try {
     $item.status = 'uploaded_pending_publish'
   }
 
+  $manifest | Add-Member -NotePropertyName site_id -NotePropertyValue $SiteId -Force
   $manifest | Add-Member -NotePropertyName uploaded_at -NotePropertyValue ([DateTimeOffset]::Now.ToString('o')) -Force
   [IO.File]::WriteAllText($manifestFile, ($manifest | ConvertTo-Json -Depth 16), (New-Object Text.UTF8Encoding($false)))
   [pscustomobject]@{ manifest = $manifestFile; uploaded_pairs = @($manifest.items).Count; note = 'Images uploaded as pending records only; nothing was published.' }

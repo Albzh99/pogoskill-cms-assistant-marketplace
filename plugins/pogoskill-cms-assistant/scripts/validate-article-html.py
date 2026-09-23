@@ -267,12 +267,26 @@ def validate(html_text, assets_dir=None, profile="tw"):
         image = img_match.group(0)
         webp_url = attr(source, "data-srcset") or attr(source, "srcset")
         fallback_url = attr(image, "data-src") or attr(image, "src")
+        combined_urls = f"{webp_url} {fallback_url}".lower()
+        if "site.p.cms.afirstsoft.cn" in combined_urls or re.search(r"[?&]attachment=1(?:&|$)", combined_urls):
+            errors.append(f"picture #{index} must not use a CMS backend/attachment URL")
+        expected_image_prefix = (
+            "https://tw.pogoskill.com/images/"
+            if profile == "tw"
+            else "https://images.pogoskill.com/"
+        )
+        if webp_url and not webp_url.startswith(expected_image_prefix):
+            errors.append(f"picture #{index} WebP URL must use the {profile} public image host")
+        if fallback_url and not fallback_url.startswith(expected_image_prefix):
+            errors.append(f"picture #{index} fallback URL must use the {profile} public image host")
         if not re.search(r"\.webp(?:$|\?)", webp_url, re.I):
             errors.append(f"picture #{index} source is not WebP")
         if not re.search(r"\.(?:jpe?g|png)(?:$|\?)", fallback_url, re.I):
             errors.append(f"picture #{index} fallback is not JPG/PNG")
         if webp_url and fallback_url and basename(webp_url) != basename(fallback_url):
             errors.append(f"picture #{index} WebP/fallback basenames differ")
+        if re.search(r"-[0-9a-f]{10}$", basename(fallback_url), re.I):
+            errors.append(f"picture #{index} filename must not end with a checksum/hash")
         if not attr(image, "alt").strip():
             errors.append(f"picture #{index} ALT is empty")
 

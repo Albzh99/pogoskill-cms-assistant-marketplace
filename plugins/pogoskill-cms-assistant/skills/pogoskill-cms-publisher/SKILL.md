@@ -61,6 +61,7 @@ description: 将 PoGoskill 台湾站 SEO 文稿转换为文章内容页面模板
 - 下载/使用步骤图必须逐步理解文字操作，再从 `guides` 中匹配对应界面；步骤文字与图片功能必须一一对应。
 - 主图必须为 850×460。横图适配正文宽度；手机截图等竖图保持比例并限制宽高，避免占据整个屏幕。
 - ALT 描述图片真实内容，使用自然繁体中文并适度包含主题词；不同图片不得机械重复文章标题。
+- 正文图片只使用繁中前台公开地址 `https://tw.pogoskill.com/images/<folder>/<semantic-name>.<ext>?w=<w>&h=<h>`。CMS 返回的 `site.p.cms.afirstsoft.cn`、`attachment=1` 或其他后台 `upload` 地址只作上传证据，禁止写进 HTML；文件名禁止追加 SHA/随机哈希。
 - 需要图片但资源尚未提供时，保留 `img-wrap`，并在 `IMAGE_PENDING` 中填写唯一 `image-key`、用途、繁体中文 ALT、建议尺寸与双格式要求。
 - 不伪造 URL、文件名、尺寸、WebP 版本或上传成功状态；不上传 DOCX 中未被正文引用的媒体。
 - 任何 `IMAGE_PENDING` 都是硬性发布阻断：可以在授权后保存草稿，但禁止 make 和 publish。
