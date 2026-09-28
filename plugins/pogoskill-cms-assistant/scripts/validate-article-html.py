@@ -29,11 +29,39 @@ class StructureParser(HTMLParser):
         self.table_parent_ok = []
         self.bare_uls = 0
         self.in_toc_depth = None
+        self.paired_layouts = []
+        self.pair_stack = []
 
     def handle_starttag(self, tag, attrs):
         tag = tag.lower()
         attrs_dict = dict(attrs)
         cls = classes(attrs)
+        if tag == "div" and attrs_dict.get("data-image-layout") == "pair":
+            self.pair_stack.append({
+                "depth": len(self.stack),
+                "columns": 0,
+                "pictures": 0,
+                "captions": 0,
+                "caption_depth": None,
+                "caption_texts": [],
+                "images": [],
+            })
+        elif self.pair_stack:
+            pair = self.pair_stack[-1]
+            if (
+                tag == "div"
+                and len(self.stack) == pair["depth"] + 1
+                and {"col-12", "col-md-6"}.issubset(cls)
+            ):
+                pair["columns"] += 1
+            elif tag == "picture":
+                pair["pictures"] += 1
+            elif tag == "p" and "text-center" in cls:
+                pair["captions"] += 1
+                pair["caption_depth"] = len(self.stack)
+                pair["caption_texts"].append("")
+            elif tag == "img":
+                pair["images"].append(attrs_dict)
         if tag == "h1":
             self.h1 += 1
         elif tag == "h2":
@@ -76,7 +104,17 @@ class StructureParser(HTMLParser):
             return
         if tag == "ul" and self.in_toc_depth == len(self.stack):
             self.in_toc_depth = None
+        if self.pair_stack:
+            pair = self.pair_stack[-1]
+            if tag == "p" and pair["caption_depth"] == len(self.stack) - 1:
+                pair["caption_depth"] = None
+            if tag == "div" and pair["depth"] == len(self.stack) - 1:
+                self.paired_layouts.append(self.pair_stack.pop())
         self.stack.pop()
+
+    def handle_data(self, data):
+        if self.pair_stack and self.pair_stack[-1]["caption_depth"] is not None:
+            self.pair_stack[-1]["caption_texts"][-1] += data
 
     def finish(self):
         if self.stack:
@@ -222,6 +260,36 @@ def validate(html_text, assets_dir=None, profile="tw"):
                 errors.append(f"English profile contains Taiwan download ID: {forbidden_download}")
 
     validate_step_lists(html_text, errors)
+
+    for pair_index, pair in enumerate(parser.paired_layouts, 1):
+        if pair["columns"] != 2:
+            errors.append(f"paired image layout #{pair_index} must contain exactly two responsive columns")
+        if pair["pictures"] != 2 or len(pair["images"]) != 2:
+            errors.append(f"paired image layout #{pair_index} must contain exactly two complete pictures")
+        if pair["captions"] != 2 or any(not text.strip() for text in pair["caption_texts"]):
+            errors.append(f"paired image layout #{pair_index} must contain two non-empty descriptions")
+        for image_index, image_attrs in enumerate(pair["images"], 1):
+            style = image_attrs.get("style", "").replace(" ", "").lower()
+            max_height = re.search(r"max-height:(\d+)px", style)
+            max_width = re.search(r"max-width:(\d+)px", style)
+            if "object-fit:cover" in style:
+                errors.append(f"paired image layout #{pair_index} image #{image_index} must not be cropped")
+            if max_height:
+                if int(max_height.group(1)) > 520 or not all(
+                    item in style for item in ("max-width:100%", "width:auto", "height:auto")
+                ):
+                    errors.append(
+                        f"paired vertical image #{pair_index}.{image_index} must use max-height <= 520px and automatic dimensions"
+                    )
+            elif (
+                not max_width
+                or int(max_width.group(1)) > 400
+                or "width:100%" not in style
+                or "height:auto" not in style
+            ):
+                errors.append(
+                    f"paired horizontal image #{pair_index}.{image_index} must use max-width <= 400px, width:100%, and height:auto"
+                )
 
     tips_count = len(re.findall(r'class="tit-tips"', html_text, re.I))
     if profile == "tw" and tips_count != 2:
@@ -376,6 +444,8 @@ def validate(html_text, assets_dir=None, profile="tw"):
     pending_count = html_text.count("IMAGE_PENDING")
     if pending_count:
         errors.append(f"IMAGE_PENDING count must be 0 for a complete draft, got {pending_count}")
+    if re.search(r"\bPAIR_[12]_(?:WEBP_URL|FALLBACK_URL|ALT|DESCRIPTION)\b", html_text):
+        errors.append("paired image template placeholders must be fully replaced")
 
     return {
         "ok": not errors,
@@ -388,6 +458,7 @@ def validate(html_text, assets_dir=None, profile="tw"):
             "tit_tips": tips_count,
             "h3": len(parser.h3_classes),
             "pictures": len(picture_blocks),
+            "paired_layouts": len(parser.paired_layouts),
             "article_cta": cta_count,
             "buybox": buybox_count,
             "image_pending": pending_count,

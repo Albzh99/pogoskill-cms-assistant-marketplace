@@ -63,6 +63,20 @@ def sample_html_with_faq_cta():
     )
 
 
+def sample_html_with_paired_images():
+    pair = '''<div class="row justify-content-center" data-image-layout="pair">
+  <div class="col-12 col-md-6 text-center mb-3">
+    <div class="img-wrap text-center"><picture><source class="lozad img-fluid" srcset="https://tw.pogoskill.com/images/loading.svg" data-srcset="https://tw.pogoskill.com/images/pikmin/pikmin-left.webp?w=380&amp;h=300" type="image/webp"><img class="lozad img-fluid" src="https://tw.pogoskill.com/images/loading.svg" data-src="https://tw.pogoskill.com/images/pikmin/pikmin-left.jpg?w=380&amp;h=300" alt="左側皮克敏畫面" style="max-width:380px;width:100%;height:auto;"></picture></div>
+    <p class="text-center">左側畫面說明。</p>
+  </div>
+  <div class="col-12 col-md-6 text-center mb-3">
+    <div class="img-wrap text-center"><picture><source class="lozad img-fluid" srcset="https://tw.pogoskill.com/images/loading.svg" data-srcset="https://tw.pogoskill.com/images/pikmin/pikmin-right.webp?w=380&amp;h=300" type="image/webp"><img class="lozad img-fluid" src="https://tw.pogoskill.com/images/loading.svg" data-src="https://tw.pogoskill.com/images/pikmin/pikmin-right.jpg?w=380&amp;h=300" alt="右側皮克敏畫面" style="max-width:380px;width:100%;height:auto;"></picture></div>
+    <p class="text-center">右側畫面說明。</p>
+  </div>
+</div>'''
+    return sample_html().replace("  <p>完整內容。</p>", f"  <p>完整內容。</p>\n  {pair}")
+
+
 def sample_en_html():
     cta = (EN_PUBLISHER / "assets" / "download-cta.html").read_text(encoding="utf-8")
     buybox = (EN_PUBLISHER / "assets" / "buybox.html").read_text(encoding="utf-8")
@@ -116,6 +130,38 @@ def sample_en_html_with_faq_cta():
 class ValidatorTests(unittest.TestCase):
     def test_valid_contract_passes(self):
         self.assertTrue(VALIDATOR.validate(sample_html(), PUBLISHER / "assets")["ok"])
+
+    def test_valid_paired_image_layout_passes(self):
+        result = VALIDATOR.validate(sample_html_with_paired_images(), PUBLISHER / "assets")
+        self.assertTrue(result["ok"], result["errors"])
+        self.assertEqual(result["counts"]["paired_layouts"], 1)
+
+    def test_paired_image_layout_rejects_oversized_image(self):
+        broken = sample_html_with_paired_images().replace("max-width:380px", "max-width:620px", 1)
+        result = VALIDATOR.validate(broken, PUBLISHER / "assets")
+        self.assertFalse(result["ok"])
+        self.assertTrue(any("max-width <= 400px" in item for item in result["errors"]))
+
+    def test_paired_image_layout_requires_two_descriptions(self):
+        broken = sample_html_with_paired_images().replace(
+            '<p class="text-center">右側畫面說明。</p>',
+            '<p class="text-center"></p>',
+        )
+        result = VALIDATOR.validate(broken, PUBLISHER / "assets")
+        self.assertFalse(result["ok"])
+        self.assertTrue(any("two non-empty descriptions" in item for item in result["errors"]))
+
+    def test_paired_image_layout_requires_mobile_columns(self):
+        broken = sample_html_with_paired_images().replace("col-12 col-md-6", "col-md-6", 1)
+        result = VALIDATOR.validate(broken, PUBLISHER / "assets")
+        self.assertFalse(result["ok"])
+        self.assertTrue(any("exactly two responsive columns" in item for item in result["errors"]))
+
+    def test_paired_image_layout_rejects_unfilled_placeholders(self):
+        broken = sample_html_with_paired_images().replace("左側畫面說明。", "PAIR_1_DESCRIPTION")
+        result = VALIDATOR.validate(broken, PUBLISHER / "assets")
+        self.assertFalse(result["ok"])
+        self.assertTrue(any("placeholders" in item for item in result["errors"]))
 
     def test_missing_download_box_is_blocked(self):
         broken = sample_html().replace('class="secure-download"', 'class="missing-download-box"', 1)

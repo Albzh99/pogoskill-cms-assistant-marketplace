@@ -19,7 +19,9 @@ Before any CMS request, read the shared [execution evidence contract](../pogoski
 
 1. [English V2 HTML contract](references/english-html-contract.md);
 2. [English CMS live contract](references/cms-en-live-contract.md);
-3. `assets/download-cta.html` and `assets/buybox.html` in full.
+3. `assets/download-cta.html`, `assets/buybox.html`, and `assets/paired-image-box.html` in full.
+
+Use `assets/paired-image-box.html` when the DOCX or reference article explicitly groups two images side by side with descriptions. Preserve their left/right order; each image must remain responsive, independently captioned, and no wider than 400px on desktop.
 
 ## Fixed boundary
 

@@ -11,6 +11,7 @@
 | 结语链接 | 最后一个结语 section 使用源文提供的关键词短语链接正确站点首页；`PoGoskill` 位于链接后且不是锚文本 |
 | 下载区完整 | 主介绍 CTA 位于完整介绍之后及步骤标题附近，桌面按钮组固定居中；每组均有两个 `secure-btn`、两个 `secure-download`。只有源文 FAQ 明确推荐 PoGoskill 时才允许第二组对应语言 CTA，全文最多两组 |
 | 图片完整 | 需新上传的正文图已嵌入 DOCX 实际位置并全部完成 fallback/WebP；Guide 图在对应位置提供含扩展名的 CMS 准确文件名并唯一命中；未猜图、换相似图或重传 Guide 图；新图具备上传 request_id、图片 publish_id、图片发布 request_id；图片资源发布成功且前台双格式可读；英文手机截图使用 `max-height` 和自动宽高；`IMAGE_PENDING = 0`；繁中/英文分别使用正确前台公开图片域名，正文无 CMS 后台 URL、`attachment=1` 或文件名哈希 |
+| 并排双图 | 源稿／参考样式要求并排时，使用 `data-image-layout="pair"`；恰好两个响应式列、两个完整 picture、两条对应说明，左右顺序与源稿一致；桌面单图不超过 400px，移动端 `col-12` 自动上下排列 |
 | CMS 写入 | `page/add` 或已确认目标的 `page/update` 返回 `code: 0`、页面 ID 与 `request_id` |
 | CMS 回读 | `page/info` 返回相同页面 ID、完整正文和草稿状态 |
 | 来源覆盖 | `compare-docx-to-cms-page.py` 报告无未解释缺失区块；有编辑性改写时逐条记录对应关系 |

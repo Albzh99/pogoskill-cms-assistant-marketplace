@@ -73,6 +73,18 @@ Before image publication, a correct public URL can return HTTP 404. This is an i
 - User-supplied article images are the primary source. Convert each JPG/PNG to a same-basename WebP and keep both formats.
 - Upload against English `site_id = 286` and choose the English image directory by article topic, such as `change-location`, `pokemon-ios`, `pikmin-bloom` or another live-confirmed folder.
 - Guide/product screenshots are different: when the source supplies an exact Guide filename, search the English `guides` library and reuse that exact image pair. Do not guess a visually similar screenshot.
+
+### Paired images with descriptions
+
+Use this module only when the DOCX or reference article clearly treats two images as one side-by-side comparison or step box. Copy `assets/paired-image-box.html` and replace its placeholders; do not invent another grid or custom CSS.
+
+- Keep `div.row.justify-content-center[data-image-layout="pair"]` with exactly two `div.col-12.col-md-6.text-center.mb-3` children. This keeps the images side by side on desktop and stacks them on narrow screens.
+- Each child must contain one complete `img-wrap > picture > source + img` followed immediately by a non-empty `<p class="text-center">description</p>`.
+- A horizontal image must use `max-width` of at most `400px` plus `width:100%;height:auto;`. A phone screenshot or other vertical image must instead use `max-height` of at most `520px` with `max-width:100%;width:auto;height:auto;`.
+- Preserve the source left/right order. Give each image its own matching WebP/fallback pair, accurate ALT, and description; do not stretch or crop an image to make both items look equal.
+- If the source also provides one shared description, keep it as a normal paragraph after the paired module. Still fill the two short per-image descriptions so the relationship remains understandable.
+
+Do not combine two unrelated adjacent images into this module merely to make the page look richer.
 - Never upload an English image into `pogoskilltw_images`, and never silently reuse a Taiwan-site media URL as proof of an English CMS upload.
 - English phone screenshots are height-limited media. Their `<img>` must use `style="max-height:520px;max-width:100%;width:auto;height:auto;"` or a smaller justified `max-height`; do not use a fixed pixel `max-width` as the main limit. Landscape article images continue to use the normal width-limited style.
 

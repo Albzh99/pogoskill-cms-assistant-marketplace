@@ -25,6 +25,7 @@ description: 为 PoGoskill 文章提取真实 JPG/PNG、生成同名 WebP、成�
 2. 用 `extract-docx-images.ps1` 按 `document.xml` 的图片关系顺序提取正文实际引用的 JPG/PNG，不盲目复制 `word/media`。
 3. 为每张图确定用途、所在段落和目标目录：Pokémon GO 游戏图用 `pokemon-ios`，Pikmin Bloom 游戏图用 `pikmin`，PoGoskill 下载/安装/步骤/产品界面用 `guides`。
 4. 人工或语义映射补齐每张图的 `image_key`、符合文章语言的 `alt`、语义化 basename、`max_width` 和展示类型。手机截图标记 `display_mode = phone-screenshot`，可补充 `max_height`。不得把 DOCX 的 `descr` 自动当作最终 ALT，也不得给 basename 追加随机字符串或 SHA 哈希。
+   - DOCX／参考样式明确要求并排双图时，两项都标记同一个 `pair_key`、各自 `pair_order = 1/2`、`display_mode = paired` 和非空 `caption`。横图 `max_width` 不超过 400；竖图仍使用 `max_height`。不得改变左右顺序或为了并排裁切图片。
 5. 主图先处理为 850×460；其他图片保持比例，横图不超过正文需求。竖图和手机截图必须以 `max-height` 为主要限制并保持 `width:auto;height:auto`，英文手机截图不得用固定像素 `max-width` 放大铺满正文。随后用 `convert-image-pairs.ps1` 保留 JPG/PNG 并生成同 basename WebP。
 6. 上传前用 `/cms/picture/list` 检查目标文件名与完全重复项。若目标目录已经存在同名、同尺寸的 fallback/WebP 对，直接复用并回填，不得再次上传。只有缺少该图片对时才上传；上传后必须验证 `code === 0`、`total === 2`、`err_name_files` 为空、两者尺寸一致，并回查列表。
 7. 上传响应 `data.list[].url` 就是文章应使用的前台正式地址；`data.list[].upload` 只用于 CMS 上传验证，禁止写入正文。优先直接读取 `url`，缺失时用 `/cms/picture/list` 返回的 `online` 核对。脚本只给已验证的公开 URL 追加 `w/h` 尺寸参数。

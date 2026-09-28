@@ -194,6 +194,21 @@
 
 ## 8. 图片盒
 
+### 并排双图与下方说明
+
+只有 DOCX 或参考文章明确显示“两张图属于同一个对照／步骤区域，并排展示且图下有说明”时才使用双图模块。直接复制 `assets/paired-image-box.html` 的结构并替换 URL、ALT 与说明文字，不得自行创造另一套 box。
+
+固定要求：
+
+- 外层为 `div.row.justify-content-center[data-image-layout="pair"]`，仅作为布局容器，不添加 `<style>` 或新的视觉 class。
+- 内层恰好两个 `div.col-12.col-md-6.text-center.mb-3`：桌面端左右并排，窄屏通过 `col-12` 自动上下排列；禁止两个固定宽度盒子在手机端继续强行并排。
+- 每个子项包含一个标准 `img-wrap text-center > picture > source + img`，随后紧接一个非空的 `<p class="text-center">说明文字</p>`。说明与图片必须一一对应，不得把两条说明挤进同一图片盒。
+- 横图使用 `max-width` 不超过 `400px`、`width:100%;height:auto;`。竖图／手机截图仍以 `max-height`（不超过 520px）为主要限制，并使用 `max-width:100%;width:auto;height:auto;`。
+- 两张图都必须分别具备同 basename 的 WebP 与 JPG/PNG fallback、独立准确 ALT 和正确前台 URL。保留 DOCX 的左右顺序；不要裁切、拉伸或为了视觉对齐放大图片。
+- 若源文只有一条共同说明，将共同说明作为普通段落放在整个双图模块之后；固定模板中的两条图片说明仍须填写简短的图片身份／左右区别，不能留空。
+
+禁止把普通相邻的两张图自动合并成双图。只有源稿位置关系或参考样式能证明它们属于同一组时才转换。
+
 ### 新上传的正文图片
 
 ```html
