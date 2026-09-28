@@ -42,7 +42,9 @@ Do not add a TOC entry for a section that does not have a matching ID. Do not le
 
 - Use an observed `list-cont` variant such as `list-star`, `list-lamp`, `list-angle`, `list-flag`, `list-primary-dot` or `list-white-dot` only when its semantic role matches the reference.
 - Every `<li>` must remain inside its owning `<ul>` or `<ol>`. Images belonging to a step stay inside that `<li>` after its paragraph; never place a `<div>` directly between list items.
-- Wrap every table in the English site's verified responsive table container. Do not invent a table class.
+- Ordinary two- or three-column tables start from `assets/responsive-table.html`: `.table-box` without `overflow-auto`, and `width:90%;max-width:100%;table-layout:auto;margin:0 auto;text-align:center;`. Adjust the percentage within a reasonable 70%-100% range if the actual content needs it; do not force every table to fill the article width.
+- Use `assets/wide-table.html` only when the actual cell content is too long to fit comfortably in the article column. Column count or landscape orientation alone does not justify scrolling. That variant uses `.table-box.overflow-auto`, `data-table-layout="wide"`, `width:100%`, and `min-width:840px`; use 680px as the absolute minimum and raise it only as needed.
+- Never add scrolling to an ordinary table merely as a precaution. Both variants must use `table-layout:auto`, centered text, and no `white-space:nowrap`, fixed column layout, or narrow per-cell widths.
 - Internal links use `https://www.pogoskill.com/...`; external promotional links use the supplied `rel` and `target` attributes. Do not copy `tw.pogoskill.com` into English HTML.
 
 ## Images

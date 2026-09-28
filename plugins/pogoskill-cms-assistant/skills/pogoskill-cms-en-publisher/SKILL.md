@@ -19,7 +19,7 @@ Before any CMS request, read the shared [execution evidence contract](../pogoski
 
 1. [English V2 HTML contract](references/english-html-contract.md);
 2. [English CMS live contract](references/cms-en-live-contract.md);
-3. `assets/download-cta.html`, `assets/buybox.html`, and `assets/paired-image-box.html` in full.
+3. `assets/download-cta.html`, `assets/buybox.html`, `assets/paired-image-box.html`, `assets/responsive-table.html`, and `assets/wide-table.html` in full.
 
 Use `assets/paired-image-box.html` when the DOCX or reference article explicitly groups two images side by side with descriptions. Preserve their left/right order; each image must remain responsive, independently captioned, and no wider than 400px on desktop.
 
@@ -36,6 +36,7 @@ Use `assets/paired-image-box.html` when the DOCX or reference article explicitly
 1. Read the complete English source, including every paragraph, table, FAQ and image marker.
 2. Query the English site, V2 template, fields, author, classification, products, sidebar, related pages and exact URL in real time.
 3. Build readable, indented V2 HTML using only approved structures from the English contract.
+   Ordinary tables start from `assets/responsive-table.html`: centered at a reasonable content-driven width, about 90% by default, with no forced horizontal scrolling. Only tables whose actual content is too long to fit comfortably use `assets/wide-table.html`, `data-table-layout="wide"`, and the overflow wrapper; column count alone is not enough. Never make every table full-width or scrollable by default.
 4. For supplied JPG/PNG article images, create the same-basename WebP and upload both with the image pipeline using `-SiteId 286`. Article HTML must use `https://images.pogoskill.com/<folder>/<semantic-name>.<ext>` public URLs, never the CMS `upload` host. For Guide images named in the source, search the English `guides` library by that exact name; do not guess substitutes.
    If the exact fallback/WebP pair already exists in `/cms/picture/list`, reuse it instead of uploading again. If its public URL returns 404, recover the original image-upload `publish_id`, publish that image resource, and wait until both public URLs are readable before updating the draft. Never substitute a page ID or guess a publish ID.
 5. Copy the English download CTA and Buy Box byte-for-byte from this skill's assets. Do not translate, shorten, restyle or reconstruct them. The operation heading may use an approved existing H3 style such as `h3-triangle`, or the verified `h4-filled` variant, according to the selected English reference. Keep the main CTA in its established position after that `How to ... PoGoskill` heading and before the `step-cont` steps; its desktop button group must remain centered. A second CTA is allowed inside FAQ only when that exact source answer explicitly introduces or recommends PoGoskill; otherwise do not add one.

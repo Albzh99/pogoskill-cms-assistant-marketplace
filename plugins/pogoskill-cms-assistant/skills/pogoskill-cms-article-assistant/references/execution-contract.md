@@ -16,6 +16,7 @@
 3. HTTP 200 不是成功；只有响应 JSON 的 `code === 0` 才算业务成功。
 4. 每次请求都把请求 body 与响应保存到当前文章工作目录；文件名包含顺序、接口和时间，例如 `03-page-add-request.json`、`03-page-add-response.json`。
 5. 日志和回复只记录 endpoint、时间、curl exit code、业务 `code`、`msg`、`request_id`、页面 ID；不得记录 API Key。
+6. 页面 payload 只序列化一次。发出 `page/add` 或 `page/update` 前，必须检查解码后的 `content` 没有字面 `` `n ``、`\n`、`‘n`、`’n` 或相应 HTML 实体；HTML 排版换行必须是真实换行。请求 JSON 文件中由序列化器生成的 `\n` 编码本身不是污染。
 
 ## 3. 禁止虚构“连不上”
 

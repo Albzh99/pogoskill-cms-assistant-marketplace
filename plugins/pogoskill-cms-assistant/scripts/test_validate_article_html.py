@@ -77,6 +77,26 @@ def sample_html_with_paired_images():
     return sample_html().replace("  <p>完整內容。</p>", f"  <p>完整內容。</p>\n  {pair}")
 
 
+def sample_html_with_table():
+    table = '''<div class="table-box">
+  <table style="width:90%;max-width:100%;table-layout:auto;margin:0 auto;text-align:center;">
+    <thead><tr><th>項目</th><th>說明</th></tr></thead>
+    <tbody><tr><td>範例</td><td>完整內容</td></tr></tbody>
+  </table>
+</div>'''
+    return sample_html().replace("  <p>完整內容。</p>", f"  <p>完整內容。</p>\n  {table}")
+
+
+def sample_html_with_wide_table():
+    table = '''<div class="table-box overflow-auto">
+  <table data-table-layout="wide" style="width:100%;min-width:840px;table-layout:auto;margin:0 auto;text-align:center;">
+    <thead><tr><th>項目</th><th>平台</th><th>適用情境</th><th>詳細說明</th></tr></thead>
+    <tbody><tr><td>範例</td><td>iOS</td><td>多欄比較</td><td>這是需要保留舒適欄寬的長內容。</td></tr></tbody>
+  </table>
+</div>'''
+    return sample_html().replace("  <p>完整內容。</p>", f"  <p>完整內容。</p>\n  {table}")
+
+
 def sample_en_html():
     cta = (EN_PUBLISHER / "assets" / "download-cta.html").read_text(encoding="utf-8")
     buybox = (EN_PUBLISHER / "assets" / "buybox.html").read_text(encoding="utf-8")
@@ -135,6 +155,58 @@ class ValidatorTests(unittest.TestCase):
         result = VALIDATOR.validate(sample_html_with_paired_images(), PUBLISHER / "assets")
         self.assertTrue(result["ok"], result["errors"])
         self.assertEqual(result["counts"]["paired_layouts"], 1)
+
+    def test_reasonably_sized_centered_table_passes_without_scroll(self):
+        result = VALIDATOR.validate(sample_html_with_table(), PUBLISHER / "assets")
+        self.assertTrue(result["ok"], result["errors"])
+
+    def test_wide_table_scrolls_only_when_marked_wide(self):
+        result = VALIDATOR.validate(sample_html_with_wide_table(), PUBLISHER / "assets")
+        self.assertTrue(result["ok"], result["errors"])
+
+    def test_standard_table_that_is_too_narrow_is_blocked(self):
+        broken = sample_html_with_table().replace("width:90%", "width:45%")
+        result = VALIDATOR.validate(broken, PUBLISHER / "assets")
+        self.assertFalse(result["ok"])
+        self.assertTrue(any("reasonable 70%-100% width" in item for item in result["errors"]))
+
+    def test_standard_table_does_not_force_scroll(self):
+        broken = sample_html_with_table().replace('class="table-box"', 'class="table-box overflow-auto"')
+        result = VALIDATOR.validate(broken, PUBLISHER / "assets")
+        self.assertFalse(result["ok"])
+        self.assertTrue(any("must not enable horizontal scrolling" in item for item in result["errors"]))
+
+    def test_wide_table_requires_scroll_wrapper(self):
+        broken = sample_html_with_wide_table().replace("table-box overflow-auto", "table-box")
+        result = VALIDATOR.validate(broken, PUBLISHER / "assets")
+        self.assertFalse(result["ok"])
+        self.assertTrue(any("must use .table-box.overflow-auto" in item for item in result["errors"]))
+
+    def test_wide_table_requires_sufficient_min_width(self):
+        broken = sample_html_with_wide_table().replace("min-width:840px", "min-width:420px")
+        result = VALIDATOR.validate(broken, PUBLISHER / "assets")
+        self.assertFalse(result["ok"])
+        self.assertTrue(any("min-width >= 680px" in item for item in result["errors"]))
+
+    def test_non_centered_table_is_blocked(self):
+        broken = sample_html_with_table().replace("margin:0 auto;text-align:center;", "")
+        result = VALIDATOR.validate(broken, PUBLISHER / "assets")
+        self.assertFalse(result["ok"])
+        self.assertTrue(any("must be centered" in item for item in result["errors"]))
+
+    def test_fixed_table_layout_is_blocked(self):
+        broken = sample_html_with_table().replace("table-layout:auto", "table-layout:fixed")
+        result = VALIDATOR.validate(broken, PUBLISHER / "assets")
+        self.assertFalse(result["ok"])
+        self.assertTrue(any("must not force fixed columns" in item for item in result["errors"]))
+
+    def test_literal_newline_escape_markers_are_blocked(self):
+        for marker in ("`n", r"\n", " ‘n ", "&#96;n"):
+            with self.subTest(marker=marker):
+                broken = sample_html().replace("完整內容。", f"完整{marker}內容。", 1)
+                result = VALIDATOR.validate(broken, PUBLISHER / "assets")
+                self.assertFalse(result["ok"])
+                self.assertTrue(any("real line breaks" in item for item in result["errors"]))
 
     def test_paired_image_layout_rejects_oversized_image(self):
         broken = sample_html_with_paired_images().replace("max-width:380px", "max-width:620px", 1)

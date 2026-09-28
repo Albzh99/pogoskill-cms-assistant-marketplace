@@ -170,8 +170,8 @@
 ## 7. 表格
 
 ```html
-<div class="table-box overflow-auto">
-  <table>
+<div class="table-box">
+  <table style="width:90%;max-width:100%;table-layout:auto;margin:0 auto;text-align:center;">
     <thead>
       <tr>
         <th>欄位一</th>
@@ -188,9 +188,13 @@
 </div>
 ```
 
-- 所有正文表格必须放在 `.table-box.overflow-auto` 内。
-- 不给 `<table>`、`<th>` 或 `<td>` 添加自定义 style/class。
+- 普通 2–3 列或内容不拥挤的表格放在 `.table-box` 内，使用 `width:90%;max-width:100%;table-layout:auto;margin:0 auto;text-align:center;`。可按真实内容在 70%–100% 范围内调整，但不强制铺满正文，也不加 `overflow-auto`。
+- 无论列数多少，只有单元格实际内容过长、在正文宽度内必然明显挤压的表格，才使用 `assets/wide-table.html`：`.table-box.overflow-auto`、`data-table-layout="wide"`、`width:100%` 和至少 `680px` 的 `min-width`；通常从 `840px` 起按内容调整。列数多或横向排列本身不能作为滚动理由。
+- 横向滚动是宽表格的例外措施，不是普通表格的默认保险。两类表格都保留 `table-layout:auto` 和居中文字，禁止用 `table-layout:fixed`、`white-space:nowrap` 或逐格窄宽度强行排版。
+- 不给 `<th>` 或 `<td>` 添加逐格宽度、自定义 class、`white-space:nowrap` 或会造成文字逐字换行的样式。优先让浏览器按内容分配列宽。
 - 并列对象超过三个、属性适合横向比较时优先使用表格，避免制造大量 H3。
+
+普通表格以 `assets/responsive-table.html` 为起点；确认内容确实过宽后才改用 `assets/wide-table.html`。不要手写另一套窄表格。
 
 ## 8. 图片盒
 
@@ -453,7 +457,7 @@ PoGoskill 主介绍模块的正文下载 CTA 只放一次，位置必须是 PoGo
 <nav class="article-toc">
 没有 class 的 <h3>
 正文中的裸 <ul>
-不在 table-box 中的 <table>
+不在 table-box 中的 <table>；普通表格无必要地加 overflow-auto；宽表格未标记 data-table-layout="wide"
 <style> 或自定义 CSS
 自创 xxx-card、xxx-box、xxx-note、xxx-article class
 手写面包屑、相关文章、作者或侧边栏
@@ -473,7 +477,7 @@ Luna 必须输出校验结果后才能调用 `/cms/page/add` 或 `/cms/page/upda
 4. 非 FAQ 的 H3 全部为 `class="h3-triangle"`。
 5. FAQ H3 全部为 `class="h3-faq faq1"`。
 6. 不存在 `article-toc`、`<style>`、自创 class 或裸列表。
-7. 所有表格位于 `table-box overflow-auto`。
+7. 所有表格位于 `table-box`；普通表格合理宽度、居中且不滚动，只有过宽表格才标记 `data-table-layout="wide"` 并使用 `overflow-auto`。
 8. 所有完成图片盒含同 basename 的 fallback 与 WebP。
 9. 主图为 850×460；竖图使用高度限制。
 10. `.tit-tips` 恰好用于两个经过语义判断的目录项。

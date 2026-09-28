@@ -4,6 +4,8 @@
 
 API Key 只能由插件根目录 `scripts/CmsCredential.ps1` 从 Windows Credential Manager 读取。禁止把密钥写入文章、脚本参数、JSON、日志或回复。JSON 请求优先调用插件根目录的 `scripts/cms-request.ps1`。
 
+页面正文先保存为包含真实换行的 HTML 原始字符串，再由 JSON 序列化器对 payload **只序列化一次**。JSON 文件中为表示真实换行而出现的 `\n` 是正常编码；但 `ConvertFrom-Json` 后的 `content` 中不得仍出现字面 `` `n ``、`\n`、`‘n`、`’n`、`&#96;n` 或 `&grave;n`。禁止手工替换换行、双重转义或把已经序列化的 JSON 再作为字符串序列化。`cms-request.ps1` 会在 `page/add` 和 `page/update` 前检查解码后的正文并阻断污染内容。
+
 所有执行状态、失败重试、写请求防重复和“已上传草稿”的表述，必须同时遵守总助手的 `../../pogoskill-cms-article-assistant/references/execution-contract.md`。CMS 与现有权限默认视为可用；未经真实 POST、响应留档和规定重试，不得声称连接、读取或权限异常。
 
 ## 发现与读取

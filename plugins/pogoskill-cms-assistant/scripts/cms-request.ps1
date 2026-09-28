@@ -11,8 +11,21 @@ if ([string]::IsNullOrWhiteSpace($apiKey)) { throw 'Stored CMS credential not fo
 
 $body = [IO.Path]::GetFullPath($BodyPath)
 if (-not (Test-Path -LiteralPath $body -PathType Leaf)) { throw "JSON body not found: $body" }
-try { Get-Content -Raw -Encoding UTF8 -LiteralPath $body | ConvertFrom-Json | Out-Null }
+try { $payload = Get-Content -Raw -Encoding UTF8 -LiteralPath $body | ConvertFrom-Json }
 catch { throw "Body is not valid JSON: $body" }
+
+if ($Path -in @('/cms/page/add', '/cms/page/update')) {
+  $contentProperty = $payload.PSObject.Properties['content']
+  if ($null -ne $contentProperty) {
+    $content = [string]$contentProperty.Value
+    $literalNewlineTokens = @('`r`n', '`n', '`r', '\r\n', '\n', '\r', '‘n', '’n', '&#96;n', '&grave;n')
+    foreach ($token in $literalNewlineTokens) {
+      if ($content.Contains($token)) {
+        throw "HTML content contains a literal newline escape token ($token). Use real line breaks and serialize the JSON payload exactly once."
+      }
+    }
+  }
+}
 
 $curlCommand = Get-Command curl.exe -ErrorAction SilentlyContinue | Select-Object -First 1
 $curl = if ($curlCommand) { $curlCommand.Source } else { 'C:\Windows\System32\curl.exe' }

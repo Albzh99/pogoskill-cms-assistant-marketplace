@@ -13,7 +13,7 @@ description: 将 PoGoskill 台湾站 SEO 文稿转换为文章内容页面模板
 - 需要上传的普通正文图必须直接嵌入 DOCX 的实际出现位置。只给路径、文件夹或无位置说明的附件不能用于自动回填。
 - Guide 图无需嵌入；DOCX 必须在对应步骤或段落写出 CMS `guides` 中的准确文件名（含扩展名）。只按该名称精确检索并复用，不按语义猜图、不换相似图、不重新上传 Guide 图。
 
-开始前读取总助手的 [CMS 真实执行与证据契约](../pogoskill-cms-article-assistant/references/execution-contract.md)、[references/cms-live-contract.md](references/cms-live-contract.md) 和 [references/cms-api-contract.md](references/cms-api-contract.md)。制作或修改正文 HTML 时，必须先完整读取 [Luna HTML 固定执行契约](references/luna-html-contract.md) 和 [两篇旧文章的结构参考结论](references/legacy-article-patterns.md)，逐模块复制当前 V2 结构；单图位置使用 [assets/image-box.html](assets/image-box.html)，源稿／参考样式明确要求并排双图时使用 [assets/paired-image-box.html](assets/paired-image-box.html)，正文下载区原样使用 [assets/download-cta.html](assets/download-cta.html)，正文结尾原样使用 [assets/buybox.html](assets/buybox.html)。不得靠记忆重写图片布局、下载区或 Buy Box，也不得复制旧文章的自定义 CSS 或专属 class。
+开始前读取总助手的 [CMS 真实执行与证据契约](../pogoskill-cms-article-assistant/references/execution-contract.md)、[references/cms-live-contract.md](references/cms-live-contract.md) 和 [references/cms-api-contract.md](references/cms-api-contract.md)。制作或修改正文 HTML 时，必须先完整读取 [Luna HTML 固定执行契约](references/luna-html-contract.md) 和 [两篇旧文章的结构参考结论](references/legacy-article-patterns.md)，逐模块复制当前 V2 结构；单图位置使用 [assets/image-box.html](assets/image-box.html)，源稿／参考样式明确要求并排双图时使用 [assets/paired-image-box.html](assets/paired-image-box.html)，普通表格使用 [assets/responsive-table.html](assets/responsive-table.html)，确实过宽的表格才使用 [assets/wide-table.html](assets/wide-table.html)，正文下载区原样使用 [assets/download-cta.html](assets/download-cta.html)，正文结尾原样使用 [assets/buybox.html](assets/buybox.html)。不得靠记忆重写图片、表格、下载区或 Buy Box，也不得复制旧文章的自定义 CSS 或专属 class。
 
 ## 授权和安全
 
@@ -44,7 +44,7 @@ description: 将 PoGoskill 台湾站 SEO 文稿转换为文章内容页面模板
 - 参考模板文章 `240801` 学习可用组件，并优先读取同分类近期已上线文章作为实际结构基准。只复用基准中确实存在且适合当前内容的目录、列表、表格、步骤、图片、视频、FAQ、下载模块和产品模块。
 - 禁止自行新增文本框、提示框、卡片、彩色背景框、引用框、CSS class、内联/页面 CSS 或新的 HTML 层级；不得因为内容重要或希望页面更丰富而创造视觉模块。
 - 保持所选参考文章的标题、正文、段落间距、按钮、下载框架及模块结构；内容无法自然放入现有组件时，使用普通段落、H2/H3、列表或表格，或停止并报告模板缺口。
-- 表格使用站点现有响应式容器；图片使用站点现有 `picture`、lazy-load 与 `img-wrap` 规则。
+- 普通表格复制 `assets/responsive-table.html`，按内容使用合理宽度并居中，默认约为正文的 90%，不强制铺满正文，也不启用横向滚动。只有实际内容过长、在正文宽度内必然明显挤压时才复制 `assets/wide-table.html`，标记 `data-table-layout="wide"` 并在移动端横向滚动；列数本身不构成启用滚动的理由。两类表格都使用自动列宽、居中文字，禁止固定窄列。图片使用站点现有 `picture`、lazy-load 与 `img-wrap` 规则。
 - 当源 DOCX 或参考文章明确显示两图并排且图下有说明时，保留左右顺序并套用 `assets/paired-image-box.html`。必须恰好两个 `col-12 col-md-6` 子项，每项含完整 WebP/fallback `picture` 和紧随其后的说明段落；桌面单图最大显示宽度不得超过 400px，移动端由 `col-12` 自动上下排列。不得用固定总宽度、绝对定位或自定义 CSS 强行并排。
 - 每篇文章正文最后必须且只能出现一个标准 Buy Box，使用资产文件中的完整 HTML，不自行简化或重设计。
 - 结语最后一次导向首页时，必须把 DOCX 实际提供的自然关键词短语设为链接锚文本，例如“最佳皮克敏種花助手”“最佳寶可夢飛人工具”或“最佳自動種花助手”；紧随其后的品牌名 `PoGoskill` 保持为普通文字。禁止把 `PoGoskill` 本身设为结语首页链接，也不得自行发明文稿中没有的关键词。

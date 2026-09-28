@@ -26,7 +26,8 @@ class StructureParser(HTMLParser):
         self.sections = []
         self.toc_hrefs = []
         self.h3_classes = []
-        self.table_parent_ok = []
+        self.table_parent_classes = []
+        self.table_attrs = []
         self.bare_uls = 0
         self.in_toc_depth = None
         self.paired_layouts = []
@@ -81,7 +82,8 @@ class StructureParser(HTMLParser):
                 self.toc_hrefs.append(href[1:])
         elif tag == "table":
             parent_cls = self.stack[-1][1] if self.stack else set()
-            self.table_parent_ok.append({"table-box", "overflow-auto"}.issubset(parent_cls))
+            self.table_parent_classes.append(parent_cls)
+            self.table_attrs.append(attrs_dict)
 
         if tag not in VOID_TAGS:
             self.stack.append((tag, cls))
@@ -244,10 +246,52 @@ def validate(html_text, assets_dir=None, profile="tw"):
         errors.append("individual operation steps must not use H3")
     if parser.bare_uls:
         errors.append(f"bare UL count must be 0, got {parser.bare_uls}")
-    if not all(parser.table_parent_ok):
-        errors.append("every table must be directly wrapped by .table-box.overflow-auto")
+    for table_index, (table_attrs, parent_classes) in enumerate(
+        zip(parser.table_attrs, parser.table_parent_classes), 1
+    ):
+        style = table_attrs.get("style", "").replace(" ", "").lower()
+        if "table-box" not in parent_classes:
+            errors.append(f"table #{table_index} must be directly wrapped by .table-box")
+        if "table-layout:fixed" in style or "white-space:nowrap" in style:
+            errors.append(f"table #{table_index} must not force fixed columns or nowrap text")
+        if (
+            "table-layout:auto" not in style
+            or "margin:0auto" not in style
+            or "text-align:center" not in style
+        ):
+            errors.append(f"table #{table_index} must be centered and use automatic column sizing")
+
+        is_wide = table_attrs.get("data-table-layout", "").lower() == "wide"
+        min_width = re.search(r"min-width:(\d+)px", style)
+        if is_wide:
+            if "overflow-auto" not in parent_classes:
+                errors.append(f"wide table #{table_index} must use .table-box.overflow-auto")
+            if "width:100%" not in style or not min_width or int(min_width.group(1)) < 680:
+                errors.append(f"wide table #{table_index} must use width:100% and min-width >= 680px")
+        else:
+            width = re.search(r"(?:^|;)width:(\d+)%", style)
+            if "overflow-auto" in parent_classes:
+                errors.append(f"standard table #{table_index} must not enable horizontal scrolling")
+            if (
+                not width
+                or not 70 <= int(width.group(1)) <= 100
+                or "max-width:100%" not in style
+                or min_width
+            ):
+                errors.append(
+                    f"standard table #{table_index} must use a reasonable 70%-100% width, max-width:100%, and no min-width"
+                )
     if re.search(r"<style\b|article-toc", html_text, re.I):
         errors.append("custom style or article-toc is forbidden")
+    escaped_newline_patterns = (
+        ("PowerShell backtick newline", r"`(?:r`n|n|r)"),
+        ("backslash newline escape", r"\\(?:r\\n|n|r)"),
+        ("typographic quote newline artifact", r"(?:^|[\s>])[‘’]n(?=\s|<|$)"),
+        ("encoded backtick newline", r"(?:&#96;|&grave;)n"),
+    )
+    for label, pattern in escaped_newline_patterns:
+        if re.search(pattern, html_text, re.I):
+            errors.append(f"literal {label} found; HTML must contain real line breaks, not escape text")
     if re.search(r'class="[^"]*(?:rare-forest-article|gible-article|auto-tool-card|table-cont|table-list)[^"]*"', html_text, re.I):
         errors.append("legacy article-specific classes are forbidden")
     if profile == "en":

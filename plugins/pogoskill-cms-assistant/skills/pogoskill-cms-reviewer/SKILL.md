@@ -12,7 +12,8 @@ description: 独立审查 PoGoskill 台湾站 CMS 草稿的元数据、HTML、�
 ## 数据与 HTML
 
 - 核对 subject、SEO 字段、URL、作者、分类、相关文章、产品和自定义字段。
-- 按 Publisher 的 [Luna HTML 固定执行契约](../pogoskill-cms-publisher/references/luna-html-contract.md) 审查正文骨架：目录必须使用 `nav-list1`，不得出现 `article-toc`；section/H2/目录锚点一一对应；普通 H3 必须使用 `h3-triangle`，FAQ 必须使用 `h3-faq faq1`；拒绝裸列表和未包入 `table-box overflow-auto` 的表格。
+- 按 Publisher 的 [Luna HTML 固定执行契约](../pogoskill-cms-publisher/references/luna-html-contract.md) 审查正文骨架：目录必须使用 `nav-list1`，不得出现 `article-toc`；section/H2/目录锚点一一对应；普通 H3 必须使用 `h3-triangle`，FAQ 必须使用 `h3-faq faq1`；拒绝裸列表和未包入 `table-box` 的表格。普通表格必须合理宽度、居中且不滚动；只有确实过宽并标记 `data-table-layout="wide"` 的表格可使用 `overflow-auto`。
+- CMS 回读后的正文不得含可见换行转义残留，例如 `` `n ``、字面 `\n`、`‘n`、`’n`、`&#96;n` 或 `&grave;n`。请求 JSON 中合法的换行编码不算问题，必须审查解码后的 `content`。
 - 正文不得有 H1；目录锚点与 section ID 一一对应；标准 Buy Box 必须恰好一个。
 - 最后一个结语 section 必须包含正确站点首页链接；锚文本是 DOCX 实际提供的“最佳／最好……”自然关键词，不能是 `PoGoskill`。链接后面的 `PoGoskill` 必须保持普通文字。英文结语同样使用源文的 `best ...` 关键词作为首页锚文本。
 - PoGoskill 模块必须先完整写完介绍、适用情境、操作思路、作用与优势，再原样放入对应站点的 `assets/download-cta.html`；下载区必须有两个 `secure-btn` 和两个 `secure-download` 安全下载框，桌面按钮组固定居中。按钮下方必须紧接较大的现有 H3“PoGoskill 操作步驟”或英文站已验证的 `How to Use PoGoskill` 标题，随后才进入 `step-cont`。若下载区被简化、未居中、按钮过早出现或步骤标题层级错误，判定为结构不合格。FAQ 只有在 DOCX 对应答案明确介绍或推荐 PoGoskill 时才允许额外一组对应语言 CTA；繁中与英文下载资产不得混用。

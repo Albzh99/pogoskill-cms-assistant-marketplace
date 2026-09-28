@@ -14,6 +14,12 @@
 
 当前不执行 AI CMS 本地预览、浏览器截图或桌面／手机 DOM 视觉检测。审查不得为预览而要求登录 CMS，也不得把未做视觉预览视为失败。仍须通过 `/cms/page/info` 回读当前页面版本，并运行确定性的 HTML 与完整度检查。
 
+## 正文转义与表格
+
+- 审查 `/cms/page/info` 解码后的 `content`，拒绝可见的 `` `n ``、字面 `\n`、`‘n`、`’n`、`&#96;n` 或 `&grave;n`；JSON 原始文件中表示真实换行的标准 `\n` 编码不属于错误。
+- 普通表格使用 `.table-box`，宽度应根据内容保持在合理范围并居中，不应为了保险加横向滚动，也不必强制占满正文。
+- 只有实际内容过长、在正文宽度内确实会挤压时，才允许 `.table-box.overflow-auto > table[data-table-layout="wide"]`，并为宽表设置足够的最小宽度；列数或横向排列本身不能作为滚动理由。所有表格禁止 `table-layout:fixed`、`white-space:nowrap` 和逐格固定窄列。
+
 ## 图片验收
 
 - 有真实素材时，按 `$pogoskill-cms-image-pipeline` 的 manifest 核对 fallback JPG/PNG 与同名 WebP、尺寸、URL、ALT、图片上传 request_id、图片 publish_id 和图片发布 request_id。

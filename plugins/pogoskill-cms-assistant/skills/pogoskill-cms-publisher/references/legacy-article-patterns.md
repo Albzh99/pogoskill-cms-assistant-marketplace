@@ -7,7 +7,7 @@
 - 导语之后放主图，再进入单层 `ul.list-filled-dot.nav-list1` 目录。
 - 每个目录项对应一个 `section#partN` 和该 section 的首个 H2。
 - 一个 H2 下有多个真正独立的解释主题时，使用 `h3.h3-triangle`；每个 H3 后必须有完整正文、列表、表格或图片，不能只当视觉标签。
-- 活动时间、坐标、技能、属性或多对象比较适合表格，但必须改用当前标准 `div.table-box.overflow-auto > table`。
+- 活动时间、坐标、技能、属性或多对象比较适合表格。普通表格使用当前标准 `div.table-box > table` 并合理居中；只有实际文字过长、在正文宽度内确实会挤压时才使用 `div.table-box.overflow-auto > table[data-table-layout="wide"]`，不能仅因列数多或横向排列就启用滚动。
 - PoGoskill 章节先说明读者问题、产品作用和优势，再放标准下载区，然后用一个 `h3.h3-triangle` 引出完整 `ul.step-cont`。单个步骤只使用 `li > p > span`，不再创建 H3。
 - 每个步骤的 Guide 图片紧跟对应步骤文字，使用 WebP `source` 与 JPG/PNG fallback。
 - FAQ 作为独立 H2 章节，问题统一使用 `h3.h3-faq.faq1`，答案紧随其后。
