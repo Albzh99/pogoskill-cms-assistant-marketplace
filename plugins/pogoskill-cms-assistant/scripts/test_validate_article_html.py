@@ -102,8 +102,8 @@ def sample_en_html():
     buybox = (EN_PUBLISHER / "assets" / "buybox.html").read_text(encoding="utf-8")
     return f'''<p>Complete introduction.</p>
 <ul class="list-filled-dot nav-list1">
-  <li><a href="#part1">Part 1. Core Content</a></li>
-  <li><a href="#part2">Part 2. PoGoskill</a></li>
+  <li><a href="#part1">Part 1. Core Content <img class="tit-tips" src="https://images.pogoskill.com/new-tips.png?w=100&amp;h=38" width="50" alt="New"></a></li>
+  <li><a href="#part2">Part 2. PoGoskill <img class="tit-tips" src="https://images.pogoskill.com/hot-tips.png?w=100&amp;h=38" width="50" alt="Hot"></a></li>
   <li><a href="#part3">Conclusion</a></li>
 </ul>
 <section id="part1">
@@ -279,6 +279,37 @@ class ValidatorTests(unittest.TestCase):
     def test_english_bordered_template_table_passes(self):
         result = VALIDATOR.validate(sample_en_html_with_table(), EN_PUBLISHER / "assets", "en")
         self.assertTrue(result["ok"], result["errors"])
+
+    def test_english_missing_toc_tip_is_blocked(self):
+        broken = sample_en_html().replace(
+            ' <img class="tit-tips" src="https://images.pogoskill.com/new-tips.png?w=100&amp;h=38" width="50" alt="New">',
+            "",
+            1,
+        )
+        result = VALIDATOR.validate(broken, EN_PUBLISHER / "assets", "en")
+        self.assertFalse(result["ok"])
+        self.assertTrue(any("tit-tips count must be 2" in item for item in result["errors"]))
+
+    def test_english_pogoskill_toc_tip_is_required(self):
+        broken = sample_en_html().replace(
+            'Part 2. PoGoskill <img class="tit-tips" src="https://images.pogoskill.com/hot-tips.png?w=100&amp;h=38" width="50" alt="Hot">',
+            'Part 2. PoGoskill',
+        ).replace(
+            '>Conclusion</a>',
+            '>Conclusion <img class="tit-tips" src="https://images.pogoskill.com/hot-tips.png?w=100&amp;h=38" width="50" alt="Hot"></a>',
+        )
+        result = VALIDATOR.validate(broken, EN_PUBLISHER / "assets", "en")
+        self.assertFalse(result["ok"])
+        self.assertTrue(any("PoGoskill TOC entry" in item for item in result["errors"]))
+
+    def test_english_tip_asset_and_width_are_fixed(self):
+        broken = sample_en_html().replace("new-tips.png?w=100&amp;h=38", "custom-tip.png").replace(
+            'width="50" alt="New"', 'width="60" alt="New"', 1
+        )
+        result = VALIDATOR.validate(broken, EN_PUBLISHER / "assets", "en")
+        self.assertFalse(result["ok"])
+        self.assertTrue(any("approved HOT or NEW asset" in item for item in result["errors"]))
+        self.assertTrue(any("width must be 50" in item for item in result["errors"]))
 
     def test_english_bordered_wide_table_passes(self):
         result = VALIDATOR.validate(sample_en_html_with_wide_table(), EN_PUBLISHER / "assets", "en")

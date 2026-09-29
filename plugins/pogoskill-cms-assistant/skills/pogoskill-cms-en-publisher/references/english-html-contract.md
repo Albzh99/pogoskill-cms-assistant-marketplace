@@ -30,6 +30,26 @@ This contract is derived from three supplied English production examples and nor
 
 Do not add a TOC entry for a section that does not have a matching ID. Do not leave duplicate IDs. The Conclusion may be assigned the next `partN` and included in the TOC; choose one consistent approach for both TOC and section.
 
+### Required HOT / NEW markers in the table of contents
+
+- Every English article TOC contains exactly two `tit-tips` icons: one on the article's most important/key section and one on the section that introduces or recommends PoGoskill.
+- Select the entries by meaning, not by a fixed Part number. The PoGoskill section may be Part 3, Part 5, or another position depending on the source.
+- Use only the existing site assets `https://images.pogoskill.com/hot-tips.png?w=100&amp;h=38` or `https://images.pogoskill.com/new-tips.png?w=100&amp;h=38`, with `class="tit-tips"` and `width="50"`.
+- Place the icon inside the matching TOC `<a>`, immediately after its visible title. Do not place it in the H2, article body, or outside the link.
+- Do not mark every entry. If the key section is also the PoGoskill section, choose the next most useful substantive section for the second marker so two different TOC links are marked.
+
+```html
+<li>
+  <a href="#partN">
+    Part N. How to Use PoGoskill
+    <img class="tit-tips"
+         src="https://images.pogoskill.com/hot-tips.png?w=100&amp;h=38"
+         width="50"
+         alt="Hot">
+  </a>
+</li>
+```
+
 ## Heading hierarchy
 
 - H2: major article parts, FAQ and Conclusion.

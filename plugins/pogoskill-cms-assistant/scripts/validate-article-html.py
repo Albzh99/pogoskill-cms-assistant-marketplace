@@ -394,8 +394,34 @@ def validate(html_text, assets_dir=None, profile="tw"):
                 )
 
     tips_count = len(re.findall(r'class="tit-tips"', html_text, re.I))
-    if profile == "tw" and tips_count != 2:
+    if tips_count != 2:
         errors.append(f"tit-tips count must be 2, got {tips_count}")
+    if profile == "en":
+        toc_match = re.search(
+            r'<ul\b[^>]*class="[^"]*\blist-filled-dot\b[^"]*\bnav-list1\b[^"]*"[^>]*>(.*?)</ul>',
+            html_text,
+            re.I | re.S,
+        )
+        toc_html = toc_match.group(1) if toc_match else ""
+        marked_anchors = [
+            anchor.group(0)
+            for anchor in re.finditer(r"<a\b[^>]*>.*?</a>", toc_html, re.I | re.S)
+            if re.search(r'class="tit-tips"', anchor.group(0), re.I)
+        ]
+        if len(marked_anchors) != 2:
+            errors.append("English tit-tips icons must be inside two different TOC links")
+        elif not any("pogoskill" in re.sub(r"<[^>]+>", "", anchor).lower() for anchor in marked_anchors):
+            errors.append("English PoGoskill TOC entry must include a tit-tips icon")
+        for index, match in enumerate(re.finditer(r'<img\b[^>]*class="tit-tips"[^>]*>', html_text, re.I | re.S), 1):
+            tag = match.group(0)
+            src = html.unescape(attr(tag, "src"))
+            if src not in {
+                "https://images.pogoskill.com/hot-tips.png?w=100&h=38",
+                "https://images.pogoskill.com/new-tips.png?w=100&h=38",
+            }:
+                errors.append(f"English tit-tips #{index} must use the approved HOT or NEW asset")
+            if attr(tag, "width") != "50":
+                errors.append(f"English tit-tips #{index} width must be 50")
 
     buybox_count = len(re.findall(r'class="pro-content pro-board1"', html_text, re.I))
     if buybox_count != 1:
