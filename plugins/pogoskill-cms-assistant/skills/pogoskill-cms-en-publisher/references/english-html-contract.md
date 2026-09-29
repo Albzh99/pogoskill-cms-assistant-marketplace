@@ -42,9 +42,11 @@ Do not add a TOC entry for a section that does not have a matching ID. Do not le
 
 - Use an observed `list-cont` variant such as `list-star`, `list-lamp`, `list-angle`, `list-flag`, `list-primary-dot` or `list-white-dot` only when its semantic role matches the reference.
 - Every `<li>` must remain inside its owning `<ul>` or `<ol>`. Images belonging to a step stay inside that `<li>` after its paragraph; never place a `<div>` directly between list items.
-- Ordinary two- or three-column tables start from `assets/responsive-table.html`: `.table-box` without `overflow-auto`, and `width:90%;max-width:100%;table-layout:auto;margin:0 auto;text-align:center;`. Adjust the percentage within a reasonable 70%-100% range if the actual content needs it; do not force every table to fill the article width.
-- Use `assets/wide-table.html` only when the actual cell content is too long to fit comfortably in the article column. Column count or landscape orientation alone does not justify scrolling. That variant uses `.table-box.overflow-auto`, `data-table-layout="wide"`, `width:100%`, and `min-width:840px`; use 680px as the absolute minimum and raise it only as needed.
-- Never add scrolling to an ordinary table merely as a precaution. Both variants must use `table-layout:auto`, centered text, and no `white-space:nowrap`, fixed column layout, or narrow per-cell widths.
+- English V2 bordered tables are not native `<table>` elements. They must preserve the verified template hierarchy `div.table-cont > div.table-list.table3/table4 > ul > li`. The `table-cont`, `table-list` and `table3`/`table4` classes render the existing borders and cell layout; removing them produces the broken borderless result.
+- Ordinary comparison tables start from `assets/responsive-table.html`. Keep `.table-cont` and `.table-list.table4`, and center only the inner `.table-list` with `width:90%;max-width:100%;margin:0 auto;`. Adjust the percentage only within 70%-100% when content requires it.
+- Use `assets/wide-table.html` only when cell content is genuinely too long. Keep `.table-cont.overflow-auto`, `.table-list.table3`, `data-table-layout="wide"`, `width:100%`, and `min-width:840px`; 680px is the absolute minimum.
+- Each `<ul>` is one row and each `<li>` is one cell. Every row must have the same number of cells, with the first row serving as the header row. Do not put a native `<table>`, `<thead>`, `<tbody>`, `<tr>`, `<th>` or `<td>` inside this module.
+- Do not convert the bordered template into a generic Bootstrap table or a centered native table. Centering is an additional inline layout adjustment, not a replacement for the site's border classes.
 - Internal links use `https://www.pogoskill.com/...`; external promotional links use the supplied `rel` and `target` attributes. Do not copy `tw.pogoskill.com` into English HTML.
 
 ## Images

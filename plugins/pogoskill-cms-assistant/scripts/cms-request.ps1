@@ -18,7 +18,7 @@ if ($Path -in @('/cms/page/add', '/cms/page/update')) {
   $contentProperty = $payload.PSObject.Properties['content']
   if ($null -ne $contentProperty) {
     $content = [string]$contentProperty.Value
-    $literalNewlineTokens = @('`r`n', '`n', '`r', '\r\n', '\n', '\r', '‘n', '’n', '&#96;n', '&grave;n')
+    $literalNewlineTokens = @('`r`n', '`n', '`r', '\r\n', '\n', '\r', "‘n", "’n", '&#96;n', '&grave;n')
     foreach ($token in $literalNewlineTokens) {
       if ($content.Contains($token)) {
         throw "HTML content contains a literal newline escape token ($token). Use real line breaks and serialize the JSON payload exactly once."

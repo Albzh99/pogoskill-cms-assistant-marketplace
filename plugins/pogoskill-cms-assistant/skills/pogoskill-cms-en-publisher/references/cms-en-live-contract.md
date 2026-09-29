@@ -22,6 +22,12 @@ Verified through production POST APIs on 2026-09-23. Re-query before each write 
 - `/cms/template/list` for site 286: `code = 0`, request `07d43a4d-4cf4-45e8-a781-f7d16b61a3b9`
 - `/cms/picture/dirs` for site 286: `code = 0`, 33 root directories, request `83ec2465-7b08-4c87-bd76-2d18f07c6750`
 
+## Confirmed bordered table component
+
+Re-verified on 2026-09-29 through `/cms/page/info` for English V2 page `464348`, request `a36be87a-2bb9-4513-b768-c372317b3288`.
+
+The live bordered table is `div.table-cont > div.table-list.table3/table4 > ul > li`. Its borders and cell presentation come from the V2 template classes. A native `<table>` that only adds width and centering does not reproduce this component and is forbidden for English articles. Center the existing `.table-list` without removing or replacing those classes.
+
 These values prove access at the verification time; they do not replace live checks. Do not claim the English CMS is inaccessible without following the shared three-attempt evidence contract.
 
 ## Site separation
@@ -38,4 +44,3 @@ English and Traditional Chinese are different CMS sites:
 | Download IDs | `7144` / `7145` | `7925` / `7926` |
 
 Never transfer IDs, URLs, content language or assets across these site profiles.
-

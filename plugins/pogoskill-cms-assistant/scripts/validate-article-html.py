@@ -72,7 +72,8 @@ class StructureParser(HTMLParser):
         elif tag == "section":
             self.sections.append(attrs_dict.get("id", ""))
         elif tag == "ul":
-            if not cls:
+            parent_cls = self.stack[-1][1] if self.stack else set()
+            if not cls and "table-list" not in parent_cls:
                 self.bare_uls += 1
             if {"list-filled-dot", "nav-list1"}.issubset(cls):
                 self.in_toc_depth = len(self.stack) + 1
@@ -135,6 +136,57 @@ def basename(url):
 
 def canonical(fragment):
     return re.sub(r"\s+", " ", fragment).strip()
+
+
+def validate_english_template_tables(html_text, errors):
+    if re.search(r"<table\b", html_text, re.I):
+        errors.append("English tables must use the bordered V2 table-cont/table-list component, not a native TABLE")
+
+    openings = len(re.findall(r'<div\b[^>]*class="[^"]*\btable-cont\b[^"]*"', html_text, re.I))
+    modules = re.findall(
+        r'<div\b[^>]*class="([^"]*\btable-cont\b[^"]*)"[^>]*>\s*'
+        r'<div\b([^>]*)class="([^"]*\btable-list\b[^"]*)"([^>]*)>'
+        r'(.*?)</div>\s*</div>',
+        html_text,
+        re.I | re.S,
+    )
+    if openings != len(modules):
+        errors.append("every English table-cont must contain one direct table-list component")
+
+    for index, (outer_classes, before_class, inner_classes, after_class, body) in enumerate(modules, 1):
+        if not ({"table3", "table4"} & set(inner_classes.split())):
+            errors.append(f"English table module #{index} must retain table-list plus table3 or table4 for template borders")
+        attrs = before_class + after_class
+        style_match = re.search(r'\bstyle="([^"]*)"', attrs, re.I)
+        style = (style_match.group(1) if style_match else "").replace(" ", "").lower()
+        if "margin:0auto" not in style:
+            errors.append(f"English table module #{index} must center the inner table-list with margin:0 auto")
+
+        is_wide = bool(re.search(r'\bdata-table-layout="wide"', attrs, re.I))
+        width = re.search(r'(?:^|;)width:(\d+)%', style)
+        min_width = re.search(r'min-width:(\d+)px', style)
+        if is_wide:
+            if "overflow-auto" not in set(outer_classes.split()):
+                errors.append(f"wide English table module #{index} must use table-cont overflow-auto")
+            if not width or int(width.group(1)) != 100 or not min_width or int(min_width.group(1)) < 680:
+                errors.append(f"wide English table module #{index} must use width:100% and min-width >= 680px")
+        else:
+            if "overflow-auto" in set(outer_classes.split()):
+                errors.append(f"standard English table module #{index} must not force horizontal scrolling")
+            if (
+                not width
+                or not 70 <= int(width.group(1)) <= 100
+                or "max-width:100%" not in style
+                or min_width
+            ):
+                errors.append(
+                    f"standard English table module #{index} must use 70%-100% width, max-width:100%, and no min-width"
+                )
+
+        rows = re.findall(r"<ul\b[^>]*>(.*?)</ul>", body, re.I | re.S)
+        cell_counts = [len(re.findall(r"<li\b", row, re.I)) for row in rows]
+        if len(rows) < 2 or not cell_counts or min(cell_counts) < 2 or len(set(cell_counts)) != 1:
+            errors.append(f"English table module #{index} must have a header row and equal LI cell counts in every UL row")
 
 
 def validate_step_lists(html_text, errors):
@@ -246,41 +298,44 @@ def validate(html_text, assets_dir=None, profile="tw"):
         errors.append("individual operation steps must not use H3")
     if parser.bare_uls:
         errors.append(f"bare UL count must be 0, got {parser.bare_uls}")
-    for table_index, (table_attrs, parent_classes) in enumerate(
-        zip(parser.table_attrs, parser.table_parent_classes), 1
-    ):
-        style = table_attrs.get("style", "").replace(" ", "").lower()
-        if "table-box" not in parent_classes:
-            errors.append(f"table #{table_index} must be directly wrapped by .table-box")
-        if "table-layout:fixed" in style or "white-space:nowrap" in style:
-            errors.append(f"table #{table_index} must not force fixed columns or nowrap text")
-        if (
-            "table-layout:auto" not in style
-            or "margin:0auto" not in style
-            or "text-align:center" not in style
+    if profile == "en":
+        validate_english_template_tables(html_text, errors)
+    else:
+        for table_index, (table_attrs, parent_classes) in enumerate(
+            zip(parser.table_attrs, parser.table_parent_classes), 1
         ):
-            errors.append(f"table #{table_index} must be centered and use automatic column sizing")
-
-        is_wide = table_attrs.get("data-table-layout", "").lower() == "wide"
-        min_width = re.search(r"min-width:(\d+)px", style)
-        if is_wide:
-            if "overflow-auto" not in parent_classes:
-                errors.append(f"wide table #{table_index} must use .table-box.overflow-auto")
-            if "width:100%" not in style or not min_width or int(min_width.group(1)) < 680:
-                errors.append(f"wide table #{table_index} must use width:100% and min-width >= 680px")
-        else:
-            width = re.search(r"(?:^|;)width:(\d+)%", style)
-            if "overflow-auto" in parent_classes:
-                errors.append(f"standard table #{table_index} must not enable horizontal scrolling")
+            style = table_attrs.get("style", "").replace(" ", "").lower()
+            if "table-box" not in parent_classes:
+                errors.append(f"table #{table_index} must be directly wrapped by .table-box")
+            if "table-layout:fixed" in style or "white-space:nowrap" in style:
+                errors.append(f"table #{table_index} must not force fixed columns or nowrap text")
             if (
-                not width
-                or not 70 <= int(width.group(1)) <= 100
-                or "max-width:100%" not in style
-                or min_width
+                "table-layout:auto" not in style
+                or "margin:0auto" not in style
+                or "text-align:center" not in style
             ):
-                errors.append(
-                    f"standard table #{table_index} must use a reasonable 70%-100% width, max-width:100%, and no min-width"
-                )
+                errors.append(f"table #{table_index} must be centered and use automatic column sizing")
+
+            is_wide = table_attrs.get("data-table-layout", "").lower() == "wide"
+            min_width = re.search(r"min-width:(\d+)px", style)
+            if is_wide:
+                if "overflow-auto" not in parent_classes:
+                    errors.append(f"wide table #{table_index} must use .table-box.overflow-auto")
+                if "width:100%" not in style or not min_width or int(min_width.group(1)) < 680:
+                    errors.append(f"wide table #{table_index} must use width:100% and min-width >= 680px")
+            else:
+                width = re.search(r"(?:^|;)width:(\d+)%", style)
+                if "overflow-auto" in parent_classes:
+                    errors.append(f"standard table #{table_index} must not enable horizontal scrolling")
+                if (
+                    not width
+                    or not 70 <= int(width.group(1)) <= 100
+                    or "max-width:100%" not in style
+                    or min_width
+                ):
+                    errors.append(
+                        f"standard table #{table_index} must use a reasonable 70%-100% width, max-width:100%, and no min-width"
+                    )
     if re.search(r"<style\b|article-toc", html_text, re.I):
         errors.append("custom style or article-toc is forbidden")
     escaped_newline_patterns = (
@@ -292,7 +347,10 @@ def validate(html_text, assets_dir=None, profile="tw"):
     for label, pattern in escaped_newline_patterns:
         if re.search(pattern, html_text, re.I):
             errors.append(f"literal {label} found; HTML must contain real line breaks, not escape text")
-    if re.search(r'class="[^"]*(?:rare-forest-article|gible-article|auto-tool-card|table-cont|table-list)[^"]*"', html_text, re.I):
+    legacy_classes = r"rare-forest-article|gible-article|auto-tool-card"
+    if profile != "en":
+        legacy_classes += r"|table-cont|table-list"
+    if re.search(rf'class="[^"]*(?:{legacy_classes})[^"]*"', html_text, re.I):
         errors.append("legacy article-specific classes are forbidden")
     if profile == "en":
         if re.search(r"[\u4e00-\u9fff]", html_text):

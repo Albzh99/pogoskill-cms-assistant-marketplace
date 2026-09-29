@@ -147,6 +147,16 @@ def sample_en_html_with_faq_cta():
     )
 
 
+def sample_en_html_with_table():
+    table = (EN_PUBLISHER / "assets" / "responsive-table.html").read_text(encoding="utf-8")
+    return sample_en_html().replace("  <p>Complete content.</p>", f"  <p>Complete content.</p>\n  {table}")
+
+
+def sample_en_html_with_wide_table():
+    table = (EN_PUBLISHER / "assets" / "wide-table.html").read_text(encoding="utf-8")
+    return sample_en_html().replace("  <p>Complete content.</p>", f"  <p>Complete content.</p>\n  {table}")
+
+
 class ValidatorTests(unittest.TestCase):
     def test_valid_contract_passes(self):
         self.assertTrue(VALIDATOR.validate(sample_html(), PUBLISHER / "assets")["ok"])
@@ -265,6 +275,38 @@ class ValidatorTests(unittest.TestCase):
         self.assertTrue(
             VALIDATOR.validate(sample_en_html(), EN_PUBLISHER / "assets", "en")["ok"]
         )
+
+    def test_english_bordered_template_table_passes(self):
+        result = VALIDATOR.validate(sample_en_html_with_table(), EN_PUBLISHER / "assets", "en")
+        self.assertTrue(result["ok"], result["errors"])
+
+    def test_english_bordered_wide_table_passes(self):
+        result = VALIDATOR.validate(sample_en_html_with_wide_table(), EN_PUBLISHER / "assets", "en")
+        self.assertTrue(result["ok"], result["errors"])
+
+    def test_english_native_borderless_table_is_blocked(self):
+        broken_table = '''<div class="table-box">
+  <table style="width:90%;max-width:100%;table-layout:auto;margin:0 auto;text-align:center;">
+    <thead><tr><th>Item</th><th>Details</th></tr></thead>
+    <tbody><tr><td>Example</td><td>Content</td></tr></tbody>
+  </table>
+</div>'''
+        broken = sample_en_html().replace("  <p>Complete content.</p>", f"  <p>Complete content.</p>\n  {broken_table}")
+        result = VALIDATOR.validate(broken, EN_PUBLISHER / "assets", "en")
+        self.assertFalse(result["ok"])
+        self.assertTrue(any("bordered V2" in item for item in result["errors"]))
+
+    def test_english_table_missing_border_class_is_blocked(self):
+        broken = sample_en_html_with_table().replace("table-list table4", "table-list")
+        result = VALIDATOR.validate(broken, EN_PUBLISHER / "assets", "en")
+        self.assertFalse(result["ok"])
+        self.assertTrue(any("template borders" in item for item in result["errors"]))
+
+    def test_english_table_requires_equal_cell_counts(self):
+        broken = sample_en_html_with_table().replace("<li>Content two</li>", "", 1)
+        result = VALIDATOR.validate(broken, EN_PUBLISHER / "assets", "en")
+        self.assertFalse(result["ok"])
+        self.assertTrue(any("equal LI cell counts" in item for item in result["errors"]))
 
     def test_english_how_to_heading_accepts_approved_h3_variant(self):
         html = sample_en_html().replace(
