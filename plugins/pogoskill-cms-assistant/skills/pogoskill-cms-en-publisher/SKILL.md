@@ -35,6 +35,7 @@ Use `assets/paired-image-box.html` when the DOCX or reference article explicitly
 
 1. Read the complete English source, including every paragraph, table, FAQ and image marker.
 2. Query the English site, V2 template, fields, author, classification, products, sidebar, related pages and exact URL in real time.
+   For products, verify live `/cms/product/list` and `/cms/product/info` records, then submit exactly `"product_id": ["4987", "4988"]`: `4987` is PoGoskill/Windows and `4988` is PoGoskill(Mac)/Mac. Never substitute PoGo Wizard, MHN Wizard, iOS Assistant, Android App or IPA records. The shared request script rejects a non-canonical English product payload.
 3. Build readable, indented V2 HTML using only approved structures from the English contract.
    Every English table must use the site's bordered V2 component `table-cont > table-list table3/table4 > ul > li`; never replace it with a native `<table>`. Ordinary tables start from `assets/responsive-table.html`: keep the template border classes and center only the inner `table-list` at a reasonable content-driven width, about 90% by default. Only tables whose actual content is too long to fit comfortably use `assets/wide-table.html`, `data-table-layout="wide"`, and the overflow wrapper; column count alone is not enough.
 4. For supplied JPG/PNG article images, create the same-basename WebP and upload both with the image pipeline using `-SiteId 286`. Article HTML must use `https://images.pogoskill.com/<folder>/<semantic-name>.<ext>` public URLs, never the CMS `upload` host. For Guide images named in the source, search the English `guides` library by that exact name; do not guess substitutes.
@@ -49,8 +50,8 @@ python scripts/validate-article-html.py <html-path> --profile en --assets-dir sk
 ```
 
 7. Fix every validator error before any CMS write.
-8. On authorization, save only a draft, then immediately call `/cms/page/info` and compare the complete readback with the final local HTML and metadata.
+8. On authorization, save only a draft, then immediately call `/cms/page/info` and compare the complete readback with the final local HTML and metadata. Save that response and run `scripts/assert-cms-page-products.ps1 -ResponsePath <page-info-response.json>`; any product mismatch blocks completion.
 
 ## Completion
 
-`Draft ready for review` requires the page ID, write `request_id`, readback `request_id`, `status = 5`, `sync_status = 1`, complete HTML comparison, exact English CTA, exactly one English Buy Box, published and publicly readable image resources, and confirmation that no page make or article publication occurred.
+`Draft ready for review` requires the page ID, write `request_id`, readback `request_id`, `status = 5`, `sync_status = 1`, exact readback products `4987`/`4988`, complete HTML comparison, exact English CTA, exactly one English Buy Box, published and publicly readable image resources, and confirmation that no page make or article publication occurred.

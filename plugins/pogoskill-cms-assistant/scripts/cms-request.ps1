@@ -6,6 +6,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'CmsCredential.ps1')
+. (Join-Path $PSScriptRoot 'CmsProductMapping.ps1')
 $apiKey = [string](Get-CmsStoredApiKey)
 if ([string]::IsNullOrWhiteSpace($apiKey)) { throw 'Stored CMS credential not found. Run cms-save-api-key.ps1 first.' }
 
@@ -24,6 +25,21 @@ if ($Path -in @('/cms/page/add', '/cms/page/update')) {
         throw "HTML content contains a literal newline escape token ($token). Use real line breaks and serialize the JSON payload exactly once."
       }
     }
+  }
+
+  if ([string]$payload.site_id -eq '286') {
+    $productProperty = $payload.PSObject.Properties['product_id']
+    if ($null -eq $productProperty) {
+      throw 'English site page writes require product_id ["4987","4988"].'
+    }
+    Assert-PoGoskillEnglishProductSelection -ProductId $productProperty.Value -RequireCanonicalPayload | Out-Null
+  }
+  elseif ([string]$payload.site_id -eq '324') {
+    $productProperty = $payload.PSObject.Properties['product_id']
+    if ($null -eq $productProperty) {
+      throw 'Traditional Chinese site page writes require product_id ["6333","6332"].'
+    }
+    Assert-PoGoskillTwProductSelection -ProductId $productProperty.Value -RequireCanonicalPayload | Out-Null
   }
 }
 

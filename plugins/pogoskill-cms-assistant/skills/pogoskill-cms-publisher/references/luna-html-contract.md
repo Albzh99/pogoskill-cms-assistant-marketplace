@@ -443,7 +443,7 @@ PoGoskill 主介绍模块的正文下载 CTA 只放一次，位置必须是 PoGo
 - 相关文章：写入 CMS `related_id`。
 - 作者：写入 `author_id` 和模板 `author_cont` 字段。
 - 分类：写入 `classify_id` 与 `classify_page_id`。
-- 产品：写入 CMS 产品主键 `6333`、`6332`。
+- 产品：严格写成 `"product_id": ["6333", "6332"]`，分别对应 PoGoskill/Windows 与 PoGoskill(Mac)/Mac。`7925`、`7926` 只是下载 PID，不能写入 `product_id`。
 - 侧边栏：写入正确的 `sidebar_module_id`。
 
 正文中禁止复制 `.content-navlinks`、相关文章卡片、作者卡片或侧边栏 HTML，否则容易重复、挤压和遮挡。

@@ -29,7 +29,7 @@ description: 将 PoGoskill 台湾站 SEO 文稿转换为文章内容页面模板
 1. 用站点列表确认台湾站仍为目标站点。
 2. 用页面列表按 URL 与标题查重；命中时选择更新，不重复创建。
 3. 查询文章 V2 模板及其自定义字段。
-4. 查询并确认作者、分类页、产品和相关文章；相关文章必须存在且属于正确站点。
+4. 查询并确认作者、分类页、产品和相关文章；相关文章必须存在且属于正确站点。产品必须通过 `/cms/product/list` 与 `/cms/product/info` 实时核验，并严格写成 `"product_id": ["6333", "6332"]`，即 PoGoskill/Windows 与 PoGoskill(Mac)/Mac；`7925`、`7926` 是下载 PID，不得写进 `product_id`。
 5. 读取同类近期已发布文章，选择符合当前站点的 HTML 组件。
 
 任何关键字段无法确认时，停止在 CMS 写入前并报告缺失项。
@@ -83,11 +83,11 @@ description: 将 PoGoskill 台湾站 SEO 文稿转换为文章内容页面模板
 2. URL 必须为小写 `.html` 相对路径，并已通过 CMS 查重。
 3. 新建使用 `/cms/page/add`；已存在页面使用 `/cms/page/update`，更新前先读回当前版本。
    用户明确要求修改某个现有草稿时，先以页面 ID/URL 回读确认目标，再直接更新该草稿；若图片已上传但前台 URL 为 404，先用原图片上传 `publish_id` 发布图片资源，确认上云后再更新原草稿。不得改为新增页面或重复上传图片。
-4. 保存后立即调用 `/cms/page/info` 回读，逐项比对元数据、正文、图片盒和 Buy Box。
+4. 保存后立即调用 `/cms/page/info` 回读，逐项比对元数据、正文、图片盒和 Buy Box；保存响应后运行 `scripts/assert-cms-page-products.ps1 -ResponsePath <page-info-response.json>`，确认产品严格回读为 `6333`、`6332`。
 5. 将页面 ID、草稿状态、回读结果、待补图片和所有 `request_id` 交给审查 Agent。
 
 上传前必须运行插件根目录 `scripts/validate-article-html.py <html-path> --assets-dir <publisher-assets-dir>`；返回非零时禁止调用写接口。写入后运行 `compare-docx-to-cms-page.py` 并检查缺失区块，不能只比较标题或开头几段。
 
 ## 完成条件
 
-只有完整正文、所有要求图片、元数据、草稿写入和 `/cms/page/info` 回读均成功才报告 `Draft ready for review`。最终回复必须给出页面 ID、草稿状态、校验结果和回读 `request_id`；拿不到这些证据时不得说“已上传”或“正在上传”。存在图片占位时明确报告 `Image hold`，绝不报告已发布。
+只有完整正文、所有要求图片、元数据、产品 `6333`/`6332`、草稿写入和 `/cms/page/info` 回读均成功才报告 `Draft ready for review`。最终回复必须给出页面 ID、草稿状态、校验结果和回读 `request_id`；拿不到这些证据时不得说“已上传”或“正在上传”。存在图片占位时明确报告 `Image hold`，绝不报告已发布。

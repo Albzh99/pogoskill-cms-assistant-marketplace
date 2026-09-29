@@ -36,7 +36,7 @@ API Key 只能由插件根目录 `scripts/CmsCredential.ps1` 从 Windows Credent
   "seo_keywords": "主关键词",
   "content": "完整 V2 HTML",
   "author_id": 244,
-  "product_id": [6333, 6332],
+  "product_id": ["6333", "6332"],
   "classify_id": 0,
   "classify_page_id": 0,
   "sidebar_module_id": 0,
