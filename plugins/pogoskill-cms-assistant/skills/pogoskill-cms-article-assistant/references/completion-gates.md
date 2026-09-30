@@ -15,6 +15,7 @@
 | CMS 写入 | `page/add` 或已确认目标的 `page/update` 返回 `code: 0`、页面 ID 与 `request_id` |
 | CMS 回读 | `page/info` 返回相同页面 ID、完整正文和草稿状态 |
 | 来源覆盖 | `compare-docx-to-cms-page.py` 报告无未解释缺失区块；有编辑性改写时逐条记录对应关系 |
+| Guide 文字保真 | Guide／操作步骤仅改变 HTML 包装；源文已有短标题可原样加粗，其余说明逐字、原序保留；`missing_step_blocks = []`，不存在自行改写、缩写、补写或重排 |
 | 安全状态 | 未调用 `page/make`、未发布文章页面；`pagepublish/publish` 仅接收有当前图片上传 request_id 佐证的图片 publish_id；未删除或修改无关旧文章 |
 
 任一项缺失都不得输出 `Draft ready for review`。

@@ -18,6 +18,7 @@ description: 独立审查 PoGoskill 台湾站 CMS 草稿的元数据、HTML、�
 - 最后一个结语 section 必须包含正确站点首页链接；锚文本是 DOCX 实际提供的“最佳／最好……”自然关键词，不能是 `PoGoskill`。链接后面的 `PoGoskill` 必须保持普通文字。英文结语同样使用源文的 `best ...` 关键词作为首页锚文本。
 - PoGoskill 模块必须先完整写完介绍、适用情境、操作思路、作用与优势，再原样放入对应站点的 `assets/download-cta.html`；下载区必须有两个 `secure-btn` 和两个 `secure-download` 安全下载框，桌面按钮组固定居中。按钮下方必须紧接较大的现有 H3“PoGoskill 操作步驟”或英文站已验证的 `How to Use PoGoskill` 标题，随后才进入 `step-cont`。若下载区被简化、未居中、按钮过早出现或步骤标题层级错误，判定为结构不合格。FAQ 只有在 DOCX 对应答案明确介绍或推荐 PoGoskill 时才允许额外一组对应语言 CTA；繁中与英文下载资产不得混用。
 - 每个 `step-cont > li` 必须以 `<p><span>步驟 N</span><label><strong>短標題：</strong>普通正文。</label></p>` 开头。`p` 只能直接包含步骤徽标和一个无 class 的 `label`；加粗标题只能位于 `label` 开头。图片盒必须是该 `<p>` 后面的同级元素。把 `strong` 或正文直接放在 `p` 下时，判定为会产生多列挤压的结构错误。
+- 逐项对照 DOCX 的 Guide／操作步骤原文。允许的唯一变化是 HTML 标签和对源文已有开头短标题的 `strong` 包装；普通正文必须逐字、原序一致。新增短标题、同义改写、润色、缩写、补写、合并、拆分或重排任一项都判定为 `FAIL`。`compare-docx-to-cms-page.py` 的 `missing_step_blocks` 必须为空。
 - 将同分类正常上线文章作为结构基准；拒绝基准中不存在的新文本框、提示框、卡片、彩色背景框、引用框、CSS class、局部 CSS、标题样式或下载框架。
 - 每个已完成图片盒必须是 `img-wrap text-center > picture > source[type=image/webp] + img`，两者同 basename、同尺寸，fallback 为 JPG/PNG，ALT 为自然繁体中文。
 - 并排双图必须来自源 DOCX／参考样式的明确分组，使用 `row justify-content-center[data-image-layout="pair"]`，且恰好两个 `col-12 col-md-6` 子项。每项只能有一个完整 picture，图下紧跟非空说明；桌面横图最大宽度不超过 400px，竖图最大高度不超过 520px，移动端必须能上下排列。左右顺序、ALT、说明和真实画面逐项对应；不得裁切、拉伸或用自定义 CSS 修补。

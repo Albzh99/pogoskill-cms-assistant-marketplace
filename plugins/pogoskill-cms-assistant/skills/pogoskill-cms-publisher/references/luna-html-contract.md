@@ -361,6 +361,7 @@ PoGoskill 主介绍模块的正文下载 CTA 只放一次，位置必须是 PoGo
 - “PoGoskill 操作步驟”模块标题必须是 H3；但每个单独步骤不能再写成 H3，`step-cont` 已负责步骤内部的视觉层级。
 - 每个 `<li>` 的第一个元素必须是一个无 class 的 `<p>`。其直接子元素固定为两个：先放 `<span>步驟 N</span>` 徽标，再放一个无 class 的 `<label>`，由 `label` 包住该步骤的全部标题和说明。
 - 需要加粗时，只允许在 `label` 开头使用一个 `<strong>短標題：</strong>`，其后直接接普通文字。禁止把 `strong`、正文文字或其他标签直接放在 `p` 下，也禁止在 `label` 内加入第二个 `span`、`br`、链接或其他布局元素。
+- 加粗是纯格式转换，不是编辑授权。`strong` 中只能使用 DOCX 原句开头已有的短标题或冒号前文字，`strong` 后面的 Guide 说明必须与 DOCX 逐字一致、顺序一致。不得换同义词、调整语气、总结、补充、删除或重排。源文没有短标题时不要加粗，直接把完整原文放进 `label`。
 - `.step-cont p` 在站点中采用横向 flex；固定的 `span + label` 只形成“步骤徽标 + 完整内容”两列。若写成 `span + strong + 文字`，则会形成三列，使短标题逐字换行和正文挤压。
 - Guide 图片盒是 `<p>` 后面的同级元素，仍位于同一 `<li>` 内；禁止把 `<div class="img-wrap">` 或 `<picture>` 放进步骤文字 `<p>`。
 
@@ -486,7 +487,7 @@ Luna 必须输出校验结果后才能调用 `/cms/page/add` 或 `/cms/page/upda
 13. Buy Box 恰好一个且与资产完全一致。
 14. `IMAGE_PENDING` 为 0 才能判定图片完成。
 15. 所有标签平衡，HTML 按逻辑块换行缩进。
-16. 每个 `step-cont > li` 必须以固定的 `p > span + label` 开头；`label` 可用一个开头 `strong` 加粗短标题，并包含其余普通正文。图片盒只能作为该 `<p>` 后面的同级元素。
+16. 每个 `step-cont > li` 必须以固定的 `p > span + label` 开头；`label` 可用一个开头 `strong` 加粗源文已有短标题，并逐字包含其余原文正文。图片盒只能作为该 `<p>` 后面的同级元素；不得因格式转换改写步骤文字。
 17. 上传前必须运行 `scripts/validate-article-html.py`，返回码必须为 0；不得用人工口头检查代替。
 18. DOCX 的所有正文段落、表格、FAQ、结语和图片占位都必须进入 HTML。写入后用 `compare-docx-to-cms-page.py` 列出缺失区块；存在未解释缺失时不得报告完成。
 19. 所有图片 `data-src/data-srcset` 必须使用 `https://tw.pogoskill.com/images/`；正文不得出现 `site.p.cms.afirstsoft.cn`、`attachment=1` 或哈希结尾文件名。新图还必须具备上传 request_id、图片 publish_id、图片发布 request_id，且前台双格式可读。

@@ -10,6 +10,7 @@ description: Convert English PoGoskill SEO drafts into the English site's fixed 
 - The DOCX must include at least one verifiable layout reference: a reference article URL, CMS page ID, or existing HTML. Read and record it before composing the page; never invent a new visual module when the reference is absent.
 - Every ordinary article image that must be uploaded must be embedded at its intended position in the DOCX. A loose folder, local path, or unattached image set is not enough for automatic placement.
 - Guide images are not embedded or re-uploaded. The DOCX must state the exact CMS `guides` filename, including extension, at the relevant paragraph or step. Search and reuse only that exact filename and its matching fallback/WebP pair; never guess by meaning or substitute a similar screenshot.
+- Guide and operation-step wording is immutable source copy. HTML may wrap an existing source lead phrase in `<strong>`, but must preserve every following word and the original order. Never rewrite, polish, shorten, expand, merge, split or invent a bold lead. If the DOCX has no explicit lead phrase, keep the full step in `<label>` without `<strong>`.
 
 Use this skill only for English articles on `https://www.pogoskill.com`. Traditional Chinese articles must use `pogoskill-cms-publisher`; never mix the two sites' wording, IDs, product links, image roots, or component assets.
 
@@ -51,8 +52,8 @@ python scripts/validate-article-html.py <html-path> --profile en --assets-dir sk
 ```
 
 7. Fix every validator error before any CMS write.
-8. On authorization, save only a draft, then immediately call `/cms/page/info` and compare the complete readback with the final local HTML and metadata. Save that response and run `scripts/assert-cms-page-products.ps1 -ResponsePath <page-info-response.json>`; any product mismatch blocks completion.
+8. On authorization, save only a draft, then immediately call `/cms/page/info` and compare the complete readback with the final local HTML and metadata. Run the plugin-root `scripts/compare-docx-to-cms-page.py` against the source structure and readback; `missing_step_blocks` must be empty, and any nonzero result blocks completion. Save the response and run `scripts/assert-cms-page-products.ps1 -ResponsePath <page-info-response.json>`; any product mismatch blocks completion.
 
 ## Completion
 
-`Draft ready for review` requires the page ID, write `request_id`, readback `request_id`, `status = 5`, `sync_status = 1`, exact readback products `4987`/`4988`, complete HTML comparison, exact English CTA, exactly one English Buy Box, published and publicly readable image resources, and confirmation that no page make or article publication occurred.
+`Draft ready for review` requires the page ID, write `request_id`, readback `request_id`, `status = 5`, `sync_status = 1`, exact readback products `4987`/`4988`, complete HTML comparison with `missing_step_blocks = []`, exact English CTA, exactly one English Buy Box, published and publicly readable image resources, and confirmation that no page make or article publication occurred.

@@ -54,6 +54,7 @@ description: 将 PoGoskill 台湾站 SEO 文稿转换为文章内容页面模板
 - PoGoskill 主介绍模块的桌面下载 CTA 只放一组，并必须逐字复制 `assets/download-cta.html`。完整结构必须含 `dev-desktop > btn-groups > 两个 secure-btn`，每个按钮下保留 `secure-download` 安全下载框；桌面按钮组固定居中，缺任一层都禁止上传。必须先写完 PoGoskill 的介绍、适用情境、操作思路、作用与优势，再放下载 CTA；不得在第一段介绍后立刻插入按钮。若 DOCX 的某个 FAQ 答案明确介绍或推荐 PoGoskill，可在该答案后额外复制一组繁中 CTA；没有明确推荐则不放。
 - PoGoskill 模块固定顺序为“完整介绍与优势文字 → 下载 CTA → 较大的现有 H3『PoGoskill 操作步驟』→ `step-cont` 步骤”。操作步骤标题不得做成普通 `section-label`、H4 或自创标题样式，必须使用 `h3-triangle` 或同分类已验证等价组件；单独的每个步骤不再使用 H3。
 - `step-cont` 每一步固定为 `<li><p><span>步驟 N</span><label><strong>步驟短標題：</strong>完整說明。</label></p>圖片盒</li>`。`label` 必须无 class，并把加粗短标题和普通正文完整包在一起；`strong` 不能直接成为 `p` 的子元素，否则站点的横向步骤布局会把标题和正文拆成多列，造成逐字换行。图片盒必须放在该 `<p>` 之后，不能塞进段落。
+- Guide／操作步骤只允许改变 HTML 包装，不允许改变 DOCX 文字。`strong` 只能包住源文开头已经存在的短标题或冒号前原文；其后的说明必须逐字保留原顺序。禁止为了套格式自行概括标题、改写、润色、缩写、扩写、合并、拆分或重排任何步骤文字。源文没有独立短标题时，整段放入 `label` 且不加 `strong`，不得编造标题。
 - FAQ 默认不放下载 CTA。只有某个问答的源文确实解释并推荐 PoGoskill 时，才可在该答案之后额外放一组繁中 CTA；不得因为文章关联产品而自动加入，也不得误用英文 CTA。
 - 标准 Buy Box 内部自带的 `dev-desktop` / `dev-mobile` 属于产品组件，不计入正文下载 CTA 数量，也不得删改。
 - 同一章节出现多个并列对象时，不要为每个对象创建 H3。优先使用参考文章已有的列表或表格；只有参考文章存在对应卡片组件时才能原样复用，H3 只表示真正的逻辑子章节。
@@ -86,7 +87,7 @@ description: 将 PoGoskill 台湾站 SEO 文稿转换为文章内容页面模板
 4. 保存后立即调用 `/cms/page/info` 回读，逐项比对元数据、正文、图片盒和 Buy Box；保存响应后运行 `scripts/assert-cms-page-products.ps1 -ResponsePath <page-info-response.json>`，确认产品严格回读为 `6333`、`6332`。
 5. 将页面 ID、草稿状态、回读结果、待补图片和所有 `request_id` 交给审查 Agent。
 
-上传前必须运行插件根目录 `scripts/validate-article-html.py <html-path> --assets-dir <publisher-assets-dir>`；返回非零时禁止调用写接口。写入后运行 `compare-docx-to-cms-page.py` 并检查缺失区块，不能只比较标题或开头几段。
+上传前必须运行插件根目录 `scripts/validate-article-html.py <html-path> --assets-dir <publisher-assets-dir>`；返回非零时禁止调用写接口。写入后运行 `compare-docx-to-cms-page.py` 并检查缺失区块，不能只比较标题或开头几段。该比较器会把 DOCX 的步骤正文作为逐字保留门槛；`missing_step_blocks` 非空或脚本非零时必须修复草稿，不得解释为“只是润色”。
 
 ## 完成条件
 
