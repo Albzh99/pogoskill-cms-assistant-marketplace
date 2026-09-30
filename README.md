@@ -13,7 +13,7 @@
 
 把本仓库地址交给组员的 Codex AI，并发送下面这句话：
 
-> 请从 Git 仓库安装 PoGoskill CMS 文章助手：`https://github.com/Albzh99/pogoskill-cms-assistant-marketplace.git`。按照仓库根目录 `SETUP.md` 完成 Marketplace 和插件安装。需要 CMS API Key 时，先替我启动保存命令并让终端停在等待提示；然后让我复制 Key，回到终端只按 Enter。不要让我把 Key 粘贴进终端或发到聊天里。安装完成后请让我新建一个任务再使用插件。
+> 请从 Git 仓库安装或更新到最新版 PoGoskill CMS 文章助手：`https://github.com/Albzh99/pogoskill-cms-assistant-marketplace.git`。按照仓库根目录 `SETUP.md` 完成 Marketplace 和插件安装，不要复用旧消息中的版本号或缓存路径。需要 CMS API Key 时，先替我启动不带 `-Prompt` 的保存命令，并把该运行会话真正打开到 Codex 可见终端；确认我能看到“请现在复制完整的 CMS API Key”后，再让我复制 Key并回到终端只按 Enter。保存进程退出后，立即用同一插件根目录运行 `cms-check-api-key.ps1`；检查通过才算完成。不要让我把 Key 粘贴进终端或发到聊天里。安装完成后请让我新建一个任务再使用插件。
 
 组员的电脑必须已经：
 
@@ -22,6 +22,10 @@
 3. 能正常访问 GitHub。
 
 API Key 不在仓库中，也不得提交到 Git。首次保存后会写入 Windows DPAPI 加密、仅当前用户可读且独立于插件版本的本地存储；Credential Manager 可用时也会保存一份。遇到 Windows `1312` 时自动使用本地副本，不应在每个新任务中重新索取。
+
+如果 AI 给出的脚本路径包含旧版本号，或声称“终端已打开”但界面没有终端面板，说明它没有完成新版交互流程。应先更新插件，再由 AI 创建终端运行会话并把该会话显示到 Codex 底部面板；不能让同事手工寻找缓存目录。
+
+已经安装过的同事可让 AI 执行 `codex plugin marketplace upgrade pogoskill-team`，再执行 `codex plugin add pogoskill-cms-assistant@pogoskill-team`，然后新建任务加载新版。
 
 不熟悉电脑操作的同事可直接下载 [PoGoskill CMS 文章助手同事试用指南](docs/PoGoskill%20CMS%20文章助手同事试用指南.docx)。手册逐步说明如何向管理员申请 API Key、让 AI 安装插件、安全保存 Key，以及分别试用繁中站和英文站文章。
 

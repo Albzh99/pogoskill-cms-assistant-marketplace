@@ -11,6 +11,13 @@ codex plugin add pogoskill-cms-assistant@pogoskill-team
 
 `codex plugin marketplace add` 会自行获取公开 Git 仓库，不需要使用者手动下载或解压。
 
+若电脑已经安装过旧版，必须先让 AI 更新 Marketplace 的 Git 仓库，再重新执行 `codex plugin add pogoskill-cms-assistant@pogoskill-team`。后续命令必须从当前 Marketplace 根目录动态定位插件；禁止复制旧消息中带 `1.0.0+codex...` 的缓存路径。
+
+```powershell
+codex plugin marketplace upgrade pogoskill-team
+codex plugin add pogoskill-cms-assistant@pogoskill-team
+```
+
 安装完成后，新建一个 Codex 任务，让新任务加载插件。
 
 ## 本地文件安装（备用）
@@ -47,7 +54,20 @@ Key 不会以明文出现在终端、文件或命令历史。加密副本位于 
 
 AI 在每个新任务中应先运行 `scripts/cms-check-api-key.ps1`。它只返回“凭据可用／不存在”，不会显示 Key；检查通过后必须继续执行，不得再次询问。
 
-不要把 `cms-save-api-key` 替换成 API Key，不要把 Key 粘贴进终端，也不要把 API Key 发到聊天中。若必须使用键盘隐藏输入，可由 AI 加上 `-Prompt`。
+### AI 必须怎样打开终端
+
+这一步不应交给同事手工打开 PowerShell。AI 必须：
+
+1. 从当前 Marketplace 根目录定位最新版脚本，不能使用旧对话里带版本号的缓存路径；
+2. 用可持续跟踪的终端会话运行不带 `-Prompt`、不带 `-FromClipboard` 的 `cms-save-api-key.ps1`；
+3. 等脚本显示“请现在复制完整的 CMS API Key”后，把同一个运行会话真正打开到 Codex 的可见终端面板；
+4. 只有终端打开工具返回成功后，才能告诉使用者“终端已打开”；看不到终端时不得假装已经打开，也不得改让使用者手工输入长路径；
+5. 使用者复制 Key 并在终端按 Enter 后，AI 必须继续等待同一进程退出；
+6. 随后立即从同一个插件根目录运行 `cms-check-api-key.ps1`。只有它报告可用，才算保存成功。
+
+如果使用者已经明确说“Key 已复制到剪贴板”，AI 可以直接从当前插件根目录运行 `cms-save-api-key.ps1 -FromClipboard`，不需要终端交互；执行后仍必须立即运行检查脚本。默认禁止使用 `-Prompt`，因为它要求粘贴而不是“复制后按 Enter”。
+
+不要把 `cms-save-api-key` 替换成 API Key，不要把 Key 粘贴进终端，也不要把 API Key 发到聊天中。只有使用者明确要求键盘隐藏输入时，AI 才可加上 `-Prompt`。
 
 ## 交稿文件先这样准备
 
