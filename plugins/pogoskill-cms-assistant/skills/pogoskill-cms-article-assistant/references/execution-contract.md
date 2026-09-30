@@ -5,6 +5,7 @@
 ## 1. 先执行，再描述
 
 - “正在读取／正在上传／正在回读”等进度句后面必须立即出现真实工具调用；不得只发进度文字后停下。
+- 上传脚本若返回运行会话 ID，必须轮询同一会话直至退出并读取最终输出。禁止把工具执行改成无人跟踪的交互式终端阶段，也不得因当前消息没有 manifest 汇总就声称未执行。
 - 只有工具或 API 已返回可核验结果，才能使用“已读取／已上传／已保存”等完成措辞。
 - 本地 HTML、JSON payload、图片转换完成不等于 CMS 已执行。
 - 不得凭感觉、旧对话、浏览器状态或一次命令准备过程判断 CMS、网络或权限异常。
@@ -12,7 +13,7 @@
 ## 2. 固定调用方式
 
 1. JSON 接口只用插件根目录 `scripts/cms-request.ps1` 发出真实 `POST`，不得改用浏览器表单。
-2. 调用前先由脚本从 Windows Credential Manager 读取 `PoGoskillCMS/OpenAPI`。凭据存在时禁止再次索取 API Key。
+2. 调用前统一使用 `Get-CmsStoredApiKey`。脚本先读取 DPAPI 加密、当前用户专属的稳定本地存储，再兼容读取 Windows Credential Manager 的 `PoGoskillCMS/OpenAPI`；只要任一位置有效，就禁止再次索取 API Key。Windows `1312` 仅表示当前进程无法使用 Credential Manager，不等于备用凭据不存在。
 3. HTTP 200 不是成功；只有响应 JSON 的 `code === 0` 才算业务成功。
 4. 每次请求都把请求 body 与响应保存到当前文章工作目录；文件名包含顺序、接口和时间，例如 `03-page-add-request.json`、`03-page-add-response.json`。
 5. 日志和回复只记录 endpoint、时间、curl exit code、业务 `code`、`msg`、`request_id`、页面 ID；不得记录 API Key。
@@ -35,6 +36,7 @@
 - 写请求超时、连接中断或结果不确定时，先用 `/cms/page/list` 按精确 URL 和标题查询，再用 `/cms/page/info` 核验；确认没有新草稿后才可重试写请求。
 - URL 或标题命中页面但不能唯一确认归属时停止写入，防止重复草稿或覆盖旧文章。
 - 对同一写请求不得无脑自动重试三次；每次重试前必须完成上述查重。
+- 图片上传无最终汇总或进程中断时，先检查 manifest 断点、文章目录 `cms-evidence` 和 `/cms/picture/list`；从已保存响应恢复上传 `request_id`/`publish_id`。确认 CMS 已存在同名同尺寸图片对时禁止重传。
 
 ## 5. “已上传草稿”的最低证据
 
@@ -55,7 +57,7 @@
 只在以下情况停止并向用户报告 `Blocked`：
 
 - 必要源文件确实不存在；
-- Windows Credential Manager 中确实没有存储凭据；
+- `Get-CmsStoredApiKey` 已确认 DPAPI 加密本地存储和 Windows Credential Manager 中都没有凭据；
 - 同一客观失败经过三次真实请求仍重复出现，并已保存证据；
 - 目标页面或关键 CMS 字段无法唯一确认；
 - 下一步需要用户新增授权。

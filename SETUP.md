@@ -39,9 +39,13 @@ pwsh -NoProfile -File (Join-Path $root 'plugins\pogoskill-cms-assistant\scripts\
 1. 等终端显示“请现在复制完整的 CMS API Key”；
 2. 复制完整 API Key 到剪贴板；
 3. 回到终端，不要粘贴，只按一次 Enter；
-4. 脚本读取剪贴板，将 Key 写入 Windows Credential Manager，然后自动清空剪贴板。
+4. 脚本读取剪贴板，将 Key 写入 Windows DPAPI 加密、仅当前 Windows 用户可读的稳定存储；Windows Credential Manager 可用时也会同时写入，随后自动清空剪贴板。
 
-Key 不会出现在终端、文件或命令历史。如果使用者已经提前复制完成，并由 AI 在非交互终端执行，可以在命令末尾加入 `-FromClipboard`，让脚本立即读取剪贴板。
+Key 不会以明文出现在终端、文件或命令历史。加密副本位于 `%LOCALAPPDATA%\PoGoskillCMS\OpenAPI.v1.dat`，不在 Git 仓库或插件缓存中，因此插件升级后仍可使用。如果使用者已经提前复制完成，并由 AI 在非交互终端执行，可以在命令末尾加入 `-FromClipboard`，让脚本立即读取剪贴板。
+
+如果 Windows 显示错误 `1312（指定的登录会话不存在）`，新版脚本会自动使用受保护的本地存储，不应再次要求输入 Key。只有脚本明确报告两个存储位置都没有凭据时才需要重新保存。
+
+AI 在每个新任务中应先运行 `scripts/cms-check-api-key.ps1`。它只返回“凭据可用／不存在”，不会显示 Key；检查通过后必须继续执行，不得再次询问。
 
 不要把 `cms-save-api-key` 替换成 API Key，不要把 Key 粘贴进终端，也不要把 API Key 发到聊天中。若必须使用键盘隐藏输入，可由 AI 加上 `-Prompt`。
 

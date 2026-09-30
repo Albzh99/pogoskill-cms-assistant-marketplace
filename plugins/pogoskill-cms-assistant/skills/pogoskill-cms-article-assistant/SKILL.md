@@ -19,13 +19,15 @@ description: 将一篇 PoGoskill 台湾站 DOCX 完整处理为图片已单独�
 
 ## API Key 首次设置
 
-如果 Windows Credential Manager 中没有 CMS Key，优先采用“先启动命令、后复制”的交互流程。由 Agent 先在可见终端运行插件根目录：
+API Key 由统一凭据脚本管理：优先使用稳定的 DPAPI 加密、当前 Windows 用户专属本地存储，并兼容 Windows Credential Manager。插件升级不会删除该存储。任务开始时先运行插件根目录 `scripts/cms-check-api-key.ps1`；只有脚本确认两个位置都不存在时，才允许再次索取 Key。看到 Windows `1312` 不能直接判定 Key 丢失或阻断任务，检查脚本也绝不输出密钥内容。
+
+首次确实没有 CMS Key 时，优先采用“先启动命令、后复制”的交互流程。由 Agent 先在可见终端运行插件根目录：
 
 ```powershell
 pwsh -NoProfile -File scripts/cms-save-api-key.ps1
 ```
 
-脚本会先停在“请现在复制完整的 CMS API Key”提示。此时让使用者复制 Key，回到终端直接按 Enter；脚本随后才读取剪贴板、保存到 Windows Credential Manager 并清空剪贴板。不要让使用者把 Key 粘贴进终端、发到聊天、写进命令行、文件或环境日志。
+脚本会先停在“请现在复制完整的 CMS API Key”提示。此时让使用者复制 Key，回到终端直接按 Enter；脚本随后读取剪贴板，写入 DPAPI 加密且仅当前 Windows 用户可读的本地存储，并在可用时同时写入 Windows Credential Manager，最后清空剪贴板。不要让使用者把 Key 粘贴进终端、发到聊天、写进命令行、文章文件或日志。
 
 如果 Agent 已经确认使用者提前复制完 Key，并且要通过非交互终端自动执行，则使用：
 
@@ -33,7 +35,7 @@ pwsh -NoProfile -File scripts/cms-save-api-key.ps1
 pwsh -NoProfile -File scripts/cms-save-api-key.ps1 -FromClipboard
 ```
 
-`-FromClipboard` 会立即读取剪贴板，不等待 Enter。只有使用者明确要求键盘隐藏输入时才使用 `-Prompt`。
+`-FromClipboard` 会立即读取剪贴板，不等待 Enter。只有使用者明确要求键盘隐藏输入时才使用 `-Prompt`。若 Credential Manager 返回 `1312`，但脚本明确显示受保护备用存储保存成功，则凭据已完成，不得再次询问。
 
 ## 强制执行闭环
 

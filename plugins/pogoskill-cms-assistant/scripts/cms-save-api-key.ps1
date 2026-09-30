@@ -27,9 +27,20 @@ try {
     }
   }
 
-  Set-CmsStoredApiKey -ApiKey $apiKey
+  $saveResult = Set-CmsStoredApiKey -ApiKey $apiKey
   if (-not $KeepClipboard) { Set-Clipboard -Value ' ' }
-  Write-Host 'CMS API key saved securely in Windows Credential Manager.'
+  if ($saveResult.CredentialManagerSaved) {
+    Write-Host 'CMS API key saved in Windows Credential Manager and the protected user-only fallback store.'
+  }
+  else {
+    Write-Host 'CMS API key saved in the protected user-only fallback store.'
+    if ($saveResult.CredentialManagerErrorCode -eq 1312) {
+      Write-Host 'Windows Credential Manager was unavailable in this logon session (1312); future CMS tasks will use the fallback automatically.'
+    }
+    elseif ($null -ne $saveResult.CredentialManagerErrorCode) {
+      Write-Host ("Windows Credential Manager was unavailable (error {0}); future CMS tasks will use the fallback automatically." -f $saveResult.CredentialManagerErrorCode)
+    }
+  }
   if (-not $KeepClipboard) { Write-Host 'Clipboard cleared.' }
 }
 finally {

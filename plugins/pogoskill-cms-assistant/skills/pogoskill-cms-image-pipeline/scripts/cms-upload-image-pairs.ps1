@@ -11,6 +11,38 @@ if (-not $Execute) { throw 'Dry run only. Re-run with -Execute only after the cu
 $manifestFile = [IO.Path]::GetFullPath($ManifestPath)
 if (-not (Test-Path -LiteralPath $manifestFile -PathType Leaf)) { throw "Manifest not found: $manifestFile" }
 $manifest = Get-Content -LiteralPath $manifestFile -Raw -Encoding UTF8 | ConvertFrom-Json
+$manifestDir = Split-Path -Parent $manifestFile
+$evidenceDir = Join-Path $manifestDir 'cms-evidence'
+if (-not (Test-Path -LiteralPath $evidenceDir -PathType Container)) {
+  [void](New-Item -ItemType Directory -Path $evidenceDir -Force)
+}
+
+function Save-Manifest {
+  [IO.File]::WriteAllText($manifestFile, ($manifest | ConvertTo-Json -Depth 18), (New-Object Text.UTF8Encoding($false)))
+}
+
+function Save-UploadEvidence([object]$Item, [string]$RawResponse) {
+  $safeKey = ([string]$Item.image_key -replace '[^a-zA-Z0-9_-]', '-')
+  $stamp = [DateTimeOffset]::UtcNow.ToString('yyyyMMddTHHmmssfffZ')
+  $evidencePath = Join-Path $evidenceDir ("picture-upload-$safeKey-$stamp-response.json")
+  [IO.File]::WriteAllText($evidencePath, $RawResponse, (New-Object Text.UTF8Encoding($false)))
+  return $evidencePath
+}
+
+function Find-UploadEvidence([object]$Item) {
+  foreach ($file in @(Get-ChildItem -LiteralPath $evidenceDir -Filter 'picture-upload-*-response.json' -File | Sort-Object LastWriteTimeUtc -Descending)) {
+    try {
+      $response = Get-Content -LiteralPath $file.FullName -Raw -Encoding UTF8 | ConvertFrom-Json
+      if ($response.code -ne 0 -or [int]$response.data.publish_id -le 0) { continue }
+      $names = @($response.data.list | ForEach-Object { [string]$_.name })
+      if ($item.fallback_name -in $names -and $item.webp_name -in $names) {
+        return [pscustomobject]@{ Path = $file.FullName; Response = $response }
+      }
+    }
+    catch { continue }
+  }
+  return $null
+}
 
 $credentialScript = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\..\..\scripts\CmsCredential.ps1'))
 if (-not (Test-Path -LiteralPath $credentialScript -PathType Leaf)) { throw 'Plugin credential helper was not found.' }
@@ -62,6 +94,10 @@ function Get-PublicImageUrl([object]$UploadedFile, [object]$ListedFile, [int]$Wi
 }
 
 try {
+  $manifest | Add-Member -NotePropertyName upload_started_at -NotePropertyValue ([DateTimeOffset]::Now.ToString('o')) -Force
+  $manifest | Add-Member -NotePropertyName upload_last_error -NotePropertyValue $null -Force
+  Save-Manifest
+
   $dirResponse = Invoke-CmsJson '/cms/picture/dirs' @{ site_id = $SiteId; path = $CmsPath; tree = 0 }
   if ($dirResponse.code -ne 0) { throw "CMS image directory check failed: code=$($dirResponse.code), request_id=$($dirResponse.request_id), msg=$($dirResponse.msg)" }
 
@@ -111,7 +147,16 @@ try {
       $item | Add-Member -NotePropertyName public_url_http_required_for_draft -NotePropertyValue $false -Force
       $item | Add-Member -NotePropertyName public_url_state_note -NotePropertyValue 'Frontend 404 is expected before image publication and does not block CMS draft HTML.' -Force
       $item | Add-Member -NotePropertyName list_request_id -NotePropertyValue $existingResponse.request_id -Force
+      $recoveredEvidence = Find-UploadEvidence $item
+      if ($null -ne $recoveredEvidence) {
+        $item | Add-Member -NotePropertyName upload_request_id -NotePropertyValue $recoveredEvidence.Response.request_id -Force
+        $item | Add-Member -NotePropertyName publish_id -NotePropertyValue $recoveredEvidence.Response.data.publish_id -Force
+        $item | Add-Member -NotePropertyName upload_evidence_path -NotePropertyValue $recoveredEvidence.Path -Force
+      }
       $item.status = 'reused_existing'
+      $manifest | Add-Member -NotePropertyName upload_last_checkpoint -NotePropertyValue $item.image_key -Force
+      Save-Manifest
+      Write-Output ([pscustomobject]@{ image_key = $item.image_key; status = $item.status; manifest_saved = $true })
       continue
     }
 
@@ -128,7 +173,9 @@ try {
       )
       @("X-API-KEY: $apiKey", 'Accept: application/json') | & $curl @formArgs
       if ($LASTEXITCODE -ne 0) { throw "Upload transport error for $($item.image_key): curl exit=$LASTEXITCODE" }
-      $response = [IO.File]::ReadAllText($responsePath, [Text.Encoding]::UTF8) | ConvertFrom-Json
+      $rawResponse = [IO.File]::ReadAllText($responsePath, [Text.Encoding]::UTF8)
+      $uploadEvidencePath = Save-UploadEvidence $item $rawResponse
+      $response = $rawResponse | ConvertFrom-Json
     }
     finally {
       Remove-Item -LiteralPath $responsePath -Force -ErrorAction SilentlyContinue
@@ -166,6 +213,7 @@ try {
 
     $item | Add-Member -NotePropertyName upload_request_id -NotePropertyValue $response.request_id -Force
     $item | Add-Member -NotePropertyName publish_id -NotePropertyValue $response.data.publish_id -Force
+    $item | Add-Member -NotePropertyName upload_evidence_path -NotePropertyValue $uploadEvidencePath -Force
     $item | Add-Member -NotePropertyName fallback_upload_url -NotePropertyValue $fallback.upload -Force
     $item | Add-Member -NotePropertyName webp_upload_url -NotePropertyValue $webp.upload -Force
     $item | Add-Member -NotePropertyName fallback_public_url -NotePropertyValue (Get-PublicImageUrl $fallback $listedFallback ([int]$item.width) ([int]$item.height)) -Force
@@ -180,17 +228,26 @@ try {
     $item | Add-Member -NotePropertyName fallback_online_url -NotePropertyValue $listedFallback.online -Force
     $item | Add-Member -NotePropertyName webp_online_url -NotePropertyValue $listedWebp.online -Force
     $item.status = 'uploaded_pending_publish'
+    $manifest | Add-Member -NotePropertyName upload_last_checkpoint -NotePropertyValue $item.image_key -Force
+    Save-Manifest
+    Write-Output ([pscustomobject]@{ image_key = $item.image_key; status = $item.status; manifest_saved = $true })
   }
 
   $manifest | Add-Member -NotePropertyName site_id -NotePropertyValue $SiteId -Force
   $manifest | Add-Member -NotePropertyName uploaded_at -NotePropertyValue ([DateTimeOffset]::Now.ToString('o')) -Force
-  [IO.File]::WriteAllText($manifestFile, ($manifest | ConvertTo-Json -Depth 16), (New-Object Text.UTF8Encoding($false)))
+  Save-Manifest
   [pscustomobject]@{
     manifest = $manifestFile
     uploaded_pairs = @($manifest.items | Where-Object status -eq 'uploaded_pending_publish').Count
     reused_pairs = @($manifest.items | Where-Object status -eq 'reused_existing').Count
     note = 'Existing pairs were reused; new pairs are pending records only. Nothing was published.'
   }
+}
+catch {
+  $manifest | Add-Member -NotePropertyName upload_last_error -NotePropertyValue $_.Exception.Message -Force
+  $manifest | Add-Member -NotePropertyName upload_failed_at -NotePropertyValue ([DateTimeOffset]::Now.ToString('o')) -Force
+  Save-Manifest
+  throw
 }
 finally {
   $apiKey = $null

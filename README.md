@@ -21,7 +21,7 @@
 2. 安装 Git；
 3. 能正常访问 GitHub。
 
-API Key 不在仓库中，也不得提交到 Git。
+API Key 不在仓库中，也不得提交到 Git。首次保存后会写入 Windows DPAPI 加密、仅当前用户可读且独立于插件版本的本地存储；Credential Manager 可用时也会保存一份。遇到 Windows `1312` 时自动使用本地副本，不应在每个新任务中重新索取。
 
 不熟悉电脑操作的同事可直接下载 [PoGoskill CMS 文章助手同事试用指南](docs/PoGoskill%20CMS%20文章助手同事试用指南.docx)。手册逐步说明如何向管理员申请 API Key、让 AI 安装插件、安全保存 Key，以及分别试用繁中站和英文站文章。
 

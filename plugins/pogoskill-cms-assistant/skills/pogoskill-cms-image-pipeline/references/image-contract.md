@@ -44,8 +44,10 @@
 - WebP 转换本身不 resize、不 crop；fallback 与 WebP 像素宽高必须完全一致。
 - 上传前验证：可解码、非零、≤30 MB、扩展名与 MIME 合理、SHA-256 已记录。
 - 上传后验证：`code=0`、`data.total=2`、`err_name_files=[]`、返回名称/尺寸/目录匹配，并对两个后台 `upload` URL 做可读性检查。
+- 上传脚本必须在每张图片对完成后立即写回 manifest，并将 `/cms/picture/upload` 原始响应持久保存到同一文章工作目录的 `cms-evidence`；不能只把响应留在临时目录或交互终端。命令返回运行会话 ID 时必须持续轮询到明确退出。
 - 上传后必须再用 `/picture/list` 回查 `uri/w/h/upload/online`；两种格式都存在且尺寸一致后才能交给文章回填。
 - 若 `/picture/list` 已确认同名、同尺寸 fallback/WebP 对存在，应直接复用；禁止为了取得不同 URL 再次上传同一图片。
+- 上传进程中断或最终汇总缺失时，先读取 manifest 断点、`cms-evidence` 和 `/picture/list`。从匹配的原上传响应恢复 `request_id` 与 `publish_id`；没有证据时不得猜 ID。CMS 中已存在图片对时不得重复上传。
 - 图片未发布时，前台 `url/online` 返回 HTTP 404 是正常的待发布状态，不触发重复上传；应继续使用原上传响应中的图片 `publish_id` 发布资源。图片发布并确认前台可读后，才把 URL 回填到草稿。
 
 ## 前台公开 URL
