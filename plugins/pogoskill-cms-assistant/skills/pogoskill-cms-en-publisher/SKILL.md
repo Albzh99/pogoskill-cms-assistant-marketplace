@@ -52,7 +52,7 @@ python scripts/validate-article-html.py <html-path> --profile en --assets-dir sk
 ```
 
 7. Fix every validator error before any CMS write.
-8. On authorization, save only a draft, then immediately call `/cms/page/info` and compare the complete readback with the final local HTML and metadata. Run the plugin-root `scripts/compare-docx-to-cms-page.py` against the source structure and readback; `missing_step_blocks` must be empty, and any nonzero result blocks completion. Save the response and run `scripts/assert-cms-page-products.ps1 -ResponsePath <page-info-response.json>`; any product mismatch blocks completion.
+8. Before any draft write, run the plugin-root `scripts/validate-image-coverage.py` against the source structure, image manifest and final HTML. Every DOCX image occurrence, including repeated references to the same media file, must have one manifest item and both public URLs in HTML; all three counts must match and `pass` must be true. On authorization, save only a draft, then immediately call `/cms/page/info` and run the same image coverage check on the readback. Also run `scripts/compare-docx-to-cms-page.py`; `missing_step_blocks` must be empty, and any nonzero result blocks completion. Save the response and run `scripts/assert-cms-page-products.ps1 -ResponsePath <page-info-response.json>`; any product mismatch blocks completion.
 
 ## Completion
 

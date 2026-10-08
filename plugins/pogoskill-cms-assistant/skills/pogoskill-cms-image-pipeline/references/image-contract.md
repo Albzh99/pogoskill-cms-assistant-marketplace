@@ -2,6 +2,10 @@
 
 ## DOCX 图片输入
 
+- `inspect-docx-structure.py` 中每个 `blocks[].images[]` 都是必须交付的源图片出现位置。必须逐项进入 image manifest，并以唯一 `image_key` 追踪到最终 HTML；同一 `source_entry` 重复出现时不得去重。
+- manifest 是账本，不是筛选结果。图片损坏、不支持、命名待确认或上传失败时，保留该项和失败状态并停止；禁止删除难处理图片来让数量看似通过。
+- 写入 CMS 前和写后回读都运行 `validate-image-coverage.py`。三个数量必须完全一致，且 `missing_source_entries`、`missing_html_image_keys`、`missing_named_images`、`unpublished_image_keys` 为空，`IMAGE_PENDING = 0`；其中 DOCX 文本点名的 Guide fallback 文件和同 basename WebP 也会机械核对。否则不得保存或声称完成。
+
 - 需要新上传的普通正文图必须直接嵌入 DOCX 的实际出现位置；以 `document.xml` 中的图片关系及其前后段落确定回填位置。无位置说明的图片文件夹、本地路径或附件清单不得由 Agent 自行猜位置。
 - Guide 图不要求嵌入。DOCX 必须在对应段落或步骤写出 CMS `guides` 的准确文件名（含扩展名）。只精确查询该名称及同 basename 的 fallback/WebP；禁止按语义猜图、替换相似图或重新上传 Guide 图。
 

@@ -84,7 +84,7 @@ description: 将 PoGoskill 台湾站 SEO 文稿转换为文章内容页面模板
 2. URL 必须为小写 `.html` 相对路径，并已通过 CMS 查重。
 3. 新建使用 `/cms/page/add`；已存在页面使用 `/cms/page/update`，更新前先读回当前版本。
    用户明确要求修改某个现有草稿时，先以页面 ID/URL 回读确认目标，再直接更新该草稿；若图片已上传但前台 URL 为 404，先用原图片上传 `publish_id` 发布图片资源，确认上云后再更新原草稿。不得改为新增页面或重复上传图片。
-4. 保存后立即调用 `/cms/page/info` 回读，逐项比对元数据、正文、图片盒和 Buy Box；保存响应后运行 `scripts/assert-cms-page-products.ps1 -ResponsePath <page-info-response.json>`，确认产品严格回读为 `6333`、`6332`。
+4. 保存前运行插件根目录 `scripts/validate-image-coverage.py`，把 DOCX structure、图片 manifest 与最终 HTML 三方对账；只有源图片出现次数、manifest 项数、HTML 回填数完全一致且 `pass: true` 才允许写入。保存后立即调用 `/cms/page/info` 回读，对回读 JSON 再运行同一图片完整度校验，并逐项比对元数据、正文、图片盒和 Buy Box；随后运行 `scripts/assert-cms-page-products.ps1 -ResponsePath <page-info-response.json>`，确认产品严格回读为 `6333`、`6332`。少一张图片或任一格式 URL 即阻断完成。
 5. 将页面 ID、草稿状态、回读结果、待补图片和所有 `request_id` 交给审查 Agent。
 
 上传前必须运行插件根目录 `scripts/validate-article-html.py <html-path> --assets-dir <publisher-assets-dir>`；返回非零时禁止调用写接口。写入后运行 `compare-docx-to-cms-page.py` 并检查缺失区块，不能只比较标题或开头几段。该比较器会把 DOCX 的步骤正文作为逐字保留门槛；`missing_step_blocks` 非空或脚本非零时必须修复草稿，不得解释为“只是润色”。

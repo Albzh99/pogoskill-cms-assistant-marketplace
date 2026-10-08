@@ -23,6 +23,8 @@
 
 ## 图片验收
 
+- 先运行插件根目录 `scripts/validate-image-coverage.py <structure.json> <image-manifest.json> <page-info-response.json>`。必须满足 `source_embedded_image_count == manifest_image_count == html_manifest_image_count`、DOCX 点名的 Guide fallback/WebP 全部存在，且 `pass: true`；重复引用同一媒体也按出现次数核对。少一项、未发布或缺任一格式 URL 都判定为 `FAIL`，不能用“其他图片正常”抵消。
+
 - 有真实素材时，按 `$pogoskill-cms-image-pipeline` 的 manifest 核对 fallback JPG/PNG 与同名 WebP、尺寸、URL、ALT、图片上传 request_id、图片 publish_id 和图片发布 request_id。
 - CMS `/picture/list` 已上线且当前 API Key 已获授权。图片验收必须包含上传响应、列表回查、图片资源发布响应和前台 URL 检查。后台 `upload` URL 只用于验证上传；前台 `url/online` 在发布前返回 404 只是中间状态，不能作为完成证据。
 - 对 `guides` 图片核对上传前图库检索与画面匹配证据；已有合适 Guide 图片却重复上传，判定为 `FAIL`。对用户提供的游戏正文图片，确认其被优先使用且仅做同名/完全重复检查，不得被图库相似图擅自替换。
