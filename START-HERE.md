@@ -17,11 +17,11 @@
 
 > 我负责【网站网址或产品名】【语言】的【文章类型】。请使用 `$tenorshare-cms-article-assistant`，先从 CMS 同站点的已发布文章建立一份仅供本站使用的 HTML 规范。按跨站学习清单检查标题、段落、目录、图片、表格、FAQ、下载区、Buy Box 等，展示本站真实组件样本和待确认项。现在只建规范，不上传文章。
 
-AI 会把规范保存在你电脑的站点专属目录。默认根目录在 Windows 是 `C:\Users\你的用户名\.codex\tenorshare-cms\site-profiles\`，在 macOS 是 `/Users/你的用户名/.codex/tenorshare-cms/site-profiles/`；若设置了 `CODEX_HOME`，位置会随之变化。AI 必须告诉你实际完整路径，不能只说“保存在本地”。每个站点／语言／文章类型一个目录，里面至少有 `profile.json`（站点与版本）、`html-contract.md`（人可读规范）、真实组件样本、CMS 参考证据、正反测试样本和 `validate-html.py`。规范模板在[这里](plugins/pogoskill-cms-assistant/skills/cms-site-standard-builder/assets/html-contract.template.md)，覆盖段落、标题、目录、图片、表格、产品区、FAQ、结论及校验；它只是填写框架，具体 HTML 必须来自你的网站。
+AI 会把规范保存在你电脑的站点专属目录。默认根目录在 Windows 是 `C:\Users\你的用户名\.codex\tenorshare-cms\site-profiles\`，在 macOS 是 `/Users/你的用户名/.codex/tenorshare-cms/site-profiles/`；若设置了 `CODEX_HOME`，位置会随之变化。AI 必须告诉你实际完整路径，不能只说“保存在本地”。每个站点／语言／文章类型一个目录，里面至少有 `profile.json`（站点与版本）、`html-contract.md`（详细 HTML 规范）、`review-report.md`（你看的简明审核报告）、真实组件样本、CMS 参考证据、正反测试样本和 `validate-html.py`。规范模板在[这里](plugins/pogoskill-cms-assistant/skills/cms-site-standard-builder/assets/html-contract.template.md)，具体 HTML 必须来自你的网站。
 
 首次学习只读取 CMS 旧文章、模板和关联信息；不会新建、修改、删除、上传、生成或发布任何 CMS 内容。AI 只会在你自己的电脑上保存一份待确认规范。看到 `ready` 规范后再提供新稿，才进入单独的草稿上传任务。
 
-你看过摘要后，觉得对就回复“确认这个规范”；不满意就说“把本站的【具体位置】改成【要求】，其他站不要动”。确认后 AI 才会将规范标成可用。建规范时如果同产品同语言有多个网址，AI 会请你选一个网址。建议首次建规范、审核或修订时使用较强模型；日常上传可选 Luna。助手不会自动替你切换模型。
+你看的是 `review-report.md`：先看网站、语言、文章类型和参考文章，再看各模块如何显示、几段短 HTML 示例、图片规则与待确认项；不需要读整篇旧文章 HTML。觉得对就回复“确认这个规范”；不满意就说“把本站的【具体位置】改成【要求】，其他站不要动”。确认后 AI 才会记录你确认的报告与规范版本，将规范标成可用；规范或报告随后被改动就必须重新确认。这里的报告是结构和证据审核，不等于 AI 已完成桌面／手机视觉预览。建规范时如果同产品同语言有多个网址，AI 会请你选一个网址。建议首次建规范、审核或修订时使用较强模型；日常上传可选 Luna。助手不会自动替你切换模型。
 
 ## 每篇新文章 只发一句话
 

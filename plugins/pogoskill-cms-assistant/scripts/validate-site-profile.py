@@ -16,6 +16,9 @@ REQUIRED_CONTRACT_SECTIONS = (
     "段落与列表", "图片与媒体", "表格", "产品区与下载", "FAQ 与特殊模块",
     "结论与链接", "校验与例外",
 )
+REQUIRED_REPORT_SECTIONS = (
+    "这份规范管什么", "文章会长什么样", "上传时会怎样处理", "已检查与待确认", "请运营回复",
+)
 
 
 def positive_int(value):
@@ -82,6 +85,23 @@ def check_profile(profile_path):
             raise ValueError("timezone required")
     except ValueError:
         errors.append("approval.confirmed_at must be an ISO 8601 timestamp with timezone")
+    if type(approval.get("profile_version")) is not int or profile.get("profile_version") != approval.get("profile_version"):
+        errors.append("approval.profile_version must match the current profile_version")
+
+    try:
+        report_path = local_file(root, profile.get("review_report"), ".md")
+        report = report_path.read_text(encoding="utf-8-sig")
+        report_headings = set(re.findall(r"^##\s+(.+?)\s*$", report, flags=re.MULTILINE))
+        for section in REQUIRED_REPORT_SECTIONS:
+            if section not in report_headings:
+                errors.append(f"review_report missing required section: {section}")
+        if "【未填写】" in report:
+            errors.append("review_report still contains unfilled template placeholders")
+        digest = hashlib.sha256(report_path.read_bytes()).hexdigest()
+        if approval.get("report_sha256") != digest:
+            errors.append("approval.report_sha256 must match the current review_report")
+    except (OSError, ValueError) as exc:
+        errors.append(f"review_report: {exc}")
 
     site = profile.get("site") if isinstance(profile.get("site"), dict) else {}
     cms = profile.get("cms") if isinstance(profile.get("cms"), dict) else {}

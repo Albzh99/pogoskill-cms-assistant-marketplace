@@ -23,6 +23,9 @@ class SiteProfileTests(unittest.TestCase):
         (self.root / "tests" / "invalid.html").write_text("<article>invalid sample</article>", encoding="utf-8")
         sections = "\n".join(f"## {name}\n本站已核对：无或有真实证据。" for name in MODULE.REQUIRED_CONTRACT_SECTIONS)
         (self.root / "html-contract.md").write_text("# Site article rules\n" + sections, encoding="utf-8")
+        report_sections = "\n".join(f"## {name}\n本站已核对的实际内容。" for name in MODULE.REQUIRED_REPORT_SECTIONS)
+        (self.root / "review-report.md").write_text("# Site review\n" + report_sections, encoding="utf-8")
+        self.report_sha256 = hashlib.sha256((self.root / "review-report.md").read_bytes()).hexdigest()
         (self.root / "validate-html.py").write_text("import sys\nsys.exit(0)\n", encoding="utf-8")
         self.page = {
             "code": 0,
@@ -34,7 +37,8 @@ class SiteProfileTests(unittest.TestCase):
             "profile_id": "example-com-how-to",
             "status": "ready",
             "profile_version": 1,
-            "approval": {"confirmed_by": "site-operator", "confirmed_at": "2026-10-09T10:00:00+08:00"},
+            "approval": {"confirmed_by": "site-operator", "confirmed_at": "2026-10-09T10:00:00+08:00",
+                         "profile_version": 1, "report_sha256": self.report_sha256},
             "site": {"id": 123, "name": "Example", "language": "en", "base_url": "https://www.example.com"},
             "article_type": "how-to",
             "cms": {"template_id": 456, "draft_status": 5, "draft_sync_status": 1,
@@ -42,6 +46,7 @@ class SiteProfileTests(unittest.TestCase):
             "images": {"enabled": False},
             "references": [{"page_id": 789, "page_info_json": "evidence/reference.json"}],
             "html_contract": "html-contract.md",
+            "review_report": "review-report.md",
             "validator": "validate-html.py",
             "validation_examples": {"valid_html": "tests/valid.html", "invalid_html": "tests/invalid.html"},
             "assets": [],
@@ -83,6 +88,32 @@ class SiteProfileTests(unittest.TestCase):
         result = self.check()
         self.assertFalse(result["pass"])
         self.assertTrue(any("approval.confirmed_by" in error for error in result["errors"]))
+
+    def test_rejects_report_changed_after_confirmation(self):
+        (self.root / "review-report.md").write_text("# Changed report\n" + "\n".join(
+            f"## {name}\n新内容。" for name in MODULE.REQUIRED_REPORT_SECTIONS), encoding="utf-8")
+        result = self.check()
+        self.assertFalse(result["pass"])
+        self.assertTrue(any("report_sha256" in error for error in result["errors"]))
+
+    def test_rejects_confirmation_of_previous_version(self):
+        self.profile["profile_version"] = 2
+        result = self.check()
+        self.assertFalse(result["pass"])
+        self.assertTrue(any("approval.profile_version" in error for error in result["errors"]))
+
+    def test_rejects_missing_review_report(self):
+        self.profile.pop("review_report")
+        result = self.check()
+        self.assertFalse(result["pass"])
+        self.assertTrue(any("review_report" in error for error in result["errors"]))
+
+    def test_rejects_unfilled_review_report(self):
+        (self.root / "review-report.md").write_text("# Site review\n" + "\n".join(
+            f"## {name}\n【未填写】" for name in MODULE.REQUIRED_REPORT_SECTIONS), encoding="utf-8")
+        result = self.check()
+        self.assertFalse(result["pass"])
+        self.assertTrue(any("unfilled template" in error for error in result["errors"]))
 
     def test_rejects_missing_version(self):
         self.profile.pop("profile_version")

@@ -1,6 +1,6 @@
 # Tenorshare CMS 文章助手
 
-这是 Tenorshare 全公司多产品、多语言网站使用的 Codex CMS 插件 Marketplace。旧仓库和插件 ID 中仍含 `pogoskill`，只是为了兼容已安装同事；PoGoskill 是其中一个产品，不是其他网站的默认模板。新站点首次从 CMS 旧文章建立本地 HTML 规范，运营确认后才可按规范上传；日常新稿不重复学习。给同事直接发送 [一页使用说明](START-HERE.md)。包含：
+这是 Tenorshare 全公司多产品、多语言网站使用的 Codex CMS 插件 Marketplace。旧仓库和插件 ID 中仍含 `pogoskill`，只是为了兼容已安装同事；PoGoskill 是其中一个产品，不是其他网站的默认模板。新站点首次从 CMS 旧文章建立本地 HTML 规范和运营可读的审核报告；运营明确确认该版本后，日常新稿才按规范上传草稿，不重复学习。给同事直接发送 [一页使用说明](START-HERE.md)。包含：
 
 - 台湾站 V2 文章 HTML 转换、机械校验与 CMS 草稿回读
 - 英文站 V2 文章 HTML 转换、固定英文下载区与 Buy Box、CMS 草稿回读

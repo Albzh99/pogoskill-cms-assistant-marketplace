@@ -5,7 +5,7 @@ description: 为公司 CMS 中的新网站或新文章类型建立可复用的�
 
 # 为新网站建立文章规范
 
-首次建站还必须读取[HTML 规范模板](assets/html-contract.template.md)，复制到本站 profile 的 `html-contract.md` 后逐项用本站证据填满；`ready` 规范不可保留占位项。交付时给运营实际绝对路径和文件清单，不能只说“已保存在本地”。
+首次建站还必须读取[HTML 规范模板](assets/html-contract.template.md)和[运营审核报告模板](assets/review-report.template.md)，分别填成本地 `html-contract.md` 与 `review-report.md`；`ready` 规范和报告不可保留占位项。交付时给运营实际绝对路径和文件清单，不能只说“已保存在本地”。
 
 使用此技能处理“以后这个站点的文章都照这样做”。同事只需说明产品／网站与语言；旧 HTML 是可选参考，不是前置条件。优先从 CMS 同站点同类已发布文章的 `page/info.content` 学习真实 HTML；也可接受用户给的 HTML 或参考 URL。不要求同事输入 ID、命令或配置。一份规范只对应一个 CMS 站点、语言和文章类型。PoGoskill 既有技能保留，但它们的 ID、下载模块、Buy Box 或图片地址不得复制给其他产品。
 
@@ -17,6 +17,6 @@ description: 为公司 CMS 中的新网站或新文章类型建立可复用的�
 
 `html-contract.md` 必须逐模块说明真实标题层级、目录、正文、图、表、购买区、下载区、FAQ、结语和站点独有模块的允许结构；某项没有就标注“无”。每种图片格式、最大尺寸和响应式写法都以本站旧 HTML 和 CMS 图片规则为证据，不预设 PoGoskill 的 850×460、JPG/WebP 或 `<picture>`。区分“参考文章确实存在”和“编辑偏好”。`validate-html.py` 必须对该站点的关键结构返回非零错误码，至少覆盖一个合格样本和一个明确不合格样本。尚未确定的模块写成待确认，不猜测组件或 CMS ID。
 
-先用真实参考 HTML 和故意删掉必需模块的样本运行该站点校验器。首次成果保持 `draft`，向运营展示本站组件样本与待确认项；只有运营确认规范、来源和资产核对完成后，才记录确认信息，把 `profile.json` 的 `status` 设为 `ready`，然后运行插件根目录 `scripts/validate-site-profile.py <profile.json>` 作最后验证。确认前不得调用文章写入接口。若证据不够，保留 `draft` 并明确列出缺口。运营不满意时，只修订该站点／语言／文章类型目录，先保存旧版本，再重新验证正反样本并请其确认；不得影响其他 profile。建立规范本身不调用 `page/add`、`page/update`、`page/make` 或文章发布接口，也不把 API Key、私人本地路径或无关文章全文提交到共享 Git。
+先用真实参考 HTML 和故意删掉必需模块的样本运行该站点校验器。首次成果保持 `draft`，填写并展示 `review-report.md`：用运营看得懂的话说明模块顺序、图片与 CMS 规则、2–4 个真实短样本、参考文章、已验证项、未预览或待确认项；完整 HTML 留在本地供需要时打开，不把整篇代码当审核报告。只有运营明确回复确认本版报告，且规范、来源和资产核对完成后，才记录确认人、带时区时间、报告 SHA256 与规范版本，把 `profile.json` 的 `status` 设为 `ready`，然后运行插件根目录 `scripts/validate-site-profile.py <profile.json>` 作最后验证。确认前不得调用文章写入接口。若证据不够，保留 `draft` 并明确列出缺口。运营不满意时，只修订该站点／语言／文章类型目录，先保存旧版本，清除旧确认、更新报告、重新验证正反样本并请其确认；不得影响其他 profile。建立规范本身不调用 `page/add`、`page/update`、`page/make` 或文章发布接口，也不把 API Key、私人本地路径或无关文章全文提交到共享 Git。
 
 向用户交付 profile 目录、适用站点和文章类型、参考页面 ID、已确认的固定组件、待确认事项，以及以后使用 `$cms-site-article-assistant` 的调用方式。
