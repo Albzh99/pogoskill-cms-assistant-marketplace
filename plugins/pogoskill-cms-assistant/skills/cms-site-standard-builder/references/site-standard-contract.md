@@ -8,6 +8,8 @@
 
 ## 输入和证据
 
+本站分类要单独建立证据：按目标站点和实际文章类型查询 `classify/displayclassifylist`，将名称、分类自身 ID、分类页面 ID、目录／URL 与参考页 `page/info` 对照；保存原始响应和 `request_id`。作者、产品、模块和相关文章也需核对本站候选与旧文用法。不能仅复制一篇旧文的动态关联 ID，更不能沿用其他站点的分类。分类或关联方式不确定时保留 `draft` 并在运营报告中列出待确认项。
+
 - 同事只需给出产品／网站、语言和新稿；旧 HTML 是可选参考。助手先从 `site/list` 确认站点，再用 `page/list` 查询同站点已发布文章，按模板／分类／URL 选 2–3 篇同类页面，用 `page/info` 的完整 `content` 学习 HTML。对每份参考运行 `inspect-reference-html.py`，再亲自阅读原文。只有 CMS 没有足够同类页面时才请同事给旧 HTML；站点多候选时只问网址，不让同事找 ID、填 JSON 或操作终端。
 - 通过 `site/list`、`template/list` 和 `template/fields` 取得可核对的站点 ID、模板 ID、字段和 `request_id`。CMS 页面参考要保存 `page/info` 的原始响应及 `request_id`；用户旧 HTML 没有 CMS 页面 ID 也可以作为样式证据，但 CMS 映射证据仍必须齐全才能把 profile 标成 `ready`。
 - 参考文章应与目标文章类型相同；多个风格差异较大的文章类型分别建规范。作者、URL、标题、关键词、描述和正文等 CMS 字段名及 POST 调用方式共用，但它们的取值、生成规则、链接目标和关联 ID 必须逐站确认；不从 PoGoskill 规则推断。
@@ -58,7 +60,7 @@ site-profiles/
     "draft_status": 5,
     "draft_sync_status": 1,
     "product_ids": [],
-    "required_fields": ["title", "subject", "url", "content"]
+    "required_fields": ["title", "subject", "description", "keywords", "seo_keywords", "url", "content"]
   },
   "references": [{"kind": "cms", "page_id": 789, "page_info_json": "evidence/reference-page-info.json"}],
   "cms_discovery": {
@@ -84,7 +86,7 @@ site-profiles/
 
 `draft_status` 和 `draft_sync_status` 的数字须由该 CMS 站点的真实草稿/接口规则确认；示例数值不直接套用。初建时保持 `draft`，`approval` 为空；运营看过组件样本并明确确认后，记录确认人和带时区的 ISO 8601 时间，把状态设为 `ready`。修订时先备份旧版本、递增 `profile_version`、改回 `draft` 并清空旧确认信息；重新验证和确认后才能恢复 `ready`。`product_ids` 为空只能表示该站点文章确实不关联产品；不确定时保持 `draft`。`required_fields` 是当前模板实际需要的 CMS 字段；文章的作者、分类、模块、相关页等动态 ID 每次写入前重新查，不把参考文章的动态 ID 当成固定值。作者、URL、标题、关键词、描述和正文仍使用共享 CMS API 字段。资产是需要原样复用的 HTML 片段；没有固定组件时数组可为空。用户提供纯 HTML 时参考写成 `{"kind":"html","html_file":"evidence/old-article.html","sha256":"<实际 SHA256>"}`，并保存三份 CMS 发现响应。
 
-`images` 把 CMS 通用上传与图片资源发布流程同站点变量分开。新图上传后必须使用该次 `/cms/picture/upload` 响应中的图片 `publish_id` 单独发布资源，绝不能用文章页面 ID，也不因此生成或发布文章。目录、前台 URL 前缀、HTML 图片盒和所需格式从本站旧 HTML 与 CMS 图片库确定；如果该文章类型没有图片，写 `{"enabled": false}`。主图、正文横图、竖图、手机截图的尺寸规则写入 `html-contract.md`，不能照搬示例数值。
+`images` 把 CMS 通用上传与图片资源发布流程同站点变量分开。新图上传后必须使用该次 `/cms/picture/upload` 响应中的图片 `publish_id` 单独发布资源，绝不能用文章页面 ID，也不因此生成或发布文章。目录、前台 URL 前缀、HTML 图片盒和所需格式从本站旧 HTML 与 CMS 图片库确定；如果该文章类型没有图片，写 `{"enabled": false}`。主图放在源文对应的正文位置，不要求运营在 Meta 里另填图片栏；从本站旧文核对是否还要同步设置 CMS `page_image_url`。主图、正文横图、竖图、手机截图的尺寸规则写入 `html-contract.md`，不能照搬示例数值。
 
 `html-contract.md` 从[HTML 规范模板](../assets/html-contract.template.md)复制并填充，至少记录：适用范围、旧 HTML 与 CMS 证据、模板与字段、模块顺序、标题层级、目录锚点、普通段落与列表、图片/媒体/表格/购买区/下载区/FAQ/结语结构、语言和链接规则、禁止改动的文字区域、图片目录、图片格式与尺寸、公开域名、草稿状态、机械校验和需要人工判断的例外。不存在的模块标记为“无”，不能删除该栏目。每条重要规则标明依据的参考文件或用户明确要求；不同旧 HTML 互相冲突时判断是否应拆成不同文章类型，不能混合为新样式。
 

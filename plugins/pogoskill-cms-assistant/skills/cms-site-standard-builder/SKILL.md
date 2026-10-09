@@ -5,6 +5,8 @@ description: 为公司 CMS 中的新网站或新文章类型建立可复用的�
 
 # 为新网站建立文章规范
 
+首次建规范不仅学习 HTML，还要学习该 CMS 站点自己的文章分类与关联字段。用目标站点的 `classify/displayclassifylist`、同类旧文 `page/info` 和分类页面 URL 交叉核对分类名称、适用文章类型、目录前缀、`classify_id` 与 `classify_page_id`；将查询响应和 `request_id` 留作本地证据，并在规范与运营报告中展示可读的分类规则。作者、产品、模块及相关文章也以本站真实记录判断固定规则或每篇动态选择，不能拿单篇旧文的 ID 当全站默认；分类关系未查清时保持 `draft`。学习阶段只读 CMS，不因此增加任何写入权限。
+
 首次建站还必须读取[HTML 规范模板](assets/html-contract.template.md)和[运营审核报告模板](assets/review-report.template.md)，分别填成本地 `html-contract.md` 与 `review-report.md`；`ready` 规范和报告不可保留占位项。交付时给运营实际绝对路径和文件清单，不能只说“已保存在本地”。
 
 使用此技能处理“以后这个站点的文章都照这样做”。同事只需说明产品／网站与语言；旧 HTML 是可选参考，不是前置条件。优先从 CMS 同站点同类已发布文章的 `page/info.content` 学习真实 HTML；也可接受用户给的 HTML 或参考 URL。不要求同事输入 ID、命令或配置。一份规范只对应一个 CMS 站点、语言和文章类型。PoGoskill 既有技能保留，但它们的 ID、下载模块、Buy Box 或图片地址不得复制给其他产品。
