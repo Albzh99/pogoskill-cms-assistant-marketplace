@@ -19,7 +19,7 @@ description: 为公司 CMS 中的新网站或新文章类型建立可复用的�
 
 先运行插件根目录 `scripts/site-profile-root.py --create` 获取**当前用户、跨任务、独立于插件版本**的保存位置。成果保存到其中的 `<site-slug>/<language>/<article-type>/`，包含 `profile.json`、`html-contract.md`、CMS `page/info` 响应或用户旧 HTML 及其 SHA256、CMS 发现响应、所有必须复用的组件样本，以及 `validate-html.py`。现有 profile 仅在用户指定或证据证明它属于同一站点、语言与文章类型时更新；不能改写无关站点规范。profile 仅存该用户本机，不默认把其他网站的文章全文推送到共享 Git。
 
-`html-contract.md` 必须逐模块说明真实标题层级、目录、正文、图、表、购买区、下载区、FAQ、结语和站点独有模块的允许结构；某项没有就标注“无”。每种图片格式、最大尺寸和响应式写法都以本站旧 HTML 和 CMS 图片规则为证据，不预设 PoGoskill 的 850×460、JPG/WebP 或 `<picture>`。区分“参考文章确实存在”和“编辑偏好”。`validate-html.py` 必须对该站点的关键结构返回非零错误码，至少覆盖一个合格样本和一个明确不合格样本。尚未确定的模块写成待确认，不猜测组件或 CMS ID。
+`html-contract.md` 必须逐模块说明真实标题层级、目录、正文、图、表、购买区、下载区、使用指南、FAQ、视频、结语和站点独有模块的允许结构；每项标记“固定／可选／无／待确认”，记录出现条件、位置、顺序、真实片段及证据。下载区和使用指南并非通用必选项；有的站点还有视频或其他特殊模块。某项没有就标注“无”，不能为丰富页面而补造。每种图片格式、最大尺寸和响应式写法都以本站旧 HTML 和 CMS 图片规则为证据，不预设 PoGoskill 的 850×460、JPG/WebP 或 `<picture>`。区分“参考文章确实存在”和“编辑偏好”。`validate-html.py` 只强制本站确认的必需结构，不把可选模块当成每篇必有；至少覆盖一个合格样本和一个明确不合格样本。尚未确定的模块写成待确认，不猜测组件或 CMS ID。
 
 先用真实参考 HTML 和故意删掉必需模块的样本运行该站点校验器。首次成果保持 `draft`，填写并展示 `review-report.md`：用运营看得懂的话说明模块顺序、图片与 CMS 规则、2–4 个真实短样本、参考文章、已验证项、未预览或待确认项；完整 HTML 留在本地供需要时打开，不把整篇代码当审核报告。只有运营明确回复确认本版报告，且规范、来源和资产核对完成后，才记录确认人、带时区时间、报告 SHA256、本站规则 SHA256 与规范版本，把 `profile.json` 的 `status` 设为 `ready`，然后运行插件根目录 `scripts/validate-site-profile.py <profile.json>` 作最后验证。两个 SHA256 用 `scripts/validate-site-profile.py <profile.json> --fingerprint` 从当前本机文件计算，运营无需计算或修改 JSON。确认前不得调用文章写入接口。若证据不够，保留 `draft` 并明确列出缺口。运营不满意时，只修订该站点／语言／文章类型目录，先保存旧版本，清除旧确认、更新报告、重新验证正反样本并请其确认；不得影响其他 profile。建立规范本身不调用 `page/add`、`page/update`、`page/make` 或文章发布接口，也不把 API Key、私人本地路径或无关文章全文提交到共享 Git。
 
