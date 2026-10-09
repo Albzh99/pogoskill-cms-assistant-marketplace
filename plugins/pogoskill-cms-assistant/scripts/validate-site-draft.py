@@ -19,9 +19,20 @@ def product_ids(value):
             value = json.loads(value)
         except json.JSONDecodeError:
             value = [part.strip() for part in value.split(",") if part.strip()]
+    if isinstance(value, (int, str)) and not isinstance(value, bool):
+        value = [value]
     if not isinstance(value, list):
         return None
     return [str(item) for item in value]
+
+
+def same_cms_number(value, expected):
+    return (not isinstance(value, bool) and isinstance(value, (int, str))
+            and isinstance(expected, (int, str)) and str(value) == str(expected))
+
+
+def same_relative_url(value, expected):
+    return isinstance(value, str) and isinstance(expected, str) and value.lstrip("/") == expected.lstrip("/")
 
 
 def check_draft(profile, payload, page_response=None):
@@ -29,9 +40,9 @@ def check_draft(profile, payload, page_response=None):
     site_id = profile["site"]["id"]
     cms = profile["cms"]
     required = cms["required_fields"]
-    if payload.get("site_id") != site_id:
+    if not same_cms_number(payload.get("site_id"), site_id):
         errors.append("payload.site_id does not match profile")
-    if payload.get("template_id") != cms["template_id"]:
+    if not same_cms_number(payload.get("template_id"), cms["template_id"]):
         errors.append("payload.template_id does not match profile")
     if product_ids(payload.get("product_id", [])) != cms["product_ids"]:
         errors.append("payload.product_id does not match profile")
@@ -43,7 +54,7 @@ def check_draft(profile, payload, page_response=None):
     if not isinstance(url, str) or not url.strip() or "://" in url or ".." in url.split("/"):
         errors.append("payload.url must be a safe relative path")
     for field, expected in (("status", cms["draft_status"]), ("sync_status", cms["draft_sync_status"])):
-        if field in payload and payload[field] != expected:
+        if field in payload and not same_cms_number(payload[field], expected):
             errors.append(f"payload.{field} must be {expected}")
 
     if page_response is not None:
@@ -54,15 +65,28 @@ def check_draft(profile, payload, page_response=None):
             if not page_response.get("request_id"):
                 errors.append("page/info request_id is missing")
             for field, expected in (("site_id", site_id), ("template_id", cms["template_id"]),
-                                    ("url", payload.get("url")), ("status", cms["draft_status"]),
-                                    ("sync_status", cms["draft_sync_status"]),
-                                    ("content", payload.get("content"))):
-                if page.get(field) != expected:
+                                    ("status", cms["draft_status"]), ("sync_status", cms["draft_sync_status"])):
+                if not same_cms_number(page.get(field), expected):
                     errors.append(f"page/info {field} differs from expected draft")
+            if not same_relative_url(page.get("url"), payload.get("url")):
+                errors.append("page/info url differs from expected draft")
+            if page.get("content") != payload.get("content"):
+                errors.append("page/info content differs from expected draft")
             if product_ids(page.get("product_id", [])) != cms["product_ids"]:
                 errors.append("page/info product_id does not match profile")
             for field in required:
-                if field not in {"status", "sync_status"} and page.get(field) != payload.get(field):
+                if field in {"status", "sync_status"}:
+                    continue
+                if field == "url":
+                    same = same_relative_url(page.get(field), payload.get(field))
+                elif field in {"site_id", "template_id", "author_id", "classify_id", "classify_page_id",
+                               "sidebar_module_id", "ad_module_id", "version"}:
+                    same = same_cms_number(page.get(field), payload.get(field))
+                elif field == "product_id":
+                    same = product_ids(page.get(field)) == product_ids(payload.get(field))
+                else:
+                    same = page.get(field) == payload.get(field)
+                if not same:
                     errors.append(f"page/info required field differs from payload: {field}")
     return {"pass": not errors, "errors": errors, "site_id": site_id,
             "profile_id": profile["profile_id"], "readback_checked": page_response is not None}

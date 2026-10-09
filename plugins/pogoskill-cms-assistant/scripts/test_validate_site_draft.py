@@ -24,6 +24,15 @@ class DraftProfileTests(unittest.TestCase):
         result = MODULE.check_draft(self.profile, self.payload, response)
         self.assertTrue(result["pass"], result["errors"])
 
+    def test_accepts_documented_string_ids_and_leading_url_slash(self):
+        self.profile["cms"]["required_fields"] = ["title", "url", "content", "author_id"]
+        self.payload["author_id"] = 244
+        response = {"code": 0, "request_id": "cms-read-id", "data": {
+            **self.payload, "site_id": "123", "template_id": "456", "url": "/guide/article.html",
+            "author_id": "244", "product_id": "42", "id": "789", "status": "5", "sync_status": "1"}}
+        result = MODULE.check_draft(self.profile, self.payload, response)
+        self.assertTrue(result["pass"], result["errors"])
+
     def test_rejects_cross_site_product_and_template(self):
         self.payload.update({"site_id": 999, "template_id": 888, "product_id": ["43"]})
         result = MODULE.check_draft(self.profile, self.payload)
