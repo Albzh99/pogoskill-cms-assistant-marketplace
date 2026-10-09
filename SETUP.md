@@ -100,7 +100,7 @@ Guide 图片：
 
 ## 其他公司网站的一站式使用方式
 
-同事只需上传新稿并说明产品／网站与语言；调用 `$tenorshare-cms-article-assistant`。助手自行通过 CMS `site/list`、`page/list`、`page/info` 发现本站同类旧文章，建立规范并在**同一任务**处理草稿。旧 HTML 可选；只有 CMS 找不到同类参考时才向运营索要。站点不唯一时只问网址。各站共用 CMS POST API、作者／URL／关键词等字段名，以及新图片上传后用图片 `publish_id` 单独发布资源的流程；字段取值、站点链接、图片格式和全部 HTML 样式按本站旧文章确定。运营说明见 [START-HERE.md](START-HERE.md)。
+首次为某站点／语言／文章类型开通时，同事说明网站和语言，调用 `$tenorshare-cms-article-assistant`；助手通过 CMS `site/list`、`page/list`、`page/info` 建立独立规范，展示本站样本并等待运营确认，**首次建规范任务不写草稿**。以后上传新稿时直接读取本机已确认的 `ready` 规范，不每篇重新学习。旧 HTML 可选；只有 CMS 找不到同类参考时才向运营索要。站点不唯一时只问网址。各站共用 CMS POST API、作者／URL／关键词等字段名，以及新图片上传后用图片 `publish_id` 单独发布资源的流程；字段取值、站点链接、图片格式和全部 HTML 样式按本站规范确定。运营说明见 [START-HERE.md](START-HERE.md)。
 
 ## 使用方式：繁中站
 

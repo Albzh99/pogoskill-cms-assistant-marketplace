@@ -16,6 +16,8 @@
   "schema_version": 1,
   "profile_id": "example-com-how-to",
   "status": "draft",
+  "profile_version": 1,
+  "approval": {"confirmed_by": "", "confirmed_at": ""},
   "site": {"id": 123, "name": "Example", "language": "en", "base_url": "https://www.example.com"},
   "article_type": "how-to",
   "cms": {
@@ -45,11 +47,13 @@
 }
 ```
 
-`draft_status` 和 `draft_sync_status` 的数字须由该 CMS 站点的真实草稿/接口规则确认；示例数值不直接套用。`product_ids` 为空只能表示该站点文章确实不关联产品；不确定时保持 `draft`。`required_fields` 是当前模板实际需要的 CMS 字段；文章的作者、分类、模块、相关页等动态 ID 每次写入前重新查，不把参考文章的动态 ID 当成固定值。作者、URL、标题、关键词、描述和正文仍使用共享 CMS API 字段。资产是需要原样复用的 HTML 片段；没有固定组件时数组可为空。用户提供纯 HTML 时参考写成 `{"kind":"html","html_file":"evidence/old-article.html","sha256":"<实际 SHA256>"}`，并保存三份 CMS 发现响应。
+`draft_status` 和 `draft_sync_status` 的数字须由该 CMS 站点的真实草稿/接口规则确认；示例数值不直接套用。初建时保持 `draft`，`approval` 为空；运营看过组件样本并明确确认后，记录确认人和带时区的 ISO 8601 时间，把状态设为 `ready`。修订时先备份旧版本、递增 `profile_version`、改回 `draft` 并清空旧确认信息；重新验证和确认后才能恢复 `ready`。`product_ids` 为空只能表示该站点文章确实不关联产品；不确定时保持 `draft`。`required_fields` 是当前模板实际需要的 CMS 字段；文章的作者、分类、模块、相关页等动态 ID 每次写入前重新查，不把参考文章的动态 ID 当成固定值。作者、URL、标题、关键词、描述和正文仍使用共享 CMS API 字段。资产是需要原样复用的 HTML 片段；没有固定组件时数组可为空。用户提供纯 HTML 时参考写成 `{"kind":"html","html_file":"evidence/old-article.html","sha256":"<实际 SHA256>"}`，并保存三份 CMS 发现响应。
 
 `images` 把 CMS 通用上传与图片资源发布流程同站点变量分开。新图上传后必须使用该次 `/cms/picture/upload` 响应中的图片 `publish_id` 单独发布资源，绝不能用文章页面 ID，也不因此生成或发布文章。目录、前台 URL 前缀、HTML 图片盒和所需格式从本站旧 HTML 与 CMS 图片库确定；如果该文章类型没有图片，写 `{"enabled": false}`。主图、正文横图、竖图、手机截图的尺寸规则写入 `html-contract.md`，不能照搬示例数值。
 
 `html-contract.md` 至少记录：适用范围、旧 HTML 与 CMS 证据、模板与字段、模块顺序、标题层级、目录锚点、图片/表格/购买区/下载区/FAQ/结语结构、语言和链接规则、禁止改动的文字区域、图片目录、图片格式与尺寸、公开域名、草稿状态、需要人工判断的例外。不存在的模块标记为“无”。每条重要规则标明依据的参考文件或用户明确要求；不同旧 HTML 互相冲突时判断是否应拆成不同文章类型，不能混合为新样式。
+
+逐项使用[跨站学习清单](html-learning-checklist.md)；它只是观察点，不是通用 HTML 样式。每个固定／可选组件留下本站真实、可读的最小 HTML 样本并标明证据。不得把 PoGoskill 的 class 或视觉模块作为其他站默认值。
 
 `validate-html.py` 接收最终 HTML 文件路径；通过时退出 0，缺少必要模块、结构失衡、图片未回填或站点错误资源时退出非 0。它验证本规范的关键结构，不调用 PoGoskill 专用 `validate-article-html.py`。在采用新规范前用真实样本和一个故意删掉必要模块的样本验证校验器确实能拦截。
 

@@ -5,6 +5,7 @@ import hashlib
 import json
 import re
 import sys
+from datetime import datetime
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -65,6 +66,17 @@ def check_profile(profile_path):
             errors.append(f"{field} must be a lowercase hyphenated slug")
     if profile.get("status") != "ready":
         errors.append("status must be ready before use for an article")
+    if not positive_int(profile.get("profile_version")):
+        errors.append("profile_version must be a positive integer")
+    approval = profile.get("approval") if isinstance(profile.get("approval"), dict) else {}
+    if not isinstance(approval.get("confirmed_by"), str) or not approval.get("confirmed_by").strip():
+        errors.append("approval.confirmed_by is required before article use")
+    confirmed_at = approval.get("confirmed_at")
+    try:
+        if not isinstance(confirmed_at, str) or datetime.fromisoformat(confirmed_at.replace("Z", "+00:00")).tzinfo is None:
+            raise ValueError("timezone required")
+    except ValueError:
+        errors.append("approval.confirmed_at must be an ISO 8601 timestamp with timezone")
 
     site = profile.get("site") if isinstance(profile.get("site"), dict) else {}
     cms = profile.get("cms") if isinstance(profile.get("cms"), dict) else {}

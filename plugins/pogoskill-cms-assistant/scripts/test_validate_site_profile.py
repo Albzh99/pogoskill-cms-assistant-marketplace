@@ -29,6 +29,8 @@ class SiteProfileTests(unittest.TestCase):
             "schema_version": 1,
             "profile_id": "example-com-how-to",
             "status": "ready",
+            "profile_version": 1,
+            "approval": {"confirmed_by": "site-operator", "confirmed_at": "2026-10-09T10:00:00+08:00"},
             "site": {"id": 123, "name": "Example", "language": "en", "base_url": "https://www.example.com"},
             "article_type": "how-to",
             "cms": {"template_id": 456, "draft_status": 5, "draft_sync_status": 1,
@@ -69,6 +71,16 @@ class SiteProfileTests(unittest.TestCase):
 
     def test_rejects_draft_profile(self):
         self.profile["status"] = "draft"
+        self.assertFalse(self.check()["pass"])
+
+    def test_rejects_unconfirmed_profile(self):
+        self.profile.pop("approval")
+        result = self.check()
+        self.assertFalse(result["pass"])
+        self.assertTrue(any("approval.confirmed_by" in error for error in result["errors"]))
+
+    def test_rejects_missing_version(self):
+        self.profile.pop("profile_version")
         self.assertFalse(self.check()["pass"])
 
     def test_rejects_assets_outside_profile(self):
