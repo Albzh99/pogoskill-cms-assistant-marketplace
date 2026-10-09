@@ -84,6 +84,10 @@ Guide 图片：
 在对应位置填写 CMS 准确文件名，例如：guide-change-location-step-1.jpg
 ```
 
+## 使用方式：其他公司网站
+
+先使用 `$cms-site-standard-builder` 建立并验证独立的“网站 + 文章类型”规范，再使用 `$cms-site-article-assistant`。给 AI 一篇同类型的正常参考文章 URL 或 CMS 页面 ID，以及目标站点和文章类型。具体提示词见仓库根目录 `README.md` 的“其他公司网站”一节。PoGoskill 的 ID、组件和图片脚本不能直接用于新站点。
+
 ## 使用方式：繁中站
 
 新建一个 Codex 任务，附上一篇繁中 DOCX，然后完整发送：
