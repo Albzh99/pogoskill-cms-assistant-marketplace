@@ -16,6 +16,12 @@ def positive_int(value):
     return type(value) is int and value > 0
 
 
+def same_positive_id(value, expected):
+    """CMS readbacks may encode database IDs as decimal strings."""
+    return (positive_int(expected) and not isinstance(value, bool)
+            and isinstance(value, (int, str)) and str(value) == str(expected))
+
+
 def local_file(root, name, suffix=None):
     if not isinstance(name, str) or not name.strip():
         raise ValueError("path is missing")
@@ -32,7 +38,7 @@ def local_file(root, name, suffix=None):
 
 def contains_id(value, target):
     if isinstance(value, dict):
-        if value.get("id") == target:
+        if same_positive_id(value.get("id"), target):
             return True
         return any(contains_id(child, target) for child in value.values())
     if isinstance(value, list):
@@ -148,12 +154,14 @@ def check_profile(profile_path):
             if not isinstance(evidence, dict) or evidence.get("code") != 0 or not isinstance(page, dict):
                 errors.append(f"reference {index}: page/info response is not successful")
                 continue
-            if page.get("id") != page_id:
+            if not same_positive_id(page.get("id"), page_id):
                 errors.append(f"reference {index}: page ID differs from page/info")
-            if page.get("site_id") != site_id:
+            if not same_positive_id(page.get("site_id"), site_id):
                 errors.append(f"reference {index}: site ID differs from profile")
-            if page.get("template_id") != template_id:
+            if not same_positive_id(page.get("template_id"), template_id):
                 errors.append(f"reference {index}: template ID differs from profile")
+            if str(page.get("status")) != "4":
+                errors.append(f"reference {index}: CMS reference must be a published page (status 4)")
             if not isinstance(page.get("content"), str) or len(page["content"].strip()) < 100:
                 errors.append(f"reference {index}: source HTML is absent or too short")
             if not evidence.get("request_id"):

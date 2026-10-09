@@ -23,7 +23,7 @@ class SiteProfileTests(unittest.TestCase):
         self.page = {
             "code": 0,
             "request_id": "original-cms-readback-id",
-            "data": {"id": 789, "site_id": 123, "template_id": 456, "content": "<article>" + "sample section " * 12 + "</article>"},
+            "data": {"id": 789, "site_id": 123, "template_id": 456, "status": "4", "content": "<article>" + "sample section " * 12 + "</article>"},
         }
         self.profile = {
             "schema_version": 1,
@@ -50,11 +50,22 @@ class SiteProfileTests(unittest.TestCase):
         result = self.check()
         self.assertTrue(result["pass"], result["errors"])
 
+    def test_accepts_cms_string_ids(self):
+        self.page["data"].update({"id": "789", "site_id": "123", "template_id": "456"})
+        result = self.check()
+        self.assertTrue(result["pass"], result["errors"])
+
     def test_rejects_reference_from_another_site(self):
         self.page["data"]["site_id"] = 324
         result = self.check()
         self.assertFalse(result["pass"])
         self.assertTrue(any("site ID differs" in error for error in result["errors"]))
+
+    def test_rejects_unpublished_reference(self):
+        self.page["data"]["status"] = "5"
+        result = self.check()
+        self.assertFalse(result["pass"])
+        self.assertTrue(any("published page" in error for error in result["errors"]))
 
     def test_rejects_draft_profile(self):
         self.profile["status"] = "draft"

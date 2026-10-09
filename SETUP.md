@@ -1,10 +1,12 @@
-# PoGoskill CMS 文章助手安装
+# Tenorshare CMS 文章助手安装和跨平台执行
+
+这是给 AI 执行的技术说明。运营同事只看 [START-HERE.md](START-HERE.md)，不用手工输入这里的命令。仓库和插件的技术 ID 暂保留 `pogoskill-cms-assistant`，但产品范围是 Tenorshare 全公司，而不是只处理 PoGoskill。
 
 ## 推荐：让 AI 从 Git 仓库自动安装
 
-把仓库地址交给 Codex AI，并要求它在终端执行：
+AI 在 Windows PowerShell 或 macOS Terminal 中运行相同的 Codex CLI 命令，安装前先确认 `codex` 可用：
 
-```powershell
+```text
 codex plugin marketplace add "https://github.com/Albzh99/pogoskill-cms-assistant-marketplace.git" --ref main
 codex plugin add pogoskill-cms-assistant@pogoskill-team
 ```
@@ -22,9 +24,9 @@ codex plugin add pogoskill-cms-assistant@pogoskill-team
 
 ## 本地文件安装（备用）
 
-将整个 `pogoskill-cms-assistant-marketplace` 文件夹复制到本机后，在 PowerShell 中运行：
+将整个 `pogoskill-cms-assistant-marketplace` 文件夹复制到本机后，由 AI 在当前系统的终端运行：
 
-```powershell
+```text
 codex plugin marketplace add "此文件夹的完整路径"
 codex plugin add pogoskill-cms-assistant@pogoskill-team
 ```
@@ -32,6 +34,12 @@ codex plugin add pogoskill-cms-assistant@pogoskill-team
 安装完成后新建一个 Codex 任务，让新任务加载插件。
 
 ## 保存 CMS API Key
+
+AI 先检查，不要每次重新索取。Windows 从当前插件根目录运行 `scripts/cms-check-api-key.ps1`；macOS 运行 `python3 scripts/cms-macos.py check-key`（可使用 Codex 配置的 bundled Python）。检查通过就继续 CMS 任务，禁止再次要求 Key。检查失败后才打开用户可见的保存会话，不能把 Key 当命令参数或消息文本传递。
+
+保存 Key 后，AI 必须用本机可用 Python 3 运行插件 `scripts/verify-workstation.py`。它实际以现有凭据向 `/cms/site/list` 发只读 POST，只回报站点数量、`request_id` 和 WebP 编码能力，不显示 Key。Windows 找不到 PowerShell 时，AI 从当前 Codex 依赖中找 `pwsh.exe` 并传给 `--powershell`；macOS 不传此参数。预检失败时按其客观错误修复，不能说“安装完成”。预检通过只证明本机可读取 CMS，不证明任一新站点的草稿写入或图片发布已通过实测。
+
+### Windows
 
 API Key 不包含在 Git 仓库或分享包内。为避免终端无法粘贴，必须先运行命令，再复制 Key：
 
@@ -69,7 +77,13 @@ AI 在每个新任务中应先运行 `scripts/cms-check-api-key.ps1`。它只返
 
 不要把 `cms-save-api-key` 替换成 API Key，不要把 Key 粘贴进终端，也不要把 API Key 发到聊天中。只有使用者明确要求键盘隐藏输入时，AI 才可加上 `-Prompt`。
 
-## 交稿文件先这样准备
+### macOS
+
+AI 从**当前安装的插件根目录**找到 `scripts/cms-macos.py`，确认可用的 Python 3，然后在可跟踪、用户可见的终端运行 `python3 scripts/cms-macos.py save-key`。脚本先等待；运营复制完整 Key，回到同一终端只按 Enter。脚本通过 `pbpaste` 读取剪贴板，用 macOS Keychain 保存，清空剪贴板，并在同一进程中验证。AI 再独立运行 `python3 scripts/cms-macos.py check-key`。Key 不写入脚本参数、聊天、仓库或明文文件。macOS 可能弹出系统钥匙串授权窗口；仅让用户完成系统原生授权，不要求在聊天里提供 Key。若 `python3` 或 Keychain 不可用，AI 应先定位 Codex bundled Python 或按机器实际情况处理依赖，不能声称已保存。
+
+macOS JSON POST 使用 `python3 scripts/cms-macos.py request --path /cms/site/list --body <请求文件> --output <响应文件>`；页面写入额外加 `--execute`。图片可用 `upload-image --site-id ... --cms-path ... --file ... --output ... --execute`，再用该次响应文件执行 `publish-image --upload-response ... --output ... --execute`。`cms-macos.py` 会阻止页面生成、删除和把普通文章发布请求当成图片发布。图片原图加 WebP 的站点可用跨平台 `prepare-image-pair.py`（要求该 Python 运行时有 Pillow/WebP 编码）；DOCX 图片可用 `extract-docx-media.py` 提取。AI 自行运行这些命令，不让运营填写参数。
+
+## PoGoskill 专用交稿要求
 
 每篇 DOCX 都必须给出参考样式，可提供参考文章 URL、CMS 页面 ID 或现有 HTML，至少一项。需要上传的新正文图片必须直接嵌入 DOCX 的实际出现位置；不要只给文件夹或本地路径。Guide 图片不需要重新上传，请在对应位置写出 CMS `guides` 图片库的准确文件名（含扩展名），AI 只按名称精确复用，不猜图、不换相似图。
 
@@ -84,9 +98,9 @@ Guide 图片：
 在对应位置填写 CMS 准确文件名，例如：guide-change-location-step-1.jpg
 ```
 
-## 使用方式：其他公司网站
+## 其他公司网站的一站式使用方式
 
-同事只要上传 2–3 篇旧 HTML，告诉 AI“请学习这些旧文章，为这个网站建立规范”，即可调用 `$cms-site-standard-builder`。助手会自己识别网站、查 CMS、提取 H2/H3、目录、表格、购买区和图片规格。之后上传新稿，说“按刚建立的规范保存 CMS 草稿”，即可调用 `$cms-site-article-assistant`。只有旧 HTML 无法判定网站时才需要补一个网站 URL；同事不用输入 CMS ID、运行脚本或打开终端。各站共用 CMS POST API、作者／URL／关键词等字段名，以及新图片上传后用图片 `publish_id` 单独发布资源的流程；字段取值、站点链接、图片格式和全部 HTML 样式按本站旧文章确定。详细提示词见根目录 `README.md`。
+同事只需上传新稿并说明产品／网站与语言；调用 `$tenorshare-cms-article-assistant`。助手自行通过 CMS `site/list`、`page/list`、`page/info` 发现本站同类旧文章，建立规范并在**同一任务**处理草稿。旧 HTML 可选；只有 CMS 找不到同类参考时才向运营索要。站点不唯一时只问网址。各站共用 CMS POST API、作者／URL／关键词等字段名，以及新图片上传后用图片 `publish_id` 单独发布资源的流程；字段取值、站点链接、图片格式和全部 HTML 样式按本站旧文章确定。运营说明见 [START-HERE.md](START-HERE.md)。
 
 ## 使用方式：繁中站
 

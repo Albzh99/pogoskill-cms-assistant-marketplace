@@ -1,12 +1,12 @@
-# PoGoskill CMS 文章助手
+# Tenorshare CMS 文章助手
 
-这是团队使用的 Codex CMS 插件 Marketplace。PoGoskill 繁中站与英文站规则彼此独立；其他网站先建立自己的文章规范，再使用通用文章流程。包含：
+这是 Tenorshare 全公司多产品、多语言网站使用的 Codex CMS 插件 Marketplace。旧仓库和插件 ID 中仍含 `pogoskill`，只是为了兼容已安装同事；PoGoskill 是其中一个产品，不是其他网站的默认模板。运营只需提供目标产品／语言和新稿，助手可从 CMS 现有文章自动学习该站 HTML，再上传草稿。给同事直接发送 [一页使用说明](START-HERE.md)。包含：
 
 - 台湾站 V2 文章 HTML 转换、机械校验与 CMS 草稿回读
 - 英文站 V2 文章 HTML 转换、固定英文下载区与 Buy Box、CMS 草稿回读
 - JPG/PNG 与 WebP 图片处理、上传及回填
 - CMS 草稿字段、HTML、来源覆盖和图片审查（AI 页面预览暂时停用）
-- 为新网站和新文章类型建立独立的 profile、HTML 契约、固定组件与站点校验器
+- 从 CMS 同站点同类旧文章或可选旧 HTML，为任一产品、语言、文章类型建立独立 profile、HTML 契约和校验器
 
 默认安全规则：文章只创建或更新草稿，不生成、不发布、不删除，也不修改无法确认归属的旧文章。新上传图片会使用其图片上传 `publish_id` 单独发布到云端，确保前台 URL 可用；图片发布绝不等于文章发布。
 
@@ -14,41 +14,41 @@
 
 把本仓库地址交给组员的 Codex AI，并发送下面这句话：
 
-> 请从 Git 仓库安装或更新到最新版 PoGoskill CMS 文章助手：`https://github.com/Albzh99/pogoskill-cms-assistant-marketplace.git`。按照仓库根目录 `SETUP.md` 完成 Marketplace 和插件安装，不要复用旧消息中的版本号或缓存路径。需要 CMS API Key 时，先替我启动不带 `-Prompt` 的保存命令，并把该运行会话真正打开到 Codex 可见终端；确认我能看到“请现在复制完整的 CMS API Key”后，再让我复制 Key并回到终端只按 Enter。保存进程退出后，立即用同一插件根目录运行 `cms-check-api-key.ps1`；检查通过才算完成。不要让我把 Key 粘贴进终端或发到聊天里。安装完成后请让我新建一个任务再使用插件。
+> 请从 Git 仓库安装或更新 Tenorshare CMS 文章助手：`https://github.com/Albzh99/pogoskill-cms-assistant-marketplace.git`。按 `SETUP.md` 自动识别 Windows 或 macOS，自己完成安装。先检查已保存的 CMS Key；只有没有时才启动对应平台的剪贴板保存流程，并把等待 Enter 的同一个会话真正打开到可见终端。我只复制 Key，再回到终端按 Enter。随后运行 `verify-workstation.py`，实际核对 Key、CMS POST 和 WebP 能力；不要让我输入命令或把 Key 发到聊天。新建任务后使用。
 
-组员的电脑必须已经：
+组员的电脑需要：
 
 1. 安装 Codex 桌面版或 Codex CLI；
-2. 安装 Git；
-3. 能正常访问 GitHub。
+2. 能正常访问 GitHub；
+3. 由 AI 检查本机 `codex`、Python 3 和图片编码能力，必要时完成有权限的依赖安装。
 
-API Key 不在仓库中，也不得提交到 Git。首次保存后会写入 Windows DPAPI 加密、仅当前用户可读且独立于插件版本的本地存储；Credential Manager 可用时也会保存一份。遇到 Windows `1312` 时自动使用本地副本，不应在每个新任务中重新索取。
+API Key 不在仓库中，也不得提交到 Git。Windows 使用 DPAPI 加密的当前用户本地存储（并兼容 Credential Manager），macOS 使用当前用户 Keychain；插件升级不应重新索取已验证可用的 Key。
 
-如果 AI 给出的脚本路径包含旧版本号，或声称“终端已打开”但界面没有终端面板，说明它没有完成新版交互流程。应先更新插件，再由 AI 创建终端运行会话并把该会话显示到 Codex 底部面板；不能让同事手工寻找缓存目录。
+如果 AI 给出的脚本路径包含旧版本号，或声称“终端已打开”但界面没有终端面板，说明它没有完成交互流程。应先更新插件，再由 AI 把同一运行会话显示到可见终端；不能让同事手工寻找缓存目录。
 
 已经安装过的同事可让 AI 执行 `codex plugin marketplace upgrade pogoskill-team`，再执行 `codex plugin add pogoskill-cms-assistant@pogoskill-team`，然后新建任务加载新版。
 
-不熟悉电脑操作的同事可直接下载 [PoGoskill CMS 文章助手同事试用指南](docs/PoGoskill%20CMS%20文章助手同事试用指南.docx)。手册逐步说明如何向管理员申请 API Key、让 AI 安装插件、安全保存 Key，以及分别试用繁中站和英文站文章。
+不熟悉电脑操作的同事只需阅读 [START-HERE.md](START-HERE.md)。旧的 [PoGoskill 专用 Word 手册](docs/PoGoskill%20CMS%20文章助手同事试用指南.docx) 仅用于既有 PoGoskill 流程；其他产品请勿套用其中的固定规则。
 
 ## 安装后怎样使用
 
-每篇文章请新建一个 Codex 任务，只附上一种语言的一篇 DOCX。不要在同一任务中同时处理繁中站和英文站文章。
+每篇文章请新建一个 Codex 任务，只附上一种语言的一篇新稿。不同网站的规范分开保存。
 
-### 其他公司网站：先建规范
+### 任一 Tenorshare 网站：一句话完成
 
-首次处理一个新网站或不同文章类型时，同事直接上传 2–3 篇该网站同类的旧 HTML，最好再附上新文章稿件，然后只说：
+同事上传新稿并说明产品／网站与语言，然后说：
 
-> 使用 `$cms-site-standard-builder` 学习我上传的旧 HTML，为这个网站建立可复用的文章规范。请自己识别网站、通过 CMS API 核对资料，并把标题、目录、表格、购买区、下载区、图片格式和尺寸都按旧文章归纳；我不操作终端。这一步先不要上传新文章。
+> 我负责【产品名】【语言】网站。请使用 `$tenorshare-cms-article-assistant` 从 CMS 同站点同类旧文章学习本站 HTML，完整处理这篇新稿的文字和图片，通过 CMS API 保存并回读草稿。不要生成或发布文章。
 
-助手会自己读取 HTML、提取样式差异、查 CMS 站点和模板并建立规范。如果旧 HTML 看不出网站且 CMS 也无法唯一匹配，才会问同事“这属于哪个网站”，只需回复网址。旧文章有多种明显不同版式时，助手会分别建立文章类型规范。不会让同事填写站点 ID、模板 ID、JSON 或脚本命令。
+助手自己查 CMS 站点和旧文章、建立规范、制作新稿并保存草稿。用户旧 HTML 是可选参考；只有 CMS 找不到同类旧文章时才要求补充。多个同产品同语言站点时，助手列出网址让运营选择；不会要求输入 CMS ID、JSON 或命令。
 
-以后处理该站点文章时，附上稿件并说：
+高级用户若只想单独建立规范、不上传新文章，可说：
 
-> 使用 `$cms-site-article-assistant` 按我们刚建立的这个网站规范处理我上传的新文章，保留完整正文和所有图片，检查后通过 CMS API 保存草稿并回读。不要生成或发布文章。
+> 使用 `$cms-site-standard-builder` 为【产品／语言／网址】建立本站规范。优先读取 CMS 同类已发布文章；我提供的旧 HTML 仅作为补充。这一步不上传文章。
 
 规范按“网站 + 语言 + 文章类型”隔离。H2/H3、目录、表格、Buy Box、下载框、图片格式和尺寸均以该网站旧 HTML 为准；没有的模块不会凭空加入。作者、URL、关键词等 CMS 字段名及 POST 上传／回读方式是共享的，但字段取值、链接和关联 ID 按本站核对。新图上传后使用本次图片上传返回的 `publish_id` 单独发布资源也是共享流程；图片格式、目录、前台域名和 HTML 图片盒是站点变量。原图 + WebP 可复用现有成对上传脚本，其他格式组合先建立并验证处理规则。
 
-### 交稿前必须写进 DOCX 的内容
+### 以下交稿细节仅适用于 PoGoskill 既有流程
 
 每篇稿件都要在文档开头或备注区提供参考样式，至少填写一种可核验来源：参考文章 URL、CMS 页面 ID 或可复制的现有 HTML。AI 必须先读取参考样式，再复用其中已存在的标题、目录、图片、表格、下载区、步骤与 Buy Box 结构。
 
