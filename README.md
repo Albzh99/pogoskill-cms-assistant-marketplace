@@ -30,7 +30,7 @@ API Key 不在仓库中，也不得提交到 Git。Windows 使用 DPAPI 加密�
 
 已经安装过的同事可让 AI 执行 `codex plugin marketplace upgrade pogoskill-team`，再执行 `codex plugin add pogoskill-cms-assistant@pogoskill-team`，然后新建任务加载新版。
 
-不熟悉电脑操作的同事只需阅读 [START-HERE.md](START-HERE.md)。旧的 [PoGoskill 专用 Word 手册](docs/PoGoskill%20CMS%20文章助手同事试用指南.docx) 仅用于既有 PoGoskill 流程；其他产品请勿套用其中的固定规则。
+不熟悉电脑操作的同事可直接使用 [Tenorshare 同事试用 Word 手册](docs/Tenorshare%20CMS%20文章助手同事试用指南.docx)，在线说明见 [START-HERE.md](START-HERE.md)。旧的 [PoGoskill 专用 Word 手册](docs/PoGoskill%20CMS%20文章助手同事试用指南.docx) 仅用于既有 PoGoskill 流程；其他产品请勿套用其中的固定规则。
 
 ## 安装后怎样使用
 
