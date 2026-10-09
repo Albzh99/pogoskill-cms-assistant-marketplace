@@ -14,7 +14,7 @@
 
 把本仓库地址交给组员的 Codex AI，并发送下面这句话：
 
-> 请从 Git 仓库安装或更新 Tenorshare CMS 文章助手：`https://github.com/Albzh99/pogoskill-cms-assistant-marketplace.git`。按 `SETUP.md` 自动识别 Windows 或 macOS，自己完成安装。先检查已保存的 CMS Key；只有没有时才启动对应平台的剪贴板保存流程，并把等待 Enter 的同一个会话真正打开到可见终端。我只复制 Key，再回到终端按 Enter。随后运行 `verify-workstation.py`，实际核对 Key、CMS POST 和 WebP 能力；不要让我输入命令或把 Key 发到聊天。新建任务后使用。
+> 请从 Git 仓库安装或更新 Tenorshare CMS 文章助手：`https://github.com/Albzh99/pogoskill-cms-assistant-marketplace.git`。按 `SETUP.md` 自动识别 Windows 或 macOS，自己完成安装。先检查已保存的 CMS Key；只有没有时才启动对应平台的剪贴板保存流程，并把等待 Enter 的同一个会话真正打开到可见终端。我只复制 Key，再回到终端按 Enter。随后运行 `verify-workstation.py`，实际核对 Key、CMS POST 和 WebP 能力；不要让我输入命令或把 Key 发到聊天。安装后主动问我负责的网站、语言和文章类型，并启动首次建规范引导；如需新任务加载插件，请给我一条可直接复制的完整消息。
 
 组员的电脑需要：
 
