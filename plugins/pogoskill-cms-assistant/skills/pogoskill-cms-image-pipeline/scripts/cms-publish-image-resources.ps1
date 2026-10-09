@@ -77,7 +77,7 @@ try {
     $ids = @($publishItems | ForEach-Object { [int]$_.publish_id } | Select-Object -Unique)
     $publishResponse = Invoke-CmsJson '/cms/pagepublish/publish' @{
       ids = $ids
-      description = 'Publish PoGoskill article image resources to cloud storage; no article page publication'
+      description = 'Publish CMS article image resources to cloud storage; no article page publication'
     }
     if ($publishResponse.code -ne 0) {
       throw "Image resource publish failed: code=$($publishResponse.code), request_id=$($publishResponse.request_id), msg=$($publishResponse.msg)"

@@ -1,12 +1,25 @@
 param(
   [Parameter(Mandatory = $true)][string]$ManifestPath,
   [Parameter(Mandatory = $true)][ValidatePattern('^[a-z0-9/_-]*$')][string]$CmsPath,
-  [ValidateSet(286, 324)][int]$SiteId = 324,
+  [ValidateRange(1, 2147483647)][int]$SiteId = 324,
+  [string]$PublicUrlPrefix,
   [switch]$Execute
 )
 
 $ErrorActionPreference = 'Stop'
 if (-not $Execute) { throw 'Dry run only. Re-run with -Execute only after the current article image upload is explicitly authorized.' }
+
+$knownPrefix = if ($SiteId -eq 324) { 'https://tw.pogoskill.com/images/' } elseif ($SiteId -eq 286) { 'https://images.pogoskill.com/' } else { $null }
+if ([string]::IsNullOrWhiteSpace($PublicUrlPrefix)) {
+  if ($knownPrefix) { $PublicUrlPrefix = $knownPrefix }
+  else { throw 'PublicUrlPrefix is required for a new CMS site. Read it from the verified site profile.' }
+}
+if ($PublicUrlPrefix -notmatch '^https://[^/?#]+(?:/[^?#]*)?/$' -or $PublicUrlPrefix -match 'site\.p\.cms\.afirstsoft\.cn') {
+  throw 'PublicUrlPrefix must be an HTTPS frontend directory URL ending in /.'
+}
+if ($knownPrefix -and $PublicUrlPrefix -cne $knownPrefix) {
+  throw 'The public URL prefix for this PoGoskill site is fixed and cannot be overridden.'
+}
 
 $manifestFile = [IO.Path]::GetFullPath($ManifestPath)
 if (-not (Test-Path -LiteralPath $manifestFile -PathType Leaf)) { throw "Manifest not found: $manifestFile" }
@@ -76,7 +89,7 @@ function Test-UploadedUrl([string]$Url) {
 }
 
 function Get-PublicImageUrl([object]$UploadedFile, [object]$ListedFile, [int]$Width, [int]$Height) {
-  $expectedPrefix = if ($SiteId -eq 324) { 'https://tw.pogoskill.com/images/' } else { 'https://images.pogoskill.com/' }
+  $expectedPrefix = $PublicUrlPrefix
   $candidates = @([string]$UploadedFile.url, [string]$ListedFile.online)
   $url = $candidates | Where-Object {
     -not [string]::IsNullOrWhiteSpace($_) -and

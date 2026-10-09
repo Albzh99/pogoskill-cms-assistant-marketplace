@@ -42,7 +42,7 @@ def check_draft(profile, payload, page_response=None):
     url = payload.get("url")
     if not isinstance(url, str) or not url.strip() or "://" in url or ".." in url.split("/"):
         errors.append("payload.url must be a safe relative path")
-    for field, expected in (("status", 5), ("sync_status", 1)):
+    for field, expected in (("status", cms["draft_status"]), ("sync_status", cms["draft_sync_status"])):
         if field in payload and payload[field] != expected:
             errors.append(f"payload.{field} must be {expected}")
 
@@ -54,7 +54,8 @@ def check_draft(profile, payload, page_response=None):
             if not page_response.get("request_id"):
                 errors.append("page/info request_id is missing")
             for field, expected in (("site_id", site_id), ("template_id", cms["template_id"]),
-                                    ("url", payload.get("url")), ("status", 5), ("sync_status", 1),
+                                    ("url", payload.get("url")), ("status", cms["draft_status"]),
+                                    ("sync_status", cms["draft_sync_status"]),
                                     ("content", payload.get("content"))):
                 if page.get(field) != expected:
                     errors.append(f"page/info {field} differs from expected draft")

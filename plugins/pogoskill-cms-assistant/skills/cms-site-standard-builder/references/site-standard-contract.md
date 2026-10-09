@@ -2,9 +2,10 @@
 
 ## 输入和证据
 
-- 用户至少给出目标网站或 CMS 站点，以及一种文章类型的正常文章 URL、CMS 页面 ID 或 HTML。优先通过 `site/list` 与 `page/info` 取得可核对的站点 ID、模板 ID、实际 HTML 和 `request_id`；若参考材料来自网站 HTML 而 CMS 无对应页面，记录来源并保持 profile 为 `draft`，直到 CMS 字段可核对。
+- 同事优先只提供几份正常旧 HTML 和一篇待处理新稿。助手用 `inspect-reference-html.py` 自动提取 canonical/domain、标题类、表格、购买区、图片尺寸等，再完整阅读原 HTML。能识别网站时自行查询 CMS；只有无法判定目标网站时才要求一个网站 URL，不要让同事找页面 ID、填 JSON 或操作终端。
+- 通过 `site/list`、`template/list` 和 `template/fields` 取得可核对的站点 ID、模板 ID、字段和 `request_id`。若旧 HTML 的 canonical/URL 能在 CMS 中命中，额外保存 `page/info`；旧 HTML 没有 CMS 页面 ID 也可以作为样式证据，但 CMS 映射证据仍必须齐全才能把 profile 标成 `ready`。
 - 参考文章应与目标文章类型相同；多个风格差异较大的文章类型分别建规范。先确认文章 URL、站点、语言、作者、分类、产品、模板字段和相关文章的实际取值，不从 PoGoskill 规则推断。
-- 读取目标站点已使用的图片路径与 HTML 图片盒、原图/WebP 关系、主图尺寸、竖图展示、图片发布方式、Guide 图片复用方式。若某站点不用某模块，明确写“无”，不要硬塞 PoGoskill CTA 或 Buy Box。
+- 读取目标站点已使用的图片路径与 HTML 图片盒、格式组合、主图尺寸、竖图展示、图片发布方式和已有图片复用方式。允许只用一种格式，也允许站点另有规格；以该站点的实例和 CMS 结果为准。若某站点不用某模块，明确写“无”，不要硬塞 PoGoskill CTA 或 Buy Box。
 
 ## 文件格式
 
@@ -24,16 +25,31 @@
     "product_ids": [],
     "required_fields": ["title", "subject", "url", "content"]
   },
-  "references": [{"page_id": 789, "page_info_json": "evidence/reference-page-info.json"}],
+  "references": [{"kind": "html", "html_file": "evidence/old-article.html", "sha256": "<该文件实际 SHA256>"}],
+  "cms_discovery": {
+    "site_list_json": "evidence/site-list.json",
+    "template_list_json": "evidence/template-list.json",
+    "template_fields_json": "evidence/template-fields.json"
+  },
+  "images": {
+    "enabled": true,
+    "formats": ["jpg", "webp"],
+    "cms_directories": {"article": "article-images"},
+    "public_url_prefix": "https://images.example.com/article-images/",
+    "publish_mode": "picture-upload-publish-id",
+    "markup_asset": "assets/image-box.html"
+  },
   "html_contract": "html-contract.md",
   "validator": "validate-html.py",
   "assets": []
 }
 ```
 
-`product_ids` 为空只能表示该站点文章确实不关联产品；不确定时保持 `draft`。`required_fields` 是当前模板实际需要的 CMS 字段；文章的作者、分类、模块、相关页等动态 ID 每次写入前重新查，不把参考文章的动态 ID 当成固定值。资产是需要原样复用的 HTML 片段；没有固定组件时数组可为空。
+`draft_status` 和 `draft_sync_status` 的数字须由该 CMS 站点的真实草稿/接口规则确认；示例数值不直接套用。`product_ids` 为空只能表示该站点文章确实不关联产品；不确定时保持 `draft`。`required_fields` 是当前模板实际需要的 CMS 字段；文章的作者、分类、模块、相关页等动态 ID 每次写入前重新查，不把参考文章的动态 ID 当成固定值。作者、URL、标题、关键词、描述和正文仍使用共享 CMS API 字段。资产是需要原样复用的 HTML 片段；没有固定组件时数组可为空。若参考页来自 CMS，可改用 `{"kind":"cms","page_id":789,"page_info_json":"evidence/reference-page-info.json"}`；纯 HTML 参考则必须同时提供三份 CMS 发现响应。
 
-`html-contract.md` 至少记录：适用范围、证据 URL/页面 ID、模板与字段、模块顺序、标题层级、目录锚点、图片/表格/CTA/FAQ/结语结构、语言和链接规则、禁止改动的文字区域、图片目录与公开域名、草稿状态、需要人工判断的例外。每条重要规则标明依据的参考页面或用户明确要求；冲突时把差异写清楚，不能混合为新样式。
+`images` 把 CMS 通用上传与发布流程同站点变量分开。目录、前台 URL 前缀、HTML 图片盒和所需格式从本站旧 HTML 与 CMS 图片库确定；如果该文章类型没有图片，写 `{"enabled": false}`。主图、正文横图、竖图、手机截图的尺寸规则写入 `html-contract.md`，不能照搬示例数值。
+
+`html-contract.md` 至少记录：适用范围、旧 HTML 与 CMS 证据、模板与字段、模块顺序、标题层级、目录锚点、图片/表格/购买区/下载区/FAQ/结语结构、语言和链接规则、禁止改动的文字区域、图片目录、图片格式与尺寸、公开域名、草稿状态、需要人工判断的例外。不存在的模块标记为“无”。每条重要规则标明依据的参考文件或用户明确要求；不同旧 HTML 互相冲突时判断是否应拆成不同文章类型，不能混合为新样式。
 
 `validate-html.py` 接收最终 HTML 文件路径；通过时退出 0，缺少必要模块、结构失衡、图片未回填或站点错误资源时退出非 0。它验证本规范的关键结构，不调用 PoGoskill 专用 `validate-article-html.py`。在采用新规范前用真实样本和一个故意删掉必要模块的样本验证校验器确实能拦截。
 
@@ -41,4 +57,4 @@
 
 ## 后续使用
 
-文章任务先通过 `validate-site-profile.py`，再执行 `$cms-site-article-assistant`。写草稿前重新实时核对 CMS 字段，按 profile 渲染全文，运行站点校验器和来源/图片完整度检查；写后回读同样检查。图片上传脚本目前只支持 PoGoskill 的两个站点 ID 和域名；新站点首次启用图片时，必须先针对新站点扩展或提供经测试的图片处理器，不能把 PoGoskill 参数强套进去。
+文章任务先通过 `validate-site-profile.py`，再执行 `$cms-site-article-assistant`。写草稿前重新实时核对 CMS 字段，按 profile 渲染全文，运行站点校验器和来源/图片完整度检查；写后回读同样检查。新站点按本站规则建立图片 manifest：每个 DOCX 图片出现位置对应一项，`html_urls` 列出该站点要求的格式 URL；用 `validate-source-images.py` 对账。若本站也采用原图 + WebP 成对上传，可复用现有 `cms-upload-image-pairs.ps1`，显式传入 profile 的 `site.id`、目标 `cms_directories` 和 `public_url_prefix`；上传后继续用 `cms-publish-image-resources.ps1` 的真实图片 `publish_id` 单独发布资源。HTML 回填仍使用本站 `markup_asset`，不套用 PoGoskill 图片盒。若本站采用不同格式组合，则先实现并验证对应上传处理器。

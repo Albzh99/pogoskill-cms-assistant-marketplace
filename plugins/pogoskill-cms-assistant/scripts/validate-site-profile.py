@@ -1,6 +1,7 @@
 """Check that a new CMS site/article-type contract is based on real page readbacks."""
 
 import argparse
+import hashlib
 import json
 import re
 import sys
@@ -27,6 +28,16 @@ def local_file(root, name, suffix=None):
     if suffix and path.suffix.lower() != suffix:
         raise ValueError(f"profile file must end in {suffix}: {name}")
     return path
+
+
+def contains_id(value, target):
+    if isinstance(value, dict):
+        if value.get("id") == target:
+            return True
+        return any(contains_id(child, target) for child in value.values())
+    if isinstance(value, list):
+        return any(contains_id(child, target) for child in value)
+    return False
 
 
 def check_profile(profile_path):
@@ -64,24 +75,68 @@ def check_profile(profile_path):
     parsed = urlparse(base_url) if isinstance(base_url, str) else None
     if not parsed or parsed.scheme != "https" or not parsed.hostname:
         errors.append("site.base_url must be an HTTPS URL")
-    if cms.get("draft_status") != 5 or cms.get("draft_sync_status") != 1:
-        errors.append("CMS draft status must be 5 and draft sync status must be 1")
+    if type(cms.get("draft_status")) is not int or type(cms.get("draft_sync_status")) is not int:
+        errors.append("CMS draft status and sync status must be confirmed integer values")
     products = cms.get("product_ids")
     if not isinstance(products, list) or any(not isinstance(p, str) or not p.isdigit() for p in products):
         errors.append("cms.product_ids must be an array of string IDs (empty only if this site uses no product)")
     fields = cms.get("required_fields")
     if not isinstance(fields, list) or not fields or any(not isinstance(f, str) or not f.strip() for f in fields):
         errors.append("cms.required_fields must list field names confirmed for this template")
+    images = profile.get("images") if isinstance(profile.get("images"), dict) else {}
+    if type(images.get("enabled")) is not bool:
+        errors.append("images.enabled must state whether this article type uses images")
+    elif images["enabled"]:
+        prefix = images.get("public_url_prefix")
+        parsed_prefix = urlparse(prefix) if isinstance(prefix, str) else None
+        if (not parsed_prefix or parsed_prefix.scheme != "https" or not parsed_prefix.hostname
+                or not prefix.endswith("/") or parsed_prefix.hostname == "site.p.cms.afirstsoft.cn"):
+            errors.append("images.public_url_prefix must be an HTTPS frontend directory ending in /")
+        formats = images.get("formats")
+        if not isinstance(formats, list) or not formats or any(ext not in {"jpg", "jpeg", "png", "webp"} for ext in formats):
+            errors.append("images.formats must list the actual formats required by this site")
+        directories = images.get("cms_directories")
+        if not isinstance(directories, dict) or not directories or any(
+            not isinstance(role, str) or not role or not isinstance(folder, str) or not folder.strip()
+            for role, folder in directories.items()
+        ):
+            errors.append("images.cms_directories must map image roles to verified CMS directories")
+        if images.get("publish_mode") != "picture-upload-publish-id":
+            errors.append("images.publish_mode must describe the confirmed CMS image publication flow")
+        try:
+            local_file(root, images.get("markup_asset"))
+        except ValueError as exc:
+            errors.append(f"images.markup_asset: {exc}")
 
     references = profile.get("references")
     if not isinstance(references, list) or not references:
         errors.append("at least one CMS page/info reference is required")
         references = []
     page_ids = set()
+    cms_reference_count = 0
     for index, reference in enumerate(references, 1):
-        if not isinstance(reference, dict) or not positive_int(reference.get("page_id")):
-            errors.append(f"reference {index}: page_id must be a positive integer")
+        if not isinstance(reference, dict):
+            errors.append(f"reference {index}: reference must be an object")
             continue
+        kind = reference.get("kind", "cms")
+        if kind == "html":
+            try:
+                evidence_path = local_file(root, reference.get("html_file"))
+                if evidence_path.suffix.lower() not in {".html", ".htm"}:
+                    errors.append(f"reference {index}: HTML file extension is required")
+                raw = evidence_path.read_bytes()
+                digest = hashlib.sha256(raw).hexdigest()
+                if digest != reference.get("sha256"):
+                    errors.append(f"reference {index}: HTML checksum differs from profile")
+                if len(raw) < 100:
+                    errors.append(f"reference {index}: HTML reference is too short")
+            except (OSError, ValueError) as exc:
+                errors.append(f"reference {index}: {exc}")
+            continue
+        if kind != "cms" or not positive_int(reference.get("page_id")):
+            errors.append(f"reference {index}: kind must be cms with a positive page_id, or html with a local HTML file")
+            continue
+        cms_reference_count += 1
         page_id = reference["page_id"]
         if page_id in page_ids:
             errors.append(f"reference {index}: duplicate page_id {page_id}")
@@ -105,6 +160,26 @@ def check_profile(profile_path):
                 errors.append(f"reference {index}: request_id is absent")
         except (OSError, ValueError, TypeError) as exc:
             errors.append(f"reference {index}: {exc}")
+
+    if references and cms_reference_count == 0:
+        discovery = profile.get("cms_discovery") if isinstance(profile.get("cms_discovery"), dict) else {}
+        for field, expected_id in (("site_list_json", site_id), ("template_list_json", template_id)):
+            try:
+                evidence_path = local_file(root, discovery.get(field), ".json")
+                evidence = json.loads(evidence_path.read_text(encoding="utf-8-sig"))
+                if not isinstance(evidence, dict) or evidence.get("code") != 0 or not evidence.get("request_id"):
+                    errors.append(f"cms_discovery.{field}: unsuccessful CMS response")
+                elif not contains_id(evidence.get("data"), expected_id):
+                    errors.append(f"cms_discovery.{field}: configured ID absent from CMS response")
+            except (OSError, ValueError, TypeError) as exc:
+                errors.append(f"cms_discovery.{field}: {exc}")
+        try:
+            evidence_path = local_file(root, discovery.get("template_fields_json"), ".json")
+            evidence = json.loads(evidence_path.read_text(encoding="utf-8-sig"))
+            if not isinstance(evidence, dict) or evidence.get("code") != 0 or not evidence.get("request_id"):
+                errors.append("cms_discovery.template_fields_json: unsuccessful CMS response")
+        except (OSError, ValueError, TypeError) as exc:
+            errors.append(f"cms_discovery.template_fields_json: {exc}")
 
     for field, suffix in (("html_contract", ".md"), ("validator", ".py")):
         try:
