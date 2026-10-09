@@ -1,6 +1,8 @@
 import importlib.util
 import hashlib
 import json
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -51,6 +53,14 @@ class SiteProfileTests(unittest.TestCase):
             "validation_examples": {"valid_html": "tests/valid.html", "invalid_html": "tests/invalid.html"},
             "assets": [],
         }
+        self.seal()
+
+    def seal(self):
+        (self.root / "evidence" / "reference.json").write_text(json.dumps(self.page), encoding="utf-8")
+        self.profile["approval"]["profile_version"] = self.profile["profile_version"]
+        self.profile["approval"]["report_sha256"] = hashlib.sha256(
+            (self.root / "review-report.md").read_bytes()).hexdigest()
+        self.profile["approval"]["rules_sha256"] = MODULE.rules_sha256(self.profile, self.root)
 
     def check(self):
         (self.root / "evidence" / "reference.json").write_text(json.dumps(self.page), encoding="utf-8")
@@ -62,8 +72,19 @@ class SiteProfileTests(unittest.TestCase):
         result = self.check()
         self.assertTrue(result["pass"], result["errors"])
 
+    def test_fingerprint_command_works_before_ready(self):
+        self.profile["status"] = "draft"
+        self.check()
+        result = subprocess.run([sys.executable, str(SCRIPT), str(self.root / "profile.json"),
+                                 "--fingerprint"], capture_output=True, text=True, encoding="utf-8")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        fingerprint = json.loads(result.stdout)
+        self.assertEqual(fingerprint["rules_sha256"], self.profile["approval"]["rules_sha256"])
+        self.assertEqual(fingerprint["report_sha256"], self.profile["approval"]["report_sha256"])
+
     def test_accepts_cms_string_ids(self):
         self.page["data"].update({"id": "789", "site_id": "123", "template_id": "456"})
+        self.seal()
         result = self.check()
         self.assertTrue(result["pass"], result["errors"])
 
@@ -95,6 +116,27 @@ class SiteProfileTests(unittest.TestCase):
         result = self.check()
         self.assertFalse(result["pass"])
         self.assertTrue(any("report_sha256" in error for error in result["errors"]))
+
+    def test_rejects_local_html_contract_edit_until_reconfirmed(self):
+        contract = self.root / "html-contract.md"
+        contract.write_text(contract.read_text(encoding="utf-8") + "\n本站调整了表格样式。\n", encoding="utf-8")
+        result = self.check()
+        self.assertFalse(result["pass"])
+        self.assertTrue(any("rules_sha256" in error for error in result["errors"]))
+        self.profile["profile_version"] = 2
+        self.seal()
+        self.assertTrue(self.check()["pass"])
+
+    def test_rejects_local_component_edit_until_reconfirmed(self):
+        (self.root / "assets").mkdir()
+        asset = self.root / "assets" / "paragraph.html"
+        asset.write_text("<p>Original</p>", encoding="utf-8")
+        self.profile["assets"] = ["assets/paragraph.html"]
+        self.seal()
+        asset.write_text("<p>Changed</p>", encoding="utf-8")
+        result = self.check()
+        self.assertFalse(result["pass"])
+        self.assertTrue(any("rules_sha256" in error for error in result["errors"]))
 
     def test_rejects_confirmation_of_previous_version(self):
         self.profile["profile_version"] = 2
@@ -156,6 +198,7 @@ class SiteProfileTests(unittest.TestCase):
             (self.root / "evidence" / name).write_text(json.dumps({
                 "code": 0, "request_id": "cms-evidence-id", "data": data,
             }), encoding="utf-8")
+        self.seal()
         self.assertTrue(self.check()["pass"])
 
     def test_rejects_uploaded_html_without_cms_mapping(self):
@@ -177,6 +220,7 @@ class SiteProfileTests(unittest.TestCase):
                                   "markup_asset": "assets/image-box.html"}
         (self.root / "assets").mkdir()
         (self.root / "assets" / "image-box.html").write_text("<picture><img src=\"...\"></picture>", encoding="utf-8")
+        self.seal()
         self.assertTrue(self.check()["pass"])
         self.profile["images"]["public_url_prefix"] = "https://site.p.cms.afirstsoft.cn/example/"
         self.assertFalse(self.check()["pass"])

@@ -2,6 +2,7 @@ import importlib.util
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 
 SPEC = importlib.util.spec_from_file_location("cms_macos", Path(__file__).with_name("cms-macos.py"))
@@ -43,6 +44,14 @@ class MacTransportTests(unittest.TestCase):
                          "/cms/pagepublish/publish", "/cms/picture/upload", "/cms/file/createdir"):
             with self.subTest(endpoint=endpoint), self.assertRaises(ValueError):
                 MODULE.learning_request_json(endpoint, {}, api_key="placeholder")
+
+    def test_normal_mode_can_reach_page_write_and_image_publish(self):
+        with patch.object(MODULE, "cms_post", return_value={"code": 0, "request_id": "mock"}) as post:
+            MODULE.request_json("/cms/page/add", {"content": "<p>Ready draft</p>"}, api_key="placeholder")
+            self.assertEqual("/cms/page/add", post.call_args.args[0])
+            MODULE.request_json("/cms/pagepublish/publish", {"id": 42},
+                                api_key="placeholder", allow_image_publish=True)
+            self.assertEqual("/cms/pagepublish/publish", post.call_args.args[0])
 
     def test_learning_mode_whitelist_matches_windows(self):
         script = Path(__file__).with_name("cms-learning-request.ps1").read_text(encoding="utf-8-sig")

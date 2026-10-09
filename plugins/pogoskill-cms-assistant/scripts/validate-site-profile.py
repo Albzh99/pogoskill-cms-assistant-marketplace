@@ -19,6 +19,11 @@ REQUIRED_CONTRACT_SECTIONS = (
 REQUIRED_REPORT_SECTIONS = (
     "这份规范管什么", "文章会长什么样", "上传时会怎样处理", "已检查与待确认", "请运营回复",
 )
+RULE_FIELDS = (
+    "schema_version", "profile_id", "profile_version", "site", "article_type", "cms",
+    "references", "cms_discovery", "images", "html_contract", "review_report",
+    "validator", "validation_examples", "assets",
+)
 
 
 def positive_int(value):
@@ -43,6 +48,35 @@ def local_file(root, name, suffix=None):
     if suffix and path.suffix.lower() != suffix:
         raise ValueError(f"profile file must end in {suffix}: {name}")
     return path
+
+
+def rules_sha256(profile, root):
+    """Bind the confirmed site rules and their local files, not just the review summary."""
+    assets = profile.get("assets")
+    if not isinstance(assets, list):
+        raise ValueError("assets must be an array before computing the rules fingerprint")
+    examples = profile.get("validation_examples") or {}
+    discovery = profile.get("cms_discovery") or {}
+    names = [profile.get("html_contract"), profile.get("validator"), *assets]
+    if isinstance(examples, dict):
+        names.extend(examples.values())
+    if isinstance(discovery, dict):
+        names.extend(discovery.values())
+    images = profile.get("images") or {}
+    if isinstance(images, dict) and images.get("enabled"):
+        names.append(images.get("markup_asset"))
+    for reference in profile.get("references") or []:
+        if isinstance(reference, dict):
+            names.append(reference.get("html_file") if reference.get("kind") == "html"
+                         else reference.get("page_info_json"))
+    files = {}
+    for name in names:
+        path = local_file(root, name)
+        files[str(Path(name))] = hashlib.sha256(path.read_bytes()).hexdigest()
+    snapshot = {"profile": {field: profile.get(field) for field in RULE_FIELDS},
+                "files": dict(sorted(files.items()))}
+    encoded = json.dumps(snapshot, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
 
 
 def contains_id(value, target):
@@ -102,6 +136,11 @@ def check_profile(profile_path):
             errors.append("approval.report_sha256 must match the current review_report")
     except (OSError, ValueError) as exc:
         errors.append(f"review_report: {exc}")
+    try:
+        if approval.get("rules_sha256") != rules_sha256(profile, root):
+            errors.append("approval.rules_sha256 must match the current local site rules; revalidate and reconfirm edits")
+    except (OSError, ValueError, TypeError) as exc:
+        errors.append(f"rules fingerprint unavailable: {exc}")
 
     site = profile.get("site") if isinstance(profile.get("site"), dict) else {}
     cms = profile.get("cms") if isinstance(profile.get("cms"), dict) else {}
@@ -271,7 +310,21 @@ def check_profile(profile_path):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("profile_json")
+    parser.add_argument("--fingerprint", action="store_true", help="Print hashes for operator-confirmed local rules; does not contact CMS")
     args = parser.parse_args()
+    if args.fingerprint:
+        path = Path(args.profile_json).resolve()
+        try:
+            profile = json.loads(path.read_text(encoding="utf-8-sig"))
+            report = local_file(path.parent, profile.get("review_report"), ".md")
+            result = {"profile_version": profile.get("profile_version"),
+                      "report_sha256": hashlib.sha256(report.read_bytes()).hexdigest(),
+                      "rules_sha256": rules_sha256(profile, path.parent)}
+            print(json.dumps(result, ensure_ascii=False, indent=2))
+        except (OSError, ValueError, TypeError) as exc:
+            print(json.dumps({"pass": False, "error": str(exc)}, ensure_ascii=False))
+            sys.exit(1)
+        return
     result = check_profile(args.profile_json)
     print(json.dumps(result, ensure_ascii=False, indent=2))
     if not result["pass"]:

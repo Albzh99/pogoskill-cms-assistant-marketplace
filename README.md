@@ -8,7 +8,7 @@
 - CMS 草稿字段、HTML、来源覆盖和图片审查（AI 页面预览暂时停用）
 - 从 CMS 同站点同类旧文章或可选旧 HTML，为任一产品、语言、文章类型建立独立 profile、HTML 契约和校验器
 
-每份新站规范使用[统一填写模板](plugins/pogoskill-cms-assistant/skills/cms-site-standard-builder/assets/html-contract.template.md)，但具体代码和数值只从本站旧文章取得。默认保存在当前用户的 `.codex/tenorshare-cms/site-profiles/<站点>/<语言>/<文章类型>/`，不是插件缓存或公开 Git；确切位置由 `site-profile-root.py` 输出。
+每份新站规范使用[统一填写模板](plugins/pogoskill-cms-assistant/skills/cms-site-standard-builder/assets/html-contract.template.md)，但具体代码和数值只从本站旧文章取得。默认保存在当前用户的 `.codex/tenorshare-cms/site-profiles/<站点>/<语言>/<文章类型>/`，不是插件缓存或公开 Git；确切位置由 `site-profile-root.py` 输出。运营可以继续修改自己站点的本地规范；重新复测、确认后，新文章仍使用正常 CMS 上传与图片资源发布入口。“首次学习只读”仅限制学习期间的 CMS 请求。
 
 默认安全规则：文章只创建或更新草稿，不生成、不发布、不删除，也不修改无法确认归属的旧文章。新上传图片会使用其图片上传 `publish_id` 单独发布到云端，确保前台 URL 可用；图片发布绝不等于文章发布。
 
