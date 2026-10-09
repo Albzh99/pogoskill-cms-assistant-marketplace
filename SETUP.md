@@ -100,6 +100,8 @@ Guide 图片：
 
 ## 其他公司网站的一站式使用方式
 
+首次学习旧文章必须走只读入口：Windows `scripts/cms-learning-request.ps1`，macOS `python3 scripts/cms-macos.py learn`。这两个入口在发出 CMS POST 前按查询路由白名单拦截写入；不得因为 CMS 全部使用 POST 就把上传、编辑或发布当成查询。学习阶段只写本机 profile，不对 CMS 做任何修改。日常已有 `ready` 规范后的草稿上传才使用正常写入工具，并仍需用户明确要求。
+
 首次为某站点／语言／文章类型开通时，同事说明网站和语言，调用 `$tenorshare-cms-article-assistant`；助手通过 CMS `site/list`、`page/list`、`page/info` 建立独立规范，展示本站样本并等待运营确认，**首次建规范任务不写草稿**。以后上传新稿时直接读取本机已确认的 `ready` 规范，不每篇重新学习。旧 HTML 可选；只有 CMS 找不到同类参考时才向运营索要。站点不唯一时只问网址。各站共用 CMS POST API、作者／URL／关键词等字段名，以及新图片上传后用图片 `publish_id` 单独发布资源的流程；字段取值、站点链接、图片格式和全部 HTML 样式按本站规范确定。运营说明见 [START-HERE.md](START-HERE.md)。
 
 ## 使用方式：繁中站

@@ -120,9 +120,10 @@ def main():
     report = {"references": [inspect(path) for path in args.html_files]}
     report["canonical_hosts"] = sorted({host for item in report["references"] for host in item["canonical_hosts"]})
     rendered = json.dumps(report, ensure_ascii=False, indent=2)
-    print(rendered)
     if args.out:
         Path(args.out).write_text(rendered + "\n", encoding="utf-8")
+    # ASCII-escaped console output also works in Windows shells whose code page is not UTF-8.
+    print(json.dumps(report, ensure_ascii=True, indent=2))
 
 
 if __name__ == "__main__":

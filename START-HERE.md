@@ -19,6 +19,8 @@
 
 AI 会把规范保存在你电脑的站点专属目录。默认根目录在 Windows 是 `C:\Users\你的用户名\.codex\tenorshare-cms\site-profiles\`，在 macOS 是 `/Users/你的用户名/.codex/tenorshare-cms/site-profiles/`；若设置了 `CODEX_HOME`，位置会随之变化。AI 必须告诉你实际完整路径，不能只说“保存在本地”。每个站点／语言／文章类型一个目录，里面至少有 `profile.json`（站点与版本）、`html-contract.md`（人可读规范）、真实组件样本、CMS 参考证据、正反测试样本和 `validate-html.py`。规范模板在[这里](plugins/pogoskill-cms-assistant/skills/cms-site-standard-builder/assets/html-contract.template.md)，覆盖段落、标题、目录、图片、表格、产品区、FAQ、结论及校验；它只是填写框架，具体 HTML 必须来自你的网站。
 
+首次学习只读取 CMS 旧文章、模板和关联信息；不会新建、修改、删除、上传、生成或发布任何 CMS 内容。AI 只会在你自己的电脑上保存一份待确认规范。看到 `ready` 规范后再提供新稿，才进入单独的草稿上传任务。
+
 你看过摘要后，觉得对就回复“确认这个规范”；不满意就说“把本站的【具体位置】改成【要求】，其他站不要动”。确认后 AI 才会将规范标成可用。建规范时如果同产品同语言有多个网址，AI 会请你选一个网址。建议首次建规范、审核或修订时使用较强模型；日常上传可选 Luna。助手不会自动替你切换模型。
 
 ## 每篇新文章 只发一句话

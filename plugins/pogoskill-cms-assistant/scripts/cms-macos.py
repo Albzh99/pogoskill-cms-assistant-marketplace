@@ -23,6 +23,21 @@ BASE_URL = "https://gw.afirstsoft.com"
 KEY_PATTERN = re.compile(r"^AFS[0-9A-Za-z-]{17,}$")
 CMS_PATH = re.compile(r"^/cms/[a-z0-9/_-]+$")
 FILE_NAME = re.compile(r"^[a-z0-9_.-]{4,255}$")
+LEARNING_READ_ONLY_PATHS = frozenset({
+    "/cms/site/list", "/cms/page/list", "/cms/page/info", "/cms/page/fields",
+    "/cms/page/templatefield", "/cms/template/list", "/cms/template/fields",
+    "/cms/templatefield/list", "/cms/author/list", "/cms/author/info",
+    "/cms/author/select", "/cms/classify/displayclassifylist", "/cms/product/list",
+    "/cms/product/info", "/cms/module/list", "/cms/module/info", "/cms/module/sidebar",
+    "/cms/sidebar/list", "/cms/sidebar/info", "/cms/sidebar/select",
+    "/cms/picture/list", "/cms/picture/dirs", "/cms/file/list",
+})
+
+
+def learning_request_json(endpoint, payload, api_key=None):
+    if endpoint not in LEARNING_READ_ONLY_PATHS:
+        raise ValueError(f"Learning mode is read-only; endpoint not allowed: {endpoint}")
+    return request_json(endpoint, payload, api_key=api_key)
 
 
 def require_macos():
@@ -190,6 +205,10 @@ def main():
     req.add_argument("--body", required=True)
     req.add_argument("--output")
     req.add_argument("--execute", action="store_true")
+    learn = commands.add_parser("learn")
+    learn.add_argument("--path", required=True)
+    learn.add_argument("--body", required=True)
+    learn.add_argument("--output")
     upload = commands.add_parser("upload-image")
     upload.add_argument("--site-id", type=int, required=True)
     upload.add_argument("--cms-path", default="")
@@ -219,6 +238,9 @@ def main():
             raise ValueError("Page writes require --execute after preflight validation")
         payload = json.loads(Path(args.body).read_text(encoding="utf-8-sig"))
         write_result(request_json(args.path, payload), args.output)
+    elif args.command == "learn":
+        payload = json.loads(Path(args.body).read_text(encoding="utf-8-sig"))
+        write_result(learning_request_json(args.path, payload), args.output)
     elif args.command == "upload-image":
         body, content_type = multipart_image_body(args.site_id, args.cms_path, args.file)
         result = cms_post("/cms/picture/upload", body, content_type)

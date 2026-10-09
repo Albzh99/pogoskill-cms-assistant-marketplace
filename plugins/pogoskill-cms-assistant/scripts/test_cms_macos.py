@@ -38,6 +38,18 @@ class MacTransportTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             MODULE.request_json("/cms/page/add", {"content": "part 1\\npart 2"}, api_key="placeholder")
 
+    def test_learning_mode_rejects_mutations_before_network(self):
+        for endpoint in ("/cms/page/add", "/cms/page/update", "/cms/page/make",
+                         "/cms/pagepublish/publish", "/cms/picture/upload", "/cms/file/createdir"):
+            with self.subTest(endpoint=endpoint), self.assertRaises(ValueError):
+                MODULE.learning_request_json(endpoint, {}, api_key="placeholder")
+
+    def test_learning_mode_whitelist_matches_windows(self):
+        script = Path(__file__).with_name("cms-learning-request.ps1").read_text(encoding="utf-8-sig")
+        import re
+        windows_paths = set(re.findall(r"'(/cms/[a-z0-9/_-]+)'", script))
+        self.assertEqual(MODULE.LEARNING_READ_ONLY_PATHS, windows_paths)
+
 
 if __name__ == "__main__":
     unittest.main()
