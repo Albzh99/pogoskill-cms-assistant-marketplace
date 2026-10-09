@@ -11,6 +11,11 @@ from urllib.parse import urlparse
 
 
 SAFE_SLUG = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+REQUIRED_CONTRACT_SECTIONS = (
+    "适用范围与证据", "CMS 字段与动态关联", "页面骨架与模块顺序", "标题与目录",
+    "段落与列表", "图片与媒体", "表格", "产品区与下载", "FAQ 与特殊模块",
+    "结论与链接", "校验与例外",
+)
 
 
 def positive_int(value):
@@ -203,7 +208,15 @@ def check_profile(profile_path):
 
     for field, suffix in (("html_contract", ".md"), ("validator", ".py")):
         try:
-            local_file(root, profile.get(field), suffix)
+            contract_path = local_file(root, profile.get(field), suffix)
+            if field == "html_contract":
+                contract = contract_path.read_text(encoding="utf-8-sig")
+                headings = set(re.findall(r"^##\s+(.+?)\s*$", contract, flags=re.MULTILINE))
+                for section in REQUIRED_CONTRACT_SECTIONS:
+                    if section not in headings:
+                        errors.append(f"html_contract missing required section: {section}")
+                if "【未填写】" in contract:
+                    errors.append("html_contract still contains unfilled template placeholders")
         except ValueError as exc:
             errors.append(f"{field}: {exc}")
     assets = profile.get("assets")
@@ -215,6 +228,15 @@ def check_profile(profile_path):
                 local_file(root, asset)
             except ValueError as exc:
                 errors.append(f"asset {index}: {exc}")
+
+    examples = profile.get("validation_examples") if isinstance(profile.get("validation_examples"), dict) else {}
+    if examples.get("valid_html") == examples.get("invalid_html"):
+        errors.append("validation_examples must use distinct valid and invalid HTML files")
+    for kind in ("valid_html", "invalid_html"):
+        try:
+            local_file(root, examples.get(kind), ".html")
+        except ValueError as exc:
+            errors.append(f"validation_examples.{kind}: {exc}")
 
     return {
         "pass": not errors,

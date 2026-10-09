@@ -9,6 +9,32 @@
 
 ## 文件格式
 
+### 本机存储位置（必须向运营报出实际路径）
+
+先由插件 `scripts/site-profile-root.py --create` 取得实际根目录，不从当前工作目录或旧版插件缓存目录猜路径。未设置 `CODEX_HOME` 时：
+
+- Windows：`C:\Users\<当前用户名>\.codex\tenorshare-cms\site-profiles\`
+- macOS：`/Users/<当前用户名>/.codex/tenorshare-cms/site-profiles/`
+- 若设置了 `CODEX_HOME`：`<CODEX_HOME>/tenorshare-cms/site-profiles/`
+
+其下按 CMS 站点、语言、文章类型隔离。新建时 `<site-slug>` 应含 CMS 站点 ID 和域名短名，防止同产品多域名混淆；已有 profile 不要仅因命名规则变化而擅自搬迁。实例结构（文件名是示例，真实内容必须来自本站）：
+
+```text
+site-profiles/
+  site-44-4ddig-tenorshare-com/
+    es/
+      how-to/
+        profile.json             # 站点 ID、模板、图片规则、版本、确认状态和文件索引
+        html-contract.md         # 运营可读的本站 HTML 规范
+        validate-html.py         # 本站结构校验器
+        assets/                  # 本站真实段落、图片盒、表格、下载等组件片段
+        evidence/                # CMS 原始回读、旧 HTML、发现响应与校验摘要
+        tests/                   # 合格／不合格 HTML 样本及校验结果
+        history/                 # 后续修订时的旧版本备份
+```
+
+`profile.json` 与 `html-contract.md` 是日常执行入口；`evidence/` 是规则来源，`assets/` 是允许复用的真实片段，`tests/` 证明校验器至少能通过正样本、拒绝负样本。修订时仅备份并改动本目录，不动其他站点。本地规范不放在插件缓存或 Git 仓库，升级插件不会覆盖；换电脑不会自动同步，应由 AI 在用户授权下迁移或重建。API Key 不得写入任何 profile 文件。
+
 目录例：`<site-profile-root.py 输出>/example-com/es/how-to/`。`profile.json` 需要以下字段；数值与网址必须来自当前站点的查询结果，不使用示例值：
 
 ```json
@@ -43,6 +69,7 @@
   },
   "html_contract": "html-contract.md",
   "validator": "validate-html.py",
+  "validation_examples": {"valid_html": "tests/valid.html", "invalid_html": "tests/invalid.html"},
   "assets": []
 }
 ```
@@ -51,11 +78,13 @@
 
 `images` 把 CMS 通用上传与图片资源发布流程同站点变量分开。新图上传后必须使用该次 `/cms/picture/upload` 响应中的图片 `publish_id` 单独发布资源，绝不能用文章页面 ID，也不因此生成或发布文章。目录、前台 URL 前缀、HTML 图片盒和所需格式从本站旧 HTML 与 CMS 图片库确定；如果该文章类型没有图片，写 `{"enabled": false}`。主图、正文横图、竖图、手机截图的尺寸规则写入 `html-contract.md`，不能照搬示例数值。
 
-`html-contract.md` 至少记录：适用范围、旧 HTML 与 CMS 证据、模板与字段、模块顺序、标题层级、目录锚点、图片/表格/购买区/下载区/FAQ/结语结构、语言和链接规则、禁止改动的文字区域、图片目录、图片格式与尺寸、公开域名、草稿状态、需要人工判断的例外。不存在的模块标记为“无”。每条重要规则标明依据的参考文件或用户明确要求；不同旧 HTML 互相冲突时判断是否应拆成不同文章类型，不能混合为新样式。
+`html-contract.md` 从[HTML 规范模板](../assets/html-contract.template.md)复制并填充，至少记录：适用范围、旧 HTML 与 CMS 证据、模板与字段、模块顺序、标题层级、目录锚点、普通段落与列表、图片/媒体/表格/购买区/下载区/FAQ/结语结构、语言和链接规则、禁止改动的文字区域、图片目录、图片格式与尺寸、公开域名、草稿状态、机械校验和需要人工判断的例外。不存在的模块标记为“无”，不能删除该栏目。每条重要规则标明依据的参考文件或用户明确要求；不同旧 HTML 互相冲突时判断是否应拆成不同文章类型，不能混合为新样式。
 
 逐项使用[跨站学习清单](html-learning-checklist.md)；它只是观察点，不是通用 HTML 样式。每个固定／可选组件留下本站真实、可读的最小 HTML 样本并标明证据。不得把 PoGoskill 的 class 或视觉模块作为其他站默认值。
 
 `validate-html.py` 接收最终 HTML 文件路径；通过时退出 0，缺少必要模块、结构失衡、图片未回填或站点错误资源时退出非 0。它验证本规范的关键结构，不调用 PoGoskill 专用 `validate-article-html.py`。在采用新规范前用真实样本和一个故意删掉必要模块的样本验证校验器确实能拦截。
+
+`validation_examples` 的两个相对路径必须指向本站正反 HTML 样本，不能共用同一文件。`validate-site-profile.py` 会检查模板的 11 个必需栏目、未填占位项及正反样本文件是否存在；这仅是最低结构检查，不会替代人工判断或站点校验器实际正反运行。
 
 `validate-site-profile.py` 只检查 profile 的格式、文件存在和 CMS 参考页证据匹配；它不证明设计规则正确，也不替代站点专用 HTML 校验器。`status: ready` 还必须以人工复核参考样本和站点专用校验结果为前提。
 

@@ -18,7 +18,11 @@ class SiteProfileTests(unittest.TestCase):
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
         (self.root / "evidence").mkdir()
-        (self.root / "html-contract.md").write_text("# Site article rules\nUse h2 sections.", encoding="utf-8")
+        (self.root / "tests").mkdir()
+        (self.root / "tests" / "valid.html").write_text("<article>valid sample</article>", encoding="utf-8")
+        (self.root / "tests" / "invalid.html").write_text("<article>invalid sample</article>", encoding="utf-8")
+        sections = "\n".join(f"## {name}\n本站已核对：无或有真实证据。" for name in MODULE.REQUIRED_CONTRACT_SECTIONS)
+        (self.root / "html-contract.md").write_text("# Site article rules\n" + sections, encoding="utf-8")
         (self.root / "validate-html.py").write_text("import sys\nsys.exit(0)\n", encoding="utf-8")
         self.page = {
             "code": 0,
@@ -39,6 +43,7 @@ class SiteProfileTests(unittest.TestCase):
             "references": [{"page_id": 789, "page_info_json": "evidence/reference.json"}],
             "html_contract": "html-contract.md",
             "validator": "validate-html.py",
+            "validation_examples": {"valid_html": "tests/valid.html", "invalid_html": "tests/invalid.html"},
             "assets": [],
         }
 
@@ -82,6 +87,19 @@ class SiteProfileTests(unittest.TestCase):
     def test_rejects_missing_version(self):
         self.profile.pop("profile_version")
         self.assertFalse(self.check()["pass"])
+
+    def test_rejects_incomplete_html_contract(self):
+        (self.root / "html-contract.md").write_text("# Empty contract\n## 标题与目录\n【未填写】", encoding="utf-8")
+        result = self.check()
+        self.assertFalse(result["pass"])
+        self.assertTrue(any("missing required section" in error for error in result["errors"]))
+        self.assertTrue(any("unfilled template" in error for error in result["errors"]))
+
+    def test_rejects_missing_negative_example(self):
+        self.profile["validation_examples"]["invalid_html"] = "tests/missing.html"
+        result = self.check()
+        self.assertFalse(result["pass"])
+        self.assertTrue(any("validation_examples.invalid_html" in error for error in result["errors"]))
 
     def test_rejects_assets_outside_profile(self):
         self.profile["assets"] = ["../foreign-cta.html"]
