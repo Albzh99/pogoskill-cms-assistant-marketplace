@@ -86,7 +86,7 @@ Guide 图片：
 
 ## 使用方式：其他公司网站
 
-同事只要上传 2–3 篇旧 HTML，告诉 AI“请学习这些旧文章，为这个网站建立规范”，即可调用 `$cms-site-standard-builder`。助手会自己识别网站、查 CMS、提取 H2/H3、目录、表格、购买区和图片规格。之后上传新稿，说“按刚建立的规范保存 CMS 草稿”，即可调用 `$cms-site-article-assistant`。只有旧 HTML 无法判定网站时才需要补一个网站 URL；同事不用输入 CMS ID、运行脚本或打开终端。详细提示词见根目录 `README.md`。
+同事只要上传 2–3 篇旧 HTML，告诉 AI“请学习这些旧文章，为这个网站建立规范”，即可调用 `$cms-site-standard-builder`。助手会自己识别网站、查 CMS、提取 H2/H3、目录、表格、购买区和图片规格。之后上传新稿，说“按刚建立的规范保存 CMS 草稿”，即可调用 `$cms-site-article-assistant`。只有旧 HTML 无法判定网站时才需要补一个网站 URL；同事不用输入 CMS ID、运行脚本或打开终端。各站共用 CMS POST API、作者／URL／关键词等字段名，以及新图片上传后用图片 `publish_id` 单独发布资源的流程；字段取值、站点链接、图片格式和全部 HTML 样式按本站旧文章确定。详细提示词见根目录 `README.md`。
 
 ## 使用方式：繁中站
 
