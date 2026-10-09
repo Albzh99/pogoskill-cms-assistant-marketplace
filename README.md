@@ -1,6 +1,6 @@
 # Tenorshare CMS 文章助手
 
-这是 Tenorshare 全公司多产品、多语言网站使用的 Codex CMS 插件 Marketplace。旧仓库和插件 ID 中仍含 `pogoskill`，只是为了兼容已安装同事；PoGoskill 是其中一个产品，不是其他网站的默认模板。新站点首次从 CMS 旧文章建立本地 HTML 规范和运营可读的审核报告；运营明确确认该版本后，日常新稿才按规范上传草稿，不重复学习。给同事直接发送 [一页使用说明](START-HERE.md)。包含：
+这是 Tenorshare 全公司多产品、多语言网站使用的 Codex CMS 插件 Marketplace。GitHub 仓库已使用 Tenorshare 名称；内部插件和 Marketplace 安装 ID 暂保留 `pogoskill`，以兼容已安装同事。PoGoskill 是其中一个产品，不是其他网站的默认模板。新站点首次从 CMS 旧文章建立本地 HTML 规范和运营可读的审核报告；运营明确确认该版本后，日常新稿才按规范上传草稿，不重复学习。给同事直接发送 [一页使用说明](START-HERE.md)。包含：
 
 - 台湾站 V2 文章 HTML 转换、机械校验与 CMS 草稿回读
 - 英文站 V2 文章 HTML 转换、固定英文下载区与 Buy Box、CMS 草稿回读
@@ -16,7 +16,7 @@
 
 把本仓库地址交给组员的 Codex AI，并发送下面这句话：
 
-> 请从 Git 仓库安装或更新 Tenorshare CMS 文章助手：`https://github.com/Albzh99/pogoskill-cms-assistant-marketplace.git`。按 `SETUP.md` 自动识别 Windows 或 macOS，自己完成安装。先检查已保存的 CMS Key；只有没有时才启动对应平台的剪贴板保存流程，并把等待 Enter 的同一个会话真正打开到可见终端。我只复制 Key，再回到终端按 Enter。随后运行 `verify-workstation.py`，实际核对 Key、CMS POST 和 WebP 能力；不要让我输入命令或把 Key 发到聊天。安装后主动问我负责的网站、语言和文章类型，并启动首次建规范引导；如需新任务加载插件，请给我一条可直接复制的完整消息。
+> 请从 Git 仓库安装或更新 Tenorshare CMS 文章助手：`https://github.com/Albzh99/tenorshare-cms-assistant-marketplace.git`。按 `SETUP.md` 自动识别 Windows 或 macOS，自己完成安装。先检查已保存的 CMS Key；只有没有时才启动对应平台的剪贴板保存流程，并把等待 Enter 的同一个会话真正打开到可见终端。我只复制 Key，再回到终端按 Enter。随后运行 `verify-workstation.py`，实际核对 Key、CMS POST 和 WebP 能力；不要让我输入命令或把 Key 发到聊天。安装后主动问我负责的网站、语言和文章类型，并启动首次建规范引导；如需新任务加载插件，请给我一条可直接复制的完整消息。
 
 组员的电脑需要：
 

@@ -7,7 +7,7 @@
 AI 在 Windows PowerShell 或 macOS Terminal 中运行相同的 Codex CLI 命令，安装前先确认 `codex` 可用：
 
 ```text
-codex plugin marketplace add "https://github.com/Albzh99/pogoskill-cms-assistant-marketplace.git" --ref main
+codex plugin marketplace add "https://github.com/Albzh99/tenorshare-cms-assistant-marketplace.git" --ref main
 codex plugin add pogoskill-cms-assistant@pogoskill-team
 ```
 
@@ -24,7 +24,7 @@ codex plugin add pogoskill-cms-assistant@pogoskill-team
 
 ## 本地文件安装（备用）
 
-将整个 `pogoskill-cms-assistant-marketplace` 文件夹复制到本机后，由 AI 在当前系统的终端运行：
+将整个 `tenorshare-cms-assistant-marketplace` 文件夹复制到本机后，由 AI 在当前系统的终端运行：
 
 ```text
 codex plugin marketplace add "此文件夹的完整路径"
